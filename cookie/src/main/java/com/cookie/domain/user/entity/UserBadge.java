@@ -1,7 +1,6 @@
 package com.cookie.domain.user.entity;
 
 
-
 import com.cookie.domain.badge.entity.Badge;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -17,6 +16,7 @@ public class UserBadge {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    private boolean isMain;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
@@ -27,7 +27,8 @@ public class UserBadge {
     private Badge badge;
 
     @Builder
-    public UserBadge(User user, Badge badge) {
+    public UserBadge(boolean isMain, User user, Badge badge) {
+        this.isMain = isMain;
         this.user = user;
         this.badge = badge;
     }
