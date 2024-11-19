@@ -1,4 +1,4 @@
-package com.cookie.domain.review.dto;
+package com.cookie.domain.review.dto.request;
 
 
 import com.cookie.domain.movie.entity.Movie;
@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreateReviewDto {
+public class CreateReviewRequest {
     private long movieId;
     private String content;
     private double movieScore;
