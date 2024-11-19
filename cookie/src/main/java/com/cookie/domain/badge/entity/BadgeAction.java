@@ -1,6 +1,9 @@
 package com.cookie.domain.badge.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -9,19 +12,17 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Badge {
+public class BadgeAction {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
-    private String badgeImage;
-    private int needPoint;
+    private int actionPoint;
 
     @Builder
-    public Badge(String name, String badgeImage, int needPoint) {
+    public BadgeAction(String name, int actionPoint) {
         this.name = name;
-        this.badgeImage = badgeImage;
-        this.needPoint = needPoint;
+        this.actionPoint = actionPoint;
     }
 }

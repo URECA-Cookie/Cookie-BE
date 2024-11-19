@@ -1,5 +1,7 @@
 package com.cookie.domain.user.entity;
 
+import com.cookie.domain.user.entity.enums.ActionType;
+import com.cookie.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -9,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class BadgePoint {
+public class DailyGenreScore extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,13 +21,17 @@ public class BadgePoint {
     @JoinColumn(name = "user_id")
     private User user;
 
-    private String genreCode;
-    private long point;
+    private String category;
+    private long score;
+    @Enumerated(EnumType.STRING)
+    private ActionType actionType;
 
     @Builder
-    public BadgePoint(User user, String genreCode, long point) {
+    public DailyGenreScore(User user, String category, long score, ActionType actionType) {
         this.user = user;
-        this.genreCode = genreCode;
-        this.point = point;
+        this.category = category;
+        this.score = score;
+        this.actionType = actionType;
     }
 }
+

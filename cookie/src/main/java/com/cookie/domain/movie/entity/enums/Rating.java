@@ -1,4 +1,4 @@
-package com.cookie.domain.movie.entity;
+package com.cookie.domain.movie.entity.enums;
 
 public enum Rating {
     ALL, CHILD, TEENAGER, ADULT

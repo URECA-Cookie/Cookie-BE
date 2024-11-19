@@ -1,16 +1,13 @@
 package com.cookie.domain.user.entity;
 
+import com.cookie.domain.user.entity.enums.Role;
+import com.cookie.domain.user.entity.enums.SocialProvider;
 import com.cookie.global.entity.BaseTimeEntity;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -21,20 +18,18 @@ public class User extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String username;
     private String nickname;
-    private LocalDateTime birthdate;
     private String profileImage;
+    @Enumerated(EnumType.STRING)
     private SocialProvider socialProvider;
     private String email;
+    @Enumerated(EnumType.STRING)
     private Role role;
     private String socialId;
 
     @Builder
-    public User(String username, String nickname, LocalDateTime birthdate, String profileImage, SocialProvider socialProvider, String email, Role role, String socialId) {
-        this.username = username;
+    public User(String nickname, String profileImage, SocialProvider socialProvider, String email, Role role, String socialId) {
         this.nickname = nickname;
-        this.birthdate = birthdate;
         this.profileImage = profileImage;
         this.socialProvider = socialProvider;
         this.email = email;

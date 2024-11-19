@@ -20,13 +20,35 @@ public class GenreScore {
     @JoinColumn(name = "user_id")
     private User user;
 
-    private String genreCode;
-    private double genreScore;
+    private long romance;
+    private long horror;
+    private long comedy;
+    private long action;
+    private long fantasy;
+    private long animation;
+    private long crime;
+    private long sf;
+    private long music;
+    private long thriller;
+    private long queer;
+    private long war;
+    private long documentary;
 
     @Builder
-    public GenreScore(User user, String genreCode, double genreScore) {
+    public GenreScore(User user, long romance, long horror, long comedy, long action, long fantasy, long animation, long crime, long sf, long music, long thriller, long queer, long war, long documentary) {
         this.user = user;
-        this.genreCode = genreCode;
-        this.genreScore = genreScore;
+        this.romance = romance;
+        this.horror = horror;
+        this.comedy = comedy;
+        this.action = action;
+        this.fantasy = fantasy;
+        this.animation = animation;
+        this.crime = crime;
+        this.sf = sf;
+        this.music = music;
+        this.thriller = thriller;
+        this.queer = queer;
+        this.war = war;
+        this.documentary = documentary;
     }
 }

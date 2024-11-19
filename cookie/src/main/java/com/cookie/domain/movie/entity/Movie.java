@@ -1,5 +1,6 @@
 package com.cookie.domain.movie.entity;
 
+import com.cookie.domain.movie.entity.enums.Rating;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -23,7 +24,8 @@ public class Movie {
     private String company;
     private LocalDateTime releasedAt;
     private int runtime;
-    private double score;;
+    private double score;
+    @Enumerated(EnumType.STRING)
     private Rating rating;
 
     @Builder
