@@ -9,6 +9,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 @Entity
 @Getter
@@ -34,6 +37,12 @@ public class Review extends BaseTimeEntity {
     private boolean isHide;
     private boolean isSpoiler;
     private long reviewLike;
+
+    @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ReviewLike> reviewLikes = new ArrayList<>();
+
+    @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ReviewComment> reviewComments = new ArrayList<>();
 
     @Builder
     public Review(Movie movie, User user, String content, double movieScore, boolean isHide, boolean isSpoiler, long reviewLike) {

@@ -37,4 +37,12 @@ public class ReviewController {
         List<ReviewResponse> reviewList = reviewService.getReviewList();
         return ApiUtil.success(reviewList);
     }
+
+    @DeleteMapping("/{reviewId}")
+    public ApiSuccess<?> deleteReview(@PathVariable(name = "reviewId") Long reviewId) {
+        reviewService.deleteReview(reviewId);
+        return ApiUtil.success("SUCCESS");
+    }
+
+
 }

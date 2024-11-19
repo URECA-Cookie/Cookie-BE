@@ -64,5 +64,15 @@ public class ReviewService {
                 .toList();
 
     }
+
+    @Transactional
+    public void deleteReview(Long reviewId) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new IllegalArgumentException("not found reviewId: " + reviewId));
+        log.info("Retrieved review: reviewId = {}", reviewId);
+
+        reviewRepository.delete(review);
+        log.info("Deleted review: reviewId = {}", reviewId);
+    }
 }
 
