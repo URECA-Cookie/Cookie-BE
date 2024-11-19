@@ -3,6 +3,7 @@ package com.cookie.domain.review.service;
 import com.cookie.domain.movie.entity.Movie;
 import com.cookie.domain.movie.repository.MovieRepository;
 import com.cookie.domain.review.dto.CreateReviewDto;
+import com.cookie.domain.review.dto.UpdateReviewDto;
 import com.cookie.domain.review.entity.Review;
 import com.cookie.domain.review.repository.ReviewRepository;
 import com.cookie.domain.user.entity.User;
@@ -38,5 +39,15 @@ public class ReviewService {
         Review review = createReviewDto.toEntity(user, movie);
         reviewRepository.save(review);
         log.info("Created review: userId = {}, movieId = {}", userId, movieId);
+    }
+
+    @Transactional
+    public void updateReview(Long reviewId, UpdateReviewDto updateReviewDto) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new IllegalArgumentException("not found reviewId: " + reviewId));
+        log.info("Retrieved review: reviewId = {}", reviewId);
+
+        review.update(updateReviewDto.getContent(), updateReviewDto.getMovieScore(), updateReviewDto.getIsSpoiler());
+        log.info("Updated review: reviewId = {}", reviewId);
     }
 }

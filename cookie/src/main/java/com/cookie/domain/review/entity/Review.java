@@ -45,4 +45,10 @@ public class Review extends BaseTimeEntity {
         this.isSpoiler = isSpoiler;
         this.reviewLike = reviewLike;
     }
+
+    public void update(String content, double movieScore, boolean isSpoiler) {
+        this.content = content;
+        this.movieScore = movieScore;
+        this.isSpoiler = isSpoiler;
+    }
 }
