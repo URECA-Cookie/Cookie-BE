@@ -1,5 +1,7 @@
 package com.cookie.domain.user.entity;
 
+import com.cookie.domain.category.entity.Category;
+import com.cookie.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -9,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class BadgePoint {
+public class UserCategory extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,13 +21,13 @@ public class BadgePoint {
     @JoinColumn(name = "user_id")
     private User user;
 
-    private String genreCode;
-    private long point;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
+    private Category category;
 
     @Builder
-    public BadgePoint(User user, String genreCode, long point) {
+    public UserCategory(User user, Category category) {
         this.user = user;
-        this.genreCode = genreCode;
-        this.point = point;
+        this.category = category;
     }
 }

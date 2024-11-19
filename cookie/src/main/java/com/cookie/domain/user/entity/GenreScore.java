@@ -20,22 +20,22 @@ public class GenreScore {
     @JoinColumn(name = "user_id")
     private User user;
 
-    private double romance;
-    private double horror;
-    private double comedy;
-    private double action;
-    private double fantasy;
-    private double animation;
-    private double crime;
-    private double sf;
-    private double music;
-    private double thriller;
-    private double queer;
-    private double war;
-    private double documentary;
+    private long romance;
+    private long horror;
+    private long comedy;
+    private long action;
+    private long fantasy;
+    private long animation;
+    private long crime;
+    private long sf;
+    private long music;
+    private long thriller;
+    private long queer;
+    private long war;
+    private long documentary;
 
     @Builder
-    public GenreScore(User user, double romance, double horror, double comedy, double action, double fantasy, double animation, double crime, double sf, double music, double thriller, double queer, double war, double documentary) {
+    public GenreScore(User user, long romance, long horror, long comedy, long action, long fantasy, long animation, long crime, long sf, long music, long thriller, long queer, long war, long documentary) {
         this.user = user;
         this.romance = romance;
         this.horror = horror;
