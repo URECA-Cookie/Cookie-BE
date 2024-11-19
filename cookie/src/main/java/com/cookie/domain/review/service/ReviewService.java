@@ -3,6 +3,7 @@ package com.cookie.domain.review.service;
 import com.cookie.domain.movie.entity.Movie;
 import com.cookie.domain.movie.repository.MovieRepository;
 import com.cookie.domain.review.dto.CreateReviewDto;
+import com.cookie.domain.review.dto.response.ReviewResponse;
 import com.cookie.domain.review.dto.UpdateReviewDto;
 import com.cookie.domain.review.entity.Review;
 import com.cookie.domain.review.repository.ReviewRepository;
@@ -12,6 +13,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Slf4j
 @Service
@@ -50,4 +53,16 @@ public class ReviewService {
         review.update(updateReviewDto.getContent(), updateReviewDto.getMovieScore(), updateReviewDto.getIsSpoiler());
         log.info("Updated review: reviewId = {}", reviewId);
     }
+
+    @Transactional
+    public List<ReviewResponse> getReviewList() {
+        List<Review> reviewList = reviewRepository.findAllWithMovieAndUser();
+        log.info("Total reviews: {}", reviewList.size());
+
+        return reviewList.stream()
+                .map(ReviewResponse::fromEntity)
+                .toList();
+
+    }
 }
+
