@@ -32,7 +32,8 @@ public class ReviewResponse {
 
         ReviewUserResponse reviewUser = new ReviewUserResponse(
                 review.getUser().getNickname(),
-                review.getUser().getProfileImage()
+                review.getUser().getProfileImage(),
+                review.getUser().getMainBadge() != null ? review.getUser().getMainBadge().getBadgeImage() : null
         );
 
         return new ReviewResponse(

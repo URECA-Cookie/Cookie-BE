@@ -10,4 +10,5 @@ import lombok.NoArgsConstructor;
 public class ReviewUserResponse {
     private String nickname;
     private String profileImage;
+    private String mainBadgeImage;
 }
