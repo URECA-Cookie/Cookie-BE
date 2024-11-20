@@ -11,10 +11,10 @@ import com.cookie.domain.review.entity.Review;
 import com.cookie.domain.review.repository.ReviewRepository;
 import com.cookie.domain.user.dto.response.MovieReviewUserResponse;
 import com.cookie.domain.user.entity.User;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -28,7 +28,7 @@ public class MovieService {
     private final MovieCountryRepository movieCountryRepository;
     private final MovieCategoryRepository movieCategoryRepository;
 
-    @Transactional
+    @Transactional(readOnly = true)
     public ReviewOfMovieResponse getMovieReviewList(Long movieId) {
         Movie movie = movieRepository.findById(movieId)
                 .orElseThrow(() -> new IllegalArgumentException("not found movieId: " + movieId));

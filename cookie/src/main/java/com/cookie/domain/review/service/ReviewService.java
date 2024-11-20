@@ -20,10 +20,10 @@ import com.cookie.domain.user.dto.response.CommentUserResponse;
 import com.cookie.domain.user.dto.response.ReviewUserResponse;
 import com.cookie.domain.user.entity.User;
 import com.cookie.domain.user.repository.UserRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -67,7 +67,7 @@ public class ReviewService {
         log.info("Updated review: reviewId = {}", reviewId);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<ReviewResponse> getReviewList() {
         List<Review> reviewList = reviewRepository.findAllWithMovieAndUser();
         log.info("Total reviews: {}", reviewList.size());
@@ -104,7 +104,7 @@ public class ReviewService {
         log.info("Deleted review: reviewId = {}", reviewId);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public ReviewDetailResponse getReviewDetail(Long reviewId) {
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new IllegalArgumentException("not found reviewId: " + reviewId));
