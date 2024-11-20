@@ -24,8 +24,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 @Slf4j
 @Service
@@ -38,7 +40,7 @@ public class ReviewService {
     private final ReviewLikeRepository reviewLikeRepository;
 
     @Transactional
-    public void createReview(Long userId, CreateReviewRequest createReviewRequest) {
+    public void createReview(Long userId, CreateReviewRequest createReviewRequest, CopyOnWriteArrayList<SseEmitter> emitters) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("not found userId: " + userId));
         log.info("Retrieved user: userId = {}", userId);
@@ -55,7 +57,43 @@ public class ReviewService {
         Review review = createReviewRequest.toEntity(user, movie);
         reviewRepository.save(review);
         log.info("Created review: userId = {}, movieId = {}", userId, movieId);
+
+        sendReviewCreatedEvent(review, emitters);
     }
+
+    private void sendReviewCreatedEvent(Review review, CopyOnWriteArrayList<SseEmitter> emitters) {
+        ReviewResponse reviewResponse = new ReviewResponse(
+                review.getId(),
+                review.getContent(),
+                review.getMovieScore(),
+                review.isHide(),
+                review.isSpoiler(),
+                review.getReviewLike(),
+                review.getCreatedAt(),
+                review.getUpdatedAt(),
+                new ReviewMovieResponse(
+                        review.getMovie().getPoster(),
+                        review.getMovie().getTitle()
+                ),
+                new ReviewUserResponse(
+                        review.getUser().getNickname(),
+                        review.getUser().getProfileImage(),
+                        review.getUser().getMainBadge() != null ? review.getUser().getMainBadge().getBadgeImage() : null
+                )
+        );
+
+        for (SseEmitter emitter : emitters) {
+            try {
+                emitter.send(SseEmitter.event()
+                        .name("review-created")
+                        .data(reviewResponse)); // ReviewResponse 전송
+            } catch (Exception e) {
+                log.error("Failed to send event to emitter: {}", e.getMessage());
+                emitters.remove(emitter);
+            }
+        }
+    }
+
 
     @Transactional
     public void updateReview(Long reviewId, UpdateReviewRequest updateReviewRequest) {

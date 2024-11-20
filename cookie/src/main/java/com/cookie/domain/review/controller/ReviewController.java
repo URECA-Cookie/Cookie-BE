@@ -11,8 +11,10 @@ import com.cookie.global.util.ApiUtil.ApiSuccess;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 @Slf4j
 @RestController
@@ -21,10 +23,24 @@ import java.util.List;
 public class ReviewController {
     private final ReviewService reviewService;
 
+    private final CopyOnWriteArrayList<SseEmitter> emitters = new CopyOnWriteArrayList<>();
+
+    @GetMapping("/subscribe")
+    public SseEmitter subscribe() {
+        SseEmitter emitter = new SseEmitter(Long.MAX_VALUE); // 연결 타임아웃 설정
+        emitters.add(emitter);
+
+        emitter.onCompletion(() -> emitters.remove(emitter));
+        emitter.onTimeout(() -> emitters.remove(emitter));
+        emitter.onError((e) -> emitters.remove(emitter));
+
+        return emitter;
+    }
+
     @PostMapping("/{userId}")
     public ApiSuccess<?> createReview(@PathVariable(name = "userId") Long userId, @RequestBody CreateReviewRequest createReviewRequest) {
         // TODO: userId JWT 토큰으로 변경
-        reviewService.createReview(userId, createReviewRequest);
+        reviewService.createReview(userId, createReviewRequest, emitters);
         return ApiUtil.success("SUCCESS");
     }
 
