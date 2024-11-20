@@ -1,6 +1,7 @@
 package com.cookie.domain.review.service;
 
 import com.cookie.domain.movie.dto.response.ReviewMovieResponse;
+import com.cookie.domain.movie.dto.response.ReviewOfMovieResponse;
 import com.cookie.domain.movie.entity.Movie;
 import com.cookie.domain.movie.repository.MovieRepository;
 import com.cookie.domain.review.dto.request.ReviewCommentRequest;

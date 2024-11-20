@@ -1,6 +1,7 @@
 package com.cookie.domain.movie.entity;
 
 import com.cookie.domain.movie.entity.enums.Rating;
+import com.cookie.domain.review.entity.Review;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -8,6 +9,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -27,6 +30,15 @@ public class Movie {
     private double score;
     @Enumerated(EnumType.STRING)
     private Rating rating;
+
+    @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Review> reviews = new ArrayList<>();
+
+    @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<MovieCategory> movieCategories = new ArrayList<>();
+
+    @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<MovieCountry> movieCountries = new ArrayList<>();
 
     @Builder
     public Movie(String title, String poster, String plot, String company, LocalDateTime releasedAt, int runtime, double score, Rating rating) {

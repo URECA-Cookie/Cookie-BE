@@ -17,4 +17,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     @Query("SELECT r FROM Review r JOIN FETCH r.movie m JOIN FETCH r.user u LEFT JOIN FETCH u.userBadges ub LEFT JOIN FETCH ub.badge b")
     List<Review> findAllWithMovieAndUser();
 
+    @Query("SELECT r FROM Review r JOIN FETCH r.user u LEFT JOIN FETCH u.userBadges ub LEFT JOIN FETCH ub.badge b WHERE r.movie.id = :movieId")
+    List<Review> findReviewsByMovieId(Long movieId);
+
 }
