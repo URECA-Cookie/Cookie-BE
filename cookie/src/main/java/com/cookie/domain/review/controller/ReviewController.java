@@ -66,5 +66,13 @@ public class ReviewController {
         return ApiUtil.success("SUCCESS");
     }
 
+    @PutMapping("/comments/{commentId}")
+    public ApiSuccess<?> updateComment(@PathVariable(name = "commentId") Long commentId, @RequestBody CreateReviewCommentRequest createReviewCommentRequest) {
+        // TODO: userId JWT 토큰으로 변경
+        reviewService.updateComment(commentId, createReviewCommentRequest);
+        return ApiUtil.success("SUCCESS");
+    }
+
+
 
 }

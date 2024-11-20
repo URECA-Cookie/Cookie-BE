@@ -191,5 +191,16 @@ public class ReviewService {
         log.info("Created comment for reviewId: {} by userId: {}", reviewId, userId);
 
     }
+
+    @Transactional
+    public void updateComment(Long commentId, CreateReviewCommentRequest createReviewCommentRequest) {
+        ReviewComment comment = reviewCommentRepository.findById(commentId)
+                .orElseThrow(() -> new IllegalArgumentException("not found commentId: " + commentId));
+        log.info("Retrieved comment: commentId = {}", commentId);
+
+        comment.update(createReviewCommentRequest.getComment());
+        log.info("Updated comment: commentId = {}", commentId);
+    }
+
 }
 
