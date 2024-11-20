@@ -1,6 +1,7 @@
 package com.cookie.domain.review.controller;
 
 import com.cookie.domain.review.dto.request.CreateReviewRequest;
+import com.cookie.domain.review.dto.response.ReviewDetailResponse;
 import com.cookie.domain.review.dto.response.ReviewResponse;
 import com.cookie.domain.review.dto.request.UpdateReviewRequest;
 import com.cookie.domain.review.service.ReviewService;
@@ -42,6 +43,12 @@ public class ReviewController {
     public ApiSuccess<?> deleteReview(@PathVariable(name = "reviewId") Long reviewId) {
         reviewService.deleteReview(reviewId);
         return ApiUtil.success("SUCCESS");
+    }
+
+    @GetMapping("/{reviewId}")
+    public ApiSuccess<?> getReviewDetail(@PathVariable(name = "reviewId") Long reviewId) {
+        ReviewDetailResponse reviewDetailResponse = reviewService.getReviewDetail(reviewId);
+        return ApiUtil.success(reviewDetailResponse);
     }
 
 
