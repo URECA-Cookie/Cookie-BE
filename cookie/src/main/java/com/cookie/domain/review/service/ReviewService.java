@@ -3,7 +3,7 @@ package com.cookie.domain.review.service;
 import com.cookie.domain.movie.dto.response.ReviewMovieResponse;
 import com.cookie.domain.movie.entity.Movie;
 import com.cookie.domain.movie.repository.MovieRepository;
-import com.cookie.domain.review.dto.request.CreateReviewCommentRequest;
+import com.cookie.domain.review.dto.request.ReviewCommentRequest;
 import com.cookie.domain.review.dto.request.CreateReviewRequest;
 import com.cookie.domain.review.dto.response.ReviewCommentResponse;
 import com.cookie.domain.review.dto.response.ReviewDetailResponse;
@@ -168,7 +168,7 @@ public class ReviewService {
     }
 
     @Transactional
-    public void createComment(Long reviewId, Long userId, CreateReviewCommentRequest createReviewCommentRequest) {
+    public void createComment(Long reviewId, Long userId, ReviewCommentRequest reviewCommentRequest) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("not found userId: " + userId));
         log.info("Retrieved user: userId = {}", userId);
@@ -184,7 +184,7 @@ public class ReviewService {
         ReviewComment comment = ReviewComment.builder()
                 .user(user)
                 .review(review)
-                .comment(createReviewCommentRequest.getComment())
+                .comment(reviewCommentRequest.getComment())
                 .build();
 
         reviewCommentRepository.save(comment);
@@ -193,12 +193,12 @@ public class ReviewService {
     }
 
     @Transactional
-    public void updateComment(Long commentId, CreateReviewCommentRequest createReviewCommentRequest) {
+    public void updateComment(Long commentId, ReviewCommentRequest reviewCommentRequest) {
         ReviewComment comment = reviewCommentRepository.findById(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("not found commentId: " + commentId));
         log.info("Retrieved comment: commentId = {}", commentId);
 
-        comment.update(createReviewCommentRequest.getComment());
+        comment.update(reviewCommentRequest.getComment());
         log.info("Updated comment: commentId = {}", commentId);
     }
 
