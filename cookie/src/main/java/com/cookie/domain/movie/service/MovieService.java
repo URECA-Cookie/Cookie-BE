@@ -80,4 +80,57 @@ public class MovieService {
                 reviewResponses
         );
     }
+
+    @Transactional(readOnly = true)
+    public ReviewOfMovieResponse getMovieSpoilerReviewList(Long movieId) {
+        Movie movie = movieRepository.findById(movieId)
+                .orElseThrow(() -> new IllegalArgumentException("not found movieId: " + movieId));
+
+        log.info("Retrieved movie: movieId = {}", movieId);
+
+        List<Review> reviews = reviewRepository.findSpoilerReviewsByMovieId(movieId);
+        log.info("Retrieved {} reviews for movieId = {}", reviews.size(), movieId);
+
+        List<MovieReviewResponse> reviewResponses = reviews.stream()
+                .map(review -> {
+                    User user = review.getUser();
+                    MovieReviewUserResponse userResponse = new MovieReviewUserResponse(
+                            user.getNickname(),
+                            user.getProfileImage(),
+                            user.getMainBadge() != null ? user.getMainBadge().getBadgeImage() : null,
+                            user.getMainBadge() != null ? user.getMainBadge().getName() : null
+                    );
+
+                    return new MovieReviewResponse(
+                            review.getContent(),
+                            review.getReviewLike(),
+                            review.getMovieScore(),
+                            review.getCreatedAt(),
+                            review.getUpdatedAt(),
+                            userResponse
+                    );
+                }).toList();
+
+        List<String> subCategories = movieCategoryRepository.findByMovieIdWithCategory(movieId).stream()
+                .map(movieCountry -> movieCountry.getCategory().getSubCategory())
+                .toList();
+
+        log.info("Categories for movieId = {}: {}", movieId, subCategories);
+
+        List<String> countries = movieCountryRepository.findByMovieIdWithCountry(movieId).stream()
+                .map(movieCountry -> movieCountry.getCountry().getCountry())
+                .toList();
+        log.info("Countries for movieId = {}: {}", movieId, countries);
+
+        return new ReviewOfMovieResponse(
+                movie.getTitle(),
+                movie.getPoster(),
+                movie.getRating().name(),
+                movie.getRuntime(),
+                subCategories,
+                countries,
+                movie.getReleasedAt(),
+                reviewResponses
+        );
+    }
 }

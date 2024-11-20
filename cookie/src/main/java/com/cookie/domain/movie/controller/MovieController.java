@@ -22,4 +22,12 @@ public class MovieController {
         ReviewOfMovieResponse movieReviews = movieService.getMovieReviewList(movieId);
         return ApiUtil.success(movieReviews);
     }
+
+    @GetMapping("{movieId}/reviews/spoiler")
+    public ApiSuccess<?> getMovieSpoilerReviewList(@PathVariable(name = "movieId") Long movieId) {
+        // TODO: userId JWT 토큰으로 변경
+        ReviewOfMovieResponse movieReviews = movieService.getMovieSpoilerReviewList(movieId);
+        return ApiUtil.success(movieReviews);
+    }
+
 }
