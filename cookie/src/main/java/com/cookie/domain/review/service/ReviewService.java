@@ -10,7 +10,9 @@ import com.cookie.domain.review.dto.response.ReviewResponse;
 import com.cookie.domain.review.dto.request.UpdateReviewRequest;
 import com.cookie.domain.review.entity.Review;
 import com.cookie.domain.review.entity.ReviewComment;
+import com.cookie.domain.review.entity.ReviewLike;
 import com.cookie.domain.review.repository.ReviewCommentRepository;
+import com.cookie.domain.review.repository.ReviewLikeRepository;
 import com.cookie.domain.review.repository.ReviewRepository;
 import com.cookie.domain.user.dto.response.CommentUserResponse;
 import com.cookie.domain.user.dto.response.ReviewUserResponse;
@@ -31,6 +33,7 @@ public class ReviewService {
     private final MovieRepository movieRepository;
     private final ReviewRepository reviewRepository;
     private final ReviewCommentRepository reviewCommentRepository;
+    private final ReviewLikeRepository reviewLikeRepository;
 
     @Transactional
     public void createReview(Long userId, CreateReviewRequest createReviewRequest) {
@@ -131,6 +134,36 @@ public class ReviewService {
                 comments
         );
 
+    }
+
+    @Transactional
+    public void addReviewLike(Long reviewId, Long userId) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new IllegalArgumentException("not found reviewId: " + reviewId));
+        log.info("Retrieved review: reviewId = {}", reviewId);
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("not found userId: " + userId));
+        log.info("Retrieved user: userId = {}", userId);
+
+        if (review.getUser().getId().equals(userId)) {
+            throw new IllegalArgumentException("자신의 리뷰에는 좋아요를 누를 수 없습니다.");
+        }
+
+        ReviewLike existingLike = reviewLikeRepository.findByUserAndReview(user, review);
+        if (existingLike != null) {
+            reviewLikeRepository.delete(existingLike);
+            review.decreaseLikeCount();
+            log.info("Removed like from reviewId: {}", reviewId);
+        } else {
+            ReviewLike like = ReviewLike.builder()
+                    .user(user)
+                    .review(review)
+                    .build();
+            reviewLikeRepository.save(like);
+            review.increaseLikeCount();
+            log.info("Added like to reviewId: {}", reviewId);
+        }
     }
 }
 

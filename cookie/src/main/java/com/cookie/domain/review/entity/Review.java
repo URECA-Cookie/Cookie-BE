@@ -60,4 +60,12 @@ public class Review extends BaseTimeEntity {
         this.movieScore = movieScore;
         this.isSpoiler = isSpoiler;
     }
+
+    public void increaseLikeCount() {
+        this.reviewLike++;
+    }
+
+    public void decreaseLikeCount() {
+        if(this.reviewLike > 0) this.reviewLike--;
+    }
 }
