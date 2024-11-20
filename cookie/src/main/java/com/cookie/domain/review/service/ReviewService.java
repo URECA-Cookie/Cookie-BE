@@ -62,25 +62,7 @@ public class ReviewService {
     }
 
     private void sendReviewCreatedEvent(Review review, CopyOnWriteArrayList<SseEmitter> emitters) {
-        ReviewResponse reviewResponse = new ReviewResponse(
-                review.getId(),
-                review.getContent(),
-                review.getMovieScore(),
-                review.isHide(),
-                review.isSpoiler(),
-                review.getReviewLike(),
-                review.getCreatedAt(),
-                review.getUpdatedAt(),
-                new ReviewMovieResponse(
-                        review.getMovie().getPoster(),
-                        review.getMovie().getTitle()
-                ),
-                new ReviewUserResponse(
-                        review.getUser().getNickname(),
-                        review.getUser().getProfileImage(),
-                        review.getUser().getMainBadge() != null ? review.getUser().getMainBadge().getBadgeImage() : null
-                )
-        );
+        ReviewResponse reviewResponse = ReviewResponse.fromReview(review);
 
         for (SseEmitter emitter : emitters) {
             try {
@@ -110,25 +92,9 @@ public class ReviewService {
         List<Review> reviewList = reviewRepository.findAllWithMovieAndUser();
         log.info("Total reviews: {}", reviewList.size());
 
-        return reviewList.stream().map(review -> new ReviewResponse(
-                review.getId(),
-                review.getContent(),
-                review.getMovieScore(),
-                review.isHide(),
-                review.isSpoiler(),
-                review.getReviewLike(),
-                review.getCreatedAt(),
-                review.getUpdatedAt(),
-                new ReviewMovieResponse(
-                        review.getMovie().getPoster(),
-                        review.getMovie().getTitle()
-                ),
-                new ReviewUserResponse(
-                        review.getUser().getNickname(),
-                        review.getUser().getProfileImage(),
-                        review.getUser().getMainBadge() != null ? review.getUser().getMainBadge().getBadgeImage() : null
-                )
-        )).toList();
+        return reviewList.stream()
+                .map(ReviewResponse::fromReview)
+                .toList();
 
     }
 

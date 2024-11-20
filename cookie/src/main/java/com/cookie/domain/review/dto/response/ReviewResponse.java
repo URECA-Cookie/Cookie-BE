@@ -24,4 +24,27 @@ public class ReviewResponse {
     private ReviewMovieResponse movie;
     private ReviewUserResponse user;
 
+    public static ReviewResponse fromReview(Review review) {
+        return new ReviewResponse(
+                review.getId(),
+                review.getContent(),
+                review.getMovieScore(),
+                review.isHide(),
+                review.isSpoiler(),
+                review.getReviewLike(),
+                review.getCreatedAt(),
+                review.getUpdatedAt(),
+                new ReviewMovieResponse(
+                        review.getMovie().getPoster(),
+                        review.getMovie().getTitle()
+                ),
+                new ReviewUserResponse(
+                        review.getUser().getNickname(),
+                        review.getUser().getProfileImage(),
+                        review.getUser().getMainBadge() != null ? review.getUser().getMainBadge().getBadgeImage() : null
+                )
+        );
+    }
+
+
 }
