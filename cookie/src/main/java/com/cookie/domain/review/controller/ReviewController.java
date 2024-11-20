@@ -73,6 +73,11 @@ public class ReviewController {
         return ApiUtil.success("SUCCESS");
     }
 
-
+    @DeleteMapping("/comments/{commentId}")
+    public ApiSuccess<?> deleteComment(@PathVariable(name = "commentId") Long commentId) {
+        // TODO: userId JWT 토큰으로 변경
+        reviewService.deleteComment(commentId);
+        return ApiUtil.success("SUCCESS");
+    }
 
 }

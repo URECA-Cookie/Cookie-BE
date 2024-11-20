@@ -202,5 +202,15 @@ public class ReviewService {
         log.info("Updated comment: commentId = {}", commentId);
     }
 
+    @Transactional
+    public void deleteComment(Long commentId) {
+        ReviewComment comment = reviewCommentRepository.findById(commentId)
+                .orElseThrow(() -> new IllegalArgumentException("not found commentId: " + commentId));
+        log.info("Retrieved comment: commentId = {}", commentId);
+
+        reviewCommentRepository.delete(comment);
+        log.info("Deleted comment: commentId = {}", commentId);
+    }
+
 }
 
