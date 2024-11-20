@@ -67,9 +67,25 @@ public class ReviewService {
         List<Review> reviewList = reviewRepository.findAllWithMovieAndUser();
         log.info("Total reviews: {}", reviewList.size());
 
-        return reviewList.stream()
-                .map(ReviewResponse::fromEntity)
-                .toList();
+        return reviewList.stream().map(review -> new ReviewResponse(
+                review.getId(),
+                review.getContent(),
+                review.getMovieScore(),
+                review.isHide(),
+                review.isSpoiler(),
+                review.getReviewLike(),
+                review.getCreatedAt(),
+                review.getUpdatedAt(),
+                new ReviewMovieResponse(
+                        review.getMovie().getPoster(),
+                        review.getMovie().getTitle()
+                ),
+                new ReviewUserResponse(
+                        review.getUser().getNickname(),
+                        review.getUser().getProfileImage(),
+                        review.getUser().getMainBadge() != null ? review.getUser().getMainBadge().getBadgeImage() : null
+                )
+        )).toList();
 
     }
 

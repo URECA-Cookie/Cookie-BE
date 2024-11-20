@@ -14,7 +14,7 @@ import java.util.Optional;
 public interface ReviewRepository extends JpaRepository<Review, Long> {
     Optional<Review> findByUserAndMovie(User user, Movie movie);
 
-    @Query("SELECT r FROM Review r JOIN FETCH r.movie m JOIN FETCH r.user u")
+    @Query("SELECT r FROM Review r JOIN FETCH r.movie m JOIN FETCH r.user u LEFT JOIN FETCH u.userBadges ub LEFT JOIN FETCH ub.badge b")
     List<Review> findAllWithMovieAndUser();
 
 }
