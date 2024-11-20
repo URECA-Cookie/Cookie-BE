@@ -17,7 +17,7 @@ public class MovieController {
     private final MovieService movieService;
 
     @GetMapping("{movieId}/reviews")
-    public ApiSuccess<?> createReview(@PathVariable(name = "movieId") Long movieId) {
+    public ApiSuccess<?> getMovieReviewList(@PathVariable(name = "movieId") Long movieId) {
         // TODO: userId JWT 토큰으로 변경
         ReviewOfMovieResponse movieReviews = movieService.getMovieReviewList(movieId);
         return ApiUtil.success(movieReviews);
