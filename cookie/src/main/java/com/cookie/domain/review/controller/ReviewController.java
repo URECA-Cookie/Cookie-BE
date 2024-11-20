@@ -1,5 +1,6 @@
 package com.cookie.domain.review.controller;
 
+import com.cookie.domain.review.dto.request.CreateReviewCommentRequest;
 import com.cookie.domain.review.dto.request.CreateReviewRequest;
 import com.cookie.domain.review.dto.response.ReviewDetailResponse;
 import com.cookie.domain.review.dto.response.ReviewResponse;
@@ -55,6 +56,13 @@ public class ReviewController {
     public ApiSuccess<?> addReviewLike(@PathVariable(name = "reviewId") Long reviewId, @PathVariable(name = "userId") Long userId) {
         // TODO: userId JWT 토큰으로 변경
         reviewService.addReviewLike(reviewId, userId);
+        return ApiUtil.success("SUCCESS");
+    }
+
+    @PostMapping("/{reviewId}/comments/{userId}")
+    public ApiSuccess<?> createComment(@PathVariable(name = "reviewId") Long reviewId, @PathVariable(name = "userId") Long userId, @RequestBody CreateReviewCommentRequest createReviewCommentRequest) {
+        // TODO: userId JWT 토큰으로 변경
+        reviewService.createComment(reviewId, userId, createReviewCommentRequest);
         return ApiUtil.success("SUCCESS");
     }
 

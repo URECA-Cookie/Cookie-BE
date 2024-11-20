@@ -3,6 +3,7 @@ package com.cookie.domain.review.service;
 import com.cookie.domain.movie.dto.response.ReviewMovieResponse;
 import com.cookie.domain.movie.entity.Movie;
 import com.cookie.domain.movie.repository.MovieRepository;
+import com.cookie.domain.review.dto.request.CreateReviewCommentRequest;
 import com.cookie.domain.review.dto.request.CreateReviewRequest;
 import com.cookie.domain.review.dto.response.ReviewCommentResponse;
 import com.cookie.domain.review.dto.response.ReviewDetailResponse;
@@ -164,6 +165,31 @@ public class ReviewService {
             review.increaseLikeCount();
             log.info("Added like to reviewId: {}", reviewId);
         }
+    }
+
+    @Transactional
+    public void createComment(Long reviewId, Long userId, CreateReviewCommentRequest createReviewCommentRequest) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("not found userId: " + userId));
+        log.info("Retrieved user: userId = {}", userId);
+
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new IllegalArgumentException("not found reviewId: " + reviewId));
+        log.info("Retrieved review: reviewId = {}", reviewId);
+
+        if (review.getUser().getId().equals(userId)) {
+            throw new IllegalArgumentException("자신의 리뷰에는 댓글을 작성할 수 없습니다.");
+        }
+
+        ReviewComment comment = ReviewComment.builder()
+                .user(user)
+                .review(review)
+                .comment(createReviewCommentRequest.getComment())
+                .build();
+
+        reviewCommentRepository.save(comment);
+        log.info("Created comment for reviewId: {} by userId: {}", reviewId, userId);
+
     }
 }
 
