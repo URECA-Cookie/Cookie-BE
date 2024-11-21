@@ -75,15 +75,13 @@ public class SecurityConfig {
                 );
 
         http
-                .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/").permitAll()
-                        .anyRequest().authenticated());
-
-        http
                 .authorizeHttpRequests(auth -> auth
-                    .requestMatchers("/api/auth/**").permitAll()
-                    .requestMatchers("/login/oauth2/code/**").permitAll()
-                    .anyRequest().authenticated()
+                        .requestMatchers(
+                                "/",
+                                "/api/auth/**",
+                                "/login/oauth2/code/**"
+                        ).permitAll()
+                        .anyRequest().authenticated()
         );
 
         http
