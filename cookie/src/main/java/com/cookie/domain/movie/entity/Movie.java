@@ -46,9 +46,6 @@ public class Movie {
     @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MovieCategory> movieCategories = new ArrayList<>();
 
-    @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<MovieCountry> movieCountries = new ArrayList<>();
-
     @Builder
     public Movie(String title, String poster, String plot, String company, LocalDateTime releasedAt, int runtime, double score, Rating rating) {
         this.title = title;

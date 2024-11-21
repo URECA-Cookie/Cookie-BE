@@ -224,19 +224,8 @@ public class ReviewService {
 
         return likedReviews.stream()
                 .map(reviewLike -> {
-                    var review = reviewLike.getReview();
-                    return ReviewResponse.builder()
-                            .reviewId(review.getId())
-                            .userId(review.getUser().getId())
-                            .movieId(review.getMovie().getId())
-                            .content(review.getContent())
-                            .movieScore(review.getMovieScore())
-                            .isHide(review.isHide())
-                            .isSpoiler(review.isSpoiler())
-                            .reviewLike(review.getReviewLike())
-                            .createdAt(review.getCreatedAt().toLocalDate())
-                            .updatedAt(review.getUpdatedAt().toLocalDate())
-                            .build();
+                    Review review = reviewLike.getReview();
+                    return ReviewResponse.fromReview(review);
                 })
                 .toList();
     }

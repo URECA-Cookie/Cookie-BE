@@ -106,21 +106,8 @@ public class UserService {
         List<Review> reviews = reviewRepository.findAllByUserIdWithMovie(userId);
 
         return reviews.stream()
-                .map(review -> ReviewResponse.builder()
-                        .reviewId(review.getId())
-                        .userId(review.getUser().getId())
-                        .movieId(review.getMovie().getId())
-                        .content(review.getContent())
-                        .movieScore(review.getMovieScore())
-                        .isHide(review.isHide())
-                        .isSpoiler(review.isSpoiler())
-                        .reviewLike(review.getReviewLike())
-                        .createdAt(review.getCreatedAt().toLocalDate())
-                        .updatedAt(review.getUpdatedAt().toLocalDate())
-                        .movieTitle(review.getMovie().getTitle())
-                        .moviePoster(review.getMovie().getPoster())
-                        .build())
-                .collect(Collectors.toList());
+                .map(ReviewResponse::fromReview)
+                .toList();
     }
 
     public MyProfileDataResponse getMyProfile(Long userId) {

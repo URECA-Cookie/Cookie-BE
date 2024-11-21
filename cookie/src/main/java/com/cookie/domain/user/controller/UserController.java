@@ -4,13 +4,11 @@ import com.cookie.domain.movie.dto.response.MovieResponse;
 import com.cookie.domain.movie.service.MovieService;
 import com.cookie.domain.review.dto.response.ReviewCommentResponse;
 import com.cookie.domain.review.dto.response.ReviewResponse;
-import com.cookie.domain.review.service.ReviewCommentService;
 import com.cookie.domain.review.service.ReviewService;
 import com.cookie.domain.user.dto.request.MyProfileRequest;
 import com.cookie.domain.user.dto.response.BadgeAccResponse;
 import com.cookie.domain.user.dto.response.MyPageResponse;
 import com.cookie.domain.user.dto.response.MyProfileDataResponse;
-import com.cookie.domain.user.entity.BadgeAccumulationPoint;
 import com.cookie.domain.user.service.UserService;
 import com.cookie.global.util.ApiUtil;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +25,6 @@ public class UserController {
     private final UserService userService;
     private final MovieService movieLikeService;
     private final ReviewService reviewService;
-    private final ReviewCommentService reviewCommentService;
 
     @GetMapping("/{userId}")
     public ResponseEntity<?> getMyPage(@PathVariable Long userId) {
@@ -72,12 +69,6 @@ public class UserController {
     public ResponseEntity<?> getBadgePointsByUserId(@PathVariable Long userId) {
         BadgeAccResponse badgeAccResponse = userService.getBadgeAccumulationPoint(userId);
         return ResponseEntity.ok(ApiUtil.success(badgeAccResponse));
-    }
-
-    @GetMapping("/{userId}/reviewComments")
-    public ResponseEntity<?> getCommentsByUserId(@PathVariable Long userId) {
-        List<ReviewCommentResponse> comments = reviewCommentService.getCommentsByUserId(userId);
-        return ResponseEntity.ok(ApiUtil.success(comments));
     }
 
     @GetMapping("/{userId}/myReviews")
