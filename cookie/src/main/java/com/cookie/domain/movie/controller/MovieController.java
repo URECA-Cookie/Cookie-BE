@@ -2,12 +2,17 @@ package com.cookie.domain.movie.controller;
 
 
 import com.cookie.domain.movie.dto.response.MovieResponse;
+import org.springframework.http.ResponseEntity;
+import com.cookie.domain.movie.dto.response.ReviewOfMovieResponse;
 import com.cookie.domain.movie.service.MovieService;
 import com.cookie.global.util.ApiUtil;
+import com.cookie.global.util.ApiUtil.ApiSuccess;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+
+@Slf4j
 @RestController
 @RequestMapping("/api/movies")
 @RequiredArgsConstructor
@@ -17,9 +22,24 @@ public class MovieController {
     private final MovieService movieService;
 
     @GetMapping("/{movieId}")
-    public ResponseEntity<?> getMovieDetails(@PathVariable Long movieId) {
+    public ApiSuccess<?> getMovieDetails(@PathVariable(name = "movieId") Long movieId) {
         MovieResponse movieDetails = movieService.getMovieDetails(movieId);
-        return ResponseEntity.ok(ApiUtil.success(movieDetails));
+        return ApiUtil.success(movieDetails);
+    }
+  
+    @GetMapping("{movieId}/reviews")
+    public ApiSuccess<?> getMovieReviewList(@PathVariable(name = "movieId") Long movieId) {
+        // TODO: userId JWT 토큰으로 변경
+        ReviewOfMovieResponse movieReviews = movieService.getMovieReviewList(movieId);
+        return ApiUtil.success(movieReviews);
+    }
+
+    @GetMapping("{movieId}/reviews/spoiler")
+    public ApiSuccess<?> getMovieSpoilerReviewList(@PathVariable(name = "movieId") Long movieId) {
+        // TODO: userId JWT 토큰으로 변경
+        ReviewOfMovieResponse movieReviews = movieService.getMovieSpoilerReviewList(movieId);
+        return ApiUtil.success(movieReviews);
+
     }
 
 }

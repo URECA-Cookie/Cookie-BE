@@ -3,9 +3,11 @@ package com.cookie.domain.movie.repository;
 import com.cookie.domain.movie.entity.Movie;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
+@Repository
 public interface MovieRepository extends JpaRepository<Movie, Long> {
     // 기본 영화 정보
     @Query("SELECT m FROM Movie m WHERE m.id = :movieId")

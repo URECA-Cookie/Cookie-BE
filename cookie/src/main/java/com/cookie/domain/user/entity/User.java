@@ -1,10 +1,14 @@
 package com.cookie.domain.user.entity;
 
+import com.cookie.domain.badge.entity.Badge;
 import com.cookie.domain.user.entity.enums.Role;
 import com.cookie.domain.user.entity.enums.SocialProvider;
 import com.cookie.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Data
@@ -23,6 +27,18 @@ public class User extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private Role role;
     private String socialId;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserBadge> userBadges = new ArrayList<>();
+
+    // mainBadge 반환 메서드
+    public Badge getMainBadge() {
+        return userBadges.stream()
+                .filter(UserBadge::isMain)
+                .map(UserBadge::getBadge)
+                .findFirst()
+                .orElse(null);
+    }
 
     @Builder
     public User(String nickname, String profileImage, SocialProvider socialProvider, String email, Role role, String socialId) {

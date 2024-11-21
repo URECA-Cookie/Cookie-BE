@@ -1,16 +1,19 @@
 package com.cookie.domain.review.dto.response;
 
+
+import com.cookie.domain.user.dto.response.CommentUserResponse;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Data
-@Builder
+import java.time.LocalDateTime;
+
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 public class ReviewCommentResponse {
-    private String movieTitle;   // 영화 제목
-    private String reviewContent; // 리뷰 내용
-    private String commentContent; // 댓글 내용
+    private CommentUserResponse user;
+    private LocalDateTime createdAt;
+    private String comment;
+  
 }
