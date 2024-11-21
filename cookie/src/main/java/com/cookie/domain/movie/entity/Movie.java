@@ -31,6 +31,15 @@ public class Movie {
     @Enumerated(EnumType.STRING)
     private Rating rating;
 
+    @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<MovieImage> movieImages;
+
+    @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<MovieVideo> movieVideos;
+
+    @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<MovieCountry> movieCountries;
+  
     @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Review> reviews = new ArrayList<>();
 

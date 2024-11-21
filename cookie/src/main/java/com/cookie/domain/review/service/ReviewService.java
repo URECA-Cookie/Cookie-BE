@@ -1,5 +1,6 @@
 package com.cookie.domain.review.service;
 
+
 import com.cookie.domain.movie.dto.response.ReviewMovieResponse;
 import com.cookie.domain.movie.dto.response.ReviewOfMovieResponse;
 import com.cookie.domain.movie.entity.Movie;
@@ -215,6 +216,29 @@ public class ReviewService {
 
         reviewCommentRepository.delete(comment);
         log.info("Deleted comment: commentId = {}", commentId);
+    }
+  
+    @Transactional(readOnly = true)
+    public List<ReviewResponse> getLikedReviewsByUserId(Long userId) {
+        List<ReviewLike> likedReviews = reviewLikeRepository.findAllByUserIdWithReviews(userId);
+
+        return likedReviews.stream()
+                .map(reviewLike -> {
+                    var review = reviewLike.getReview();
+                    return ReviewResponse.builder()
+                            .reviewId(review.getId())
+                            .userId(review.getUser().getId())
+                            .movieId(review.getMovie().getId())
+                            .content(review.getContent())
+                            .movieScore(review.getMovieScore())
+                            .isHide(review.isHide())
+                            .isSpoiler(review.isSpoiler())
+                            .reviewLike(review.getReviewLike())
+                            .createdAt(review.getCreatedAt().toLocalDate())
+                            .updatedAt(review.getUpdatedAt().toLocalDate())
+                            .build();
+                })
+                .toList();
     }
 
 }

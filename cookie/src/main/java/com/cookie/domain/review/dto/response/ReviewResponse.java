@@ -1,5 +1,6 @@
 package com.cookie.domain.review.dto.response;
 
+import lombok.Builder;
 import com.cookie.domain.movie.dto.response.ReviewMovieResponse;
 import com.cookie.domain.review.entity.Review;
 import com.cookie.domain.user.dto.response.ReviewUserResponse;
@@ -12,6 +13,7 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class ReviewResponse {
     private Long reviewId;
     private String content;
@@ -45,6 +47,5 @@ public class ReviewResponse {
                 )
         );
     }
-
 
 }

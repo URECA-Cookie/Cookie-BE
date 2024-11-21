@@ -15,4 +15,5 @@ public class ReviewCommentResponse {
     private CommentUserResponse user;
     private LocalDateTime createdAt;
     private String comment;
+  
 }
