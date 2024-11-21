@@ -80,6 +80,13 @@ public class SecurityConfig {
                         .anyRequest().authenticated());
 
         http
+                .authorizeHttpRequests(auth -> auth
+                    .requestMatchers("/api/auth/**").permitAll()
+                    .requestMatchers("/login/oauth2/code/**").permitAll()
+                    .anyRequest().authenticated()
+        );
+
+        http
                 .sessionManagement((session) -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
