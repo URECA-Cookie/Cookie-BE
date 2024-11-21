@@ -1,6 +1,6 @@
-package com.cookie.domain.actor.dto.response;
+package com.cookie.domain.director.dto.response;
 
-import com.cookie.domain.movie.dto.response.ActorMovie;
+import com.cookie.domain.movie.dto.response.PersonDetailMovieInfo;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,8 +12,8 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ActorDetailResponse {
+public class DirectorDetailResponse {
     private String name;
     private String profileImage;
-    private List<ActorMovie> actorMovieList;
+    private List<PersonDetailMovieInfo> directorMovieList;
 }

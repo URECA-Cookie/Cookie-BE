@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class BadgeDto {
+public class BadgeResponse {
     private String name;
     private String badgeImage;
 }

@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ActorMovie {
+public class PersonDetailMovieInfo {
     private String title;
     private String poster;
     private String released;

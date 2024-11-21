@@ -4,13 +4,10 @@ import com.cookie.domain.user.entity.enums.Role;
 import com.cookie.domain.user.entity.enums.SocialProvider;
 import com.cookie.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
-@Getter
+@Data
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User extends BaseTimeEntity {
 
@@ -36,4 +33,11 @@ public class User extends BaseTimeEntity {
         this.role = role;
         this.socialId = socialId;
     }
+
+    public void updateProfile(String profileImage, String nickname) {
+        this.profileImage = profileImage;
+        this.nickname = nickname;
+    }
+
+
 }

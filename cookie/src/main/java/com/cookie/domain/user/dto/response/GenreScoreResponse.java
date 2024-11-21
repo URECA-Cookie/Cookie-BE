@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class GenreScoreDto {
+public class GenreScoreResponse {
     private Long id;           // 유저장르점수 ID
     private Long userId;       // 유저ID
     private Long romance;      // 로맨스 점수

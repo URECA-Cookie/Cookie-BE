@@ -10,7 +10,7 @@ import java.time.LocalDate;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ReviewDto {
+public class ReviewResponse {
     private Long reviewId;      // 리뷰 ID
     private Long userId;        // 유저 ID
     private Long movieId;       // 영화 ID
