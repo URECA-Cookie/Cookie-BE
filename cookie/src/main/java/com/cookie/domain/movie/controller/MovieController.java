@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class MovieController {
 
-    private final MovieService movieLikeService;
     private final MovieService movieService;
 
     @GetMapping("/{movieId}")
