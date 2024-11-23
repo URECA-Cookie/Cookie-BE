@@ -1,7 +1,5 @@
 package com.cookie.global.exception.handler;
 
-import com.cookie.domain.user.dto.response.auth.RegistrationRequiredResponse;
-import com.cookie.domain.user.exception.RegistrationRequiredException;
 import com.cookie.global.util.ApiUtil;
 import com.cookie.global.util.ApiUtil.ApiError;
 import jakarta.servlet.http.HttpServletResponse;
@@ -43,18 +41,5 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<String> handleRuntimeException(RuntimeException e) {
         log.error(e.getMessage(), e);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-    }
-
-    @ExceptionHandler(RegistrationRequiredException.class)
-    public ResponseEntity<?> handleRegistrationRequiredException(RegistrationRequiredException ex) {
-        RegistrationRequiredResponse response = new RegistrationRequiredResponse(
-                ex.getUser().getSocialProvider(),
-                ex.getUser().getSocialId(),
-                ex.getUser().getEmail()
-        );
-
-        return ResponseEntity.status(HttpStatus.TEMPORARY_REDIRECT)
-                .header("Location", "/api/auth/register")
-                .body(ApiUtil.success(response));
     }
 }
