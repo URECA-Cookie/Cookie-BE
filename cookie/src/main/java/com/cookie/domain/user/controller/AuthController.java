@@ -1,21 +1,24 @@
 package com.cookie.domain.user.controller;
 
-import com.cookie.domain.user.dto.request.RegisterRequest;
+import com.cookie.domain.user.dto.request.auth.AdminLoginRequest;
+import com.cookie.domain.user.dto.request.auth.AdminRegisterRequest;
+import com.cookie.domain.user.dto.request.auth.RegisterRequest;
 import com.cookie.domain.user.entity.User;
 import com.cookie.domain.user.entity.enums.Role;
 import com.cookie.domain.user.service.UserService;
 import com.cookie.global.jwt.JWTUtil;
 import com.cookie.global.util.ApiUtil;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-
-import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -25,12 +28,11 @@ public class AuthController {
 
     private final UserService userService;
     private final JWTUtil jwtUtil;
-
-    @Value("${app.client.url}")
-    private String clientUrl;
+    private final AuthenticationManager authenticationManager;
+    private final PasswordEncoder passwordEncoder;
 
     @PostMapping("/register")
-    public ResponseEntity<Object> registerUser(@RequestBody RegisterRequest registerRequest, HttpServletResponse response) throws IOException {
+    public ResponseEntity<Object> registerUser(@RequestBody RegisterRequest registerRequest) {
 
         if (userService.isDuplicateSocial(registerRequest.getSocialProvider(), registerRequest.getSocialId())) {
             return ResponseEntity.badRequest().body(ApiUtil.error(409, "ALREADY_REGISTERED"));
@@ -53,7 +55,7 @@ public class AuthController {
 
         userService.saveUser(newUser);
 
-        String token = jwtUtil.createJwt(newUser.getNickname(), newUser.getRole().name(), 60 * 60 * 60L);
+        String token = jwtUtil.createJwt(newUser.getNickname(), newUser.getRole().name());
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", token);
@@ -88,6 +90,48 @@ public class AuthController {
         }
 
         return ResponseEntity.ok(ApiUtil.success("SUCCESS"));
+    }
+
+    @PostMapping("/register-admin")
+    public ResponseEntity<?> registerAdmin(@RequestBody AdminRegisterRequest request) {
+        if (userService.isDuplicateNickname(request.getId())) {
+            return ResponseEntity.badRequest().body(ApiUtil.error(400, "DUPLICATED_ID"));
+        }
+
+        String encodedPassword = passwordEncoder.encode(request.getPassword());
+
+        User admin = User.builder()
+                .nickname(request.getId())
+                .password(encodedPassword)
+                .role(Role.ADMIN)
+                .build();
+
+        userService.saveUser(admin);
+
+        return ResponseEntity.ok(ApiUtil.success("SUCCESS"));
+    }
+
+    @PostMapping("/admin")
+    public ResponseEntity<?> loginAdmin(@RequestBody AdminLoginRequest request) {
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(request.getId(), request.getPassword()));
+
+            String token = jwtUtil.createJwt(
+                    authentication.getName(),
+                    authentication.getAuthorities().iterator().next().getAuthority()
+            );
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Authorization", token);
+
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(ApiUtil.success("SUCCESS"));
+
+        } catch (AuthenticationException e) {
+            return ResponseEntity.status(401).body(ApiUtil.error(401, "INVALID_CREDENTIALS"));
+        }
     }
 
 }

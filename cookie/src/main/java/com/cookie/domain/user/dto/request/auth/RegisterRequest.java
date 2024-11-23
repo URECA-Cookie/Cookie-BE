@@ -1,4 +1,4 @@
-package com.cookie.domain.user.dto.request;
+package com.cookie.domain.user.dto.request.auth;
 
 import com.cookie.domain.user.entity.enums.SocialProvider;
 import lombok.Getter;
