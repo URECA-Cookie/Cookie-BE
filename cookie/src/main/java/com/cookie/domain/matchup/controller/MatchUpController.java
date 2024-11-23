@@ -43,7 +43,7 @@ public class MatchUpController {
     }
 
     @GetMapping("{matchUpId}")
-    public ApiSuccess<?> addMatchUpVote(@PathVariable(name = "matchUpId") Long matchUpId) {
+    public ApiSuccess<?> getOnGoingMatchUp(@PathVariable(name = "matchUpId") Long matchUpId) {
         // TODO: userId JWT 토큰으로 변경
         MatchUpResponse matchUp = matchUpService.getOnGoingMatchUp(matchUpId, 1L);
         return ApiUtil.success(matchUp);

@@ -106,7 +106,7 @@ public class MatchUpService {
         log.info("Retrieved matchUp: matchUpId = {}", matchUpId);
 
         CharmPointResponse movie1CharmPoint = calculateCharmPointProportions(matchUp.getMovie1());
-        CharmPointResponse movie2CharmPoint = calculateCharmPointProportions(matchUp.getMovie1());
+        CharmPointResponse movie2CharmPoint = calculateCharmPointProportions(matchUp.getMovie2());
 
         EmotionPointResponse movie1EmotionPoint = calculateEmotionPointProportions(matchUp.getMovie1());
         EmotionPointResponse movie2EmotionPoint = calculateEmotionPointProportions(matchUp.getMovie2());
