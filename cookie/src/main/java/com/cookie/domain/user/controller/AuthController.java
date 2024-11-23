@@ -111,4 +111,27 @@ public class AuthController {
         return ResponseEntity.ok(ApiUtil.success("SUCCESS"));
     }
 
+    @PostMapping("/admin")
+    public ResponseEntity<?> loginAdmin(@RequestBody AdminLoginRequest request) {
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(request.getId(), request.getPassword()));
+
+            String token = jwtUtil.createJwt(
+                    authentication.getName(),
+                    authentication.getAuthorities().iterator().next().getAuthority()
+            );
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Authorization", token);
+
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(ApiUtil.success("SUCCESS"));
+
+        } catch (AuthenticationException e) {
+            return ResponseEntity.status(401).body(ApiUtil.error(401, "INVALID_CREDENTIALS"));
+        }
+    }
+
 }
