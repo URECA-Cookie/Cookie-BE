@@ -1,6 +1,5 @@
 package com.cookie.domain.movie.entity;
 
-import com.cookie.domain.movie.entity.enums.Rating;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -17,26 +16,27 @@ public class Movie {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    private Long TMDBMovieId;
     private String title;
     private String poster;
     @Lob
     private String plot;
-    private String company;
-    private LocalDateTime releasedAt;
-    private int runtime;
+    private String releasedAt;
+    private Integer runtime;
     private double score;
-    @Enumerated(EnumType.STRING)
-    private Rating rating;
+    private String certification;
 
     @Builder
-    public Movie(String title, String poster, String plot, String company, LocalDateTime releasedAt, int runtime, double score, Rating rating) {
+    public Movie(Long id, Long TMDBMovieId, String title, String poster, String plot,
+                 String releasedAt, Integer runtime, double score, String certification) {
+        this.id = id;
+        this.TMDBMovieId = TMDBMovieId;
         this.title = title;
         this.poster = poster;
         this.plot = plot;
-        this.company = company;
         this.releasedAt = releasedAt;
         this.runtime = runtime;
         this.score = score;
-        this.rating = rating;
+        this.certification = certification;
     }
 }
