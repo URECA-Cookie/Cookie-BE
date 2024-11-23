@@ -24,10 +24,23 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class ReviewController {
     private final ReviewService reviewService;
 
-    private final CopyOnWriteArrayList<SseEmitter> emitters = new CopyOnWriteArrayList<>();
+    private final CopyOnWriteArrayList<SseEmitter> reviewEmitters = new CopyOnWriteArrayList<>();
+    private final CopyOnWriteArrayList<SseEmitter> pushNotificationEmitters = new CopyOnWriteArrayList<>();
 
-    @GetMapping("/subscribe")
+
+    // 리뷰 피드 실시간 연결
+    @GetMapping("/subscribe/feed")
     public SseEmitter subscribe() {
+        return getSseEmitter(reviewEmitters);
+    }
+
+    // 푸시 알림 실시간 연결
+    @GetMapping("/subscribe/push-notification")
+    public SseEmitter subscribePushNotification() {
+        return getSseEmitter(pushNotificationEmitters);
+    }
+
+    private SseEmitter getSseEmitter(CopyOnWriteArrayList<SseEmitter> emitters) {
         SseEmitter emitter = new SseEmitter(Long.MAX_VALUE); // 연결 타임아웃 설정
         emitters.add(emitter);
 
@@ -41,7 +54,7 @@ public class ReviewController {
     @PostMapping("/{userId}")
     public ApiSuccess<?> createReview(@PathVariable(name = "userId") Long userId, @RequestBody CreateReviewRequest createReviewRequest) {
         // TODO: userId JWT 토큰으로 변경
-        reviewService.createReview(userId, createReviewRequest, emitters);
+        reviewService.createReview(userId, createReviewRequest, reviewEmitters, pushNotificationEmitters);
         return ApiUtil.success("SUCCESS");
     }
 
