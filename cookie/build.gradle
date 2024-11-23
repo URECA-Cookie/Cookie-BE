@@ -41,6 +41,7 @@ dependencies {
     // AssertJ (선택: 더 나은 Assertion 제공)
     testImplementation 'org.assertj:assertj-core:3.24.2'
 
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
 }
 
 tasks.named('test') {

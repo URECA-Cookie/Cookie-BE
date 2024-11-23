@@ -17,11 +17,14 @@ public class Director {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    private Long tmdbCasterId;
     private String name;
     private String profileImage;
 
     @Builder
-    public Director(String name, String profileImage) {
+    public Director(Long id, Long tmdbCasterId, String name, String profileImage) {
+        this.id = id;
+        this.tmdbCasterId = tmdbCasterId;
         this.name = name;
         this.profileImage = profileImage;
     }

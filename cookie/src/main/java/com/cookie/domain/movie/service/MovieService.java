@@ -36,7 +36,7 @@ public class MovieService {
     private final MovieCountryRepository movieCountryRepository;
     private final MovieCategoryRepository movieCategoryRepository;
     private final MovieLikeRepository movieLikeRepository;
-    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+//    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
 
     @Transactional(readOnly = true)
@@ -83,7 +83,7 @@ public class MovieService {
         return new ReviewOfMovieResponse(
                 movie.getTitle(),
                 movie.getPoster(),
-                movie.getRating().name(),
+                movie.getCertification(),
                 movie.getRuntime(),
                 subCategories,
                 countries,
@@ -136,7 +136,7 @@ public class MovieService {
         return new ReviewOfMovieResponse(
                 movie.getTitle(),
                 movie.getPoster(),
-                movie.getRating().name(),
+                movie.getCertification(),
                 movie.getRuntime(),
                 subCategories,
                 countries,
@@ -144,7 +144,7 @@ public class MovieService {
                 reviewResponses
         );
     }
-    
+
     @Transactional(readOnly = true)
     public List<MovieResponse> getLikedMoviesByUserId(Long userId) {
         List<MovieLike> likedMovies = movieLikeRepository.findAllByUserIdWithMovies(userId);
@@ -155,13 +155,10 @@ public class MovieService {
                         .title(movieLike.getMovie().getTitle())
                         .poster(movieLike.getMovie().getPoster())
                         .plot(movieLike.getMovie().getPlot())
-                        .company(movieLike.getMovie().getCompany())
-                        .releasedAt(movieLike.getMovie().getReleasedAt() != null
-                                ? movieLike.getMovie().getReleasedAt().format(DATE_FORMATTER)
-                                : null) // LocalDateTime -> String 변환
-                        .runtime(movieLike.getMovie().getRuntime() + " minutes") // int -> String 변환
+                        .releasedAt(movieLike.getMovie().getReleasedAt())
+                        .runtime(movieLike.getMovie().getRuntime())
                         .score(movieLike.getMovie().getScore())
-                        .rating(movieLike.getMovie().getRating().name()) // Enum -> String 변환
+                        .certification(movieLike.getMovie().getCertification()) // Enum -> String 변환
                         .build())
                 .collect(Collectors.toList());
     }
@@ -193,18 +190,16 @@ public class MovieService {
                 .title(movie.getTitle())
                 .poster(movie.getPoster())
                 .plot(movie.getPlot())
-                .company(movie.getCompany())
-                .releasedAt(movie.getReleasedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
-                .runtime(movie.getRuntime() + " minutes")
+                .releasedAt(movie.getReleasedAt())
+                .runtime(movie.getRuntime())
                 .score(movie.getScore())
-                .rating(movie.getRating().name())
+                .certification(movie.getCertification())
                 .images(movieImages.stream()
                         .map(MovieImage::getUrl)
                         .collect(Collectors.toList()))
                 .videos(movieVideos.stream()
                         .map(video -> MovieVideoResponse.builder()
                                 .url(video.getUrl())
-                                .title(video.getTitle())
                                 .build())
                         .collect(Collectors.toList()))
                 .countries(movieCountries.stream()

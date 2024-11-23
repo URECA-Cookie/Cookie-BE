@@ -34,7 +34,7 @@ public class ActorService {
                     return PersonDetailMovieInfo.builder()
                             .title(movie.getTitle())
                             .poster(movie.getPoster())
-                            .released(movie.getReleasedAt().toLocalDate().toString()) // LocalDateTime -> LocalDate 변환
+                            .released(movie.getReleasedAt()) // LocalDateTime -> LocalDate 변환
                             .build();
                 })
                 .collect(Collectors.toList());
