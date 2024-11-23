@@ -27,9 +27,14 @@ public class User extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private Role role;
     private String socialId;
+    private boolean pushEnabled;
+    private boolean emailEnabled;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserBadge> userBadges = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserCategory> userCategories = new ArrayList<>();
 
     // mainBadge 반환 메서드
     public Badge getMainBadge() {
