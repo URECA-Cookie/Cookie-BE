@@ -1,5 +1,6 @@
 package com.cookie.admin.dto.response.tmdb;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Getter;
@@ -19,8 +20,14 @@ public class TMDBMovieCreditsResponse {
     @JsonProperty("profile_path")
     private String profilePath;
 
-    public TMDBMovieCreditsResponse(Long tmdbCasterId, String knownForDepartment, String name,
-                                    Double popularity, String job, String profilePath) {
+    @JsonCreator
+    public TMDBMovieCreditsResponse(
+            @JsonProperty("id") Long tmdbCasterId,
+            @JsonProperty("known_for_department") String knownForDepartment,
+            @JsonProperty("name") String name,
+            @JsonProperty("popularity") Double popularity,
+            @JsonProperty("job") String job,
+            @JsonProperty("profile_path") String profilePath) {
         this.tmdbCasterId = tmdbCasterId;
         this.knownForDepartment = knownForDepartment;
         this.name = name;
@@ -29,3 +36,4 @@ public class TMDBMovieCreditsResponse {
         this.profilePath = profilePath;
     }
 }
+

@@ -1,10 +1,10 @@
 package com.cookie.admin.dto.response.tmdb;
 
-import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
-@Builder
+@NoArgsConstructor
 public class TMDBGenre {
 
     private int id;

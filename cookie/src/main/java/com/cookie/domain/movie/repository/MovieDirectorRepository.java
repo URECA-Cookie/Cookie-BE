@@ -1,6 +1,5 @@
 package com.cookie.domain.movie.repository;
 
-import com.cookie.domain.movie.entity.MovieActor;
 import com.cookie.domain.movie.entity.MovieDirector;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -19,7 +18,7 @@ public interface MovieDirectorRepository extends JpaRepository<MovieDirector, Lo
         FROM MovieDirector md
         WHERE md.movie.id = :movieId
     """)
-    Optional<MovieDirector> findMovieDirectorByMovieId(Long movieId);
+    Optional<MovieDirector> findMovieDirectorByMovieId(@Param("movieId") Long movieId);
 
     @Modifying
     @Query("""

@@ -8,8 +8,4 @@ import lombok.Getter;
 public class AdminMovieBaseAddResponse {
 
     private Long movieAddCount;
-
-    public AdminMovieBaseAddResponse(Long movieAddCount) {
-        this.movieAddCount = movieAddCount;
-    }
 }

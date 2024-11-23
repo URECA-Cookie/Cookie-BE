@@ -1,5 +1,7 @@
 package com.cookie.admin.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -12,7 +14,12 @@ public class MovieCategories {
     private String subCategory;
     private boolean isConnect;
 
-    public MovieCategories(Long categoryId, String mainCategory, String subCategory, boolean isConnect) {
+    @JsonCreator
+    public MovieCategories(
+            @JsonProperty("categoryId") Long categoryId,
+            @JsonProperty("mainCategory") String mainCategory,
+            @JsonProperty("subCategory") String subCategory,
+            @JsonProperty("isConnect") boolean isConnect) {
         this.categoryId = categoryId;
         this.mainCategory = mainCategory;
         this.subCategory = subCategory;

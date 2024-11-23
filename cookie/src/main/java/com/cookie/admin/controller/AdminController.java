@@ -66,13 +66,13 @@ public class AdminController {
 
     @GetMapping("/movies/{movieName}/{pageNumber}")
     public ApiSuccess<?> getMovieBySearch(@PathVariable("movieName") String  movieName,
-                                                  @PathVariable Integer pageNumber) {
+                                          @PathVariable("pageNumber") Integer pageNumber) {
         AdminMoviesResponse data = adminMovieSearchService.getMoviesByName(movieName, pageNumber);
         return ApiUtil.success(data);
     }
 
     @GetMapping("/movies/{pageNumber}")
-    public ApiSuccess<?> getMovies(@PathVariable Integer pageNumber) {
+    public ApiSuccess<?> getMovies(@PathVariable("pageNumber") Integer pageNumber) {
         AdminMoviesResponse data = adminMovieSearchService.getMovies(pageNumber);
         return ApiUtil.success(data);
     }

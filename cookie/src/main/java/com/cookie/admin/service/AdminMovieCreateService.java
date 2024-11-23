@@ -101,7 +101,7 @@ public class AdminMovieCreateService {
                 }
 
                 try {
-                    Thread.sleep(200);
+                    Thread.sleep(25);
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                     System.out.println("요청 지연 중 오류 발생: " + e.getMessage());
@@ -148,6 +148,8 @@ public class AdminMovieCreateService {
         List<Category> categories = createCategories(movie);
         List<MovieCategory> movieCategoryDates = createMovieCategories(movieData, categories);
         movieCategoryRepository.saveAll(movieCategoryDates);
+
+//        movieData.updateMovieDetails(movieImageDates, movieVideoData, movieCountryData, movieCategoryDates);
 
         return movieData;
     }

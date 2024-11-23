@@ -83,7 +83,7 @@ public class MovieService {
         return new ReviewOfMovieResponse(
                 movie.getTitle(),
                 movie.getPoster(),
-                movie.getCertification()
+                movie.getCertification(),
                 movie.getRuntime(),
                 subCategories,
                 countries,

@@ -10,6 +10,7 @@ import com.cookie.domain.movie.repository.MovieCategoryRepository;
 import com.cookie.domain.movie.repository.MovieRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -21,6 +22,7 @@ public class AdminMovieReadService {
     private final CategoryRepository categoryRepository;
     private final MovieCategoryRepository movieCategoryRepository;
 
+    @Transactional(readOnly = true)
     public AdminMovieCategoryResponse getMovieCategory(Long movieId) {
         Movie movie = movieRepository.findById(movieId)
                 .orElseThrow(() -> new MovieNotFoundException("해당 영화 정보가 존재하지 않습니다."));

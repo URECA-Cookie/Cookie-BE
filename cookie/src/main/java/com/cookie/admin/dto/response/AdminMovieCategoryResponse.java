@@ -13,11 +13,4 @@ public class AdminMovieCategoryResponse {
     private String title;
     private String posterPath;
     private List<MovieCategories> movieCategories;
-
-    public AdminMovieCategoryResponse(Long movieId, String title, String posterPath, List<MovieCategories> movieCategories) {
-        this.movieId = movieId;
-        this.title = title;
-        this.posterPath = posterPath;
-        this.movieCategories = movieCategories;
-    }
 }
