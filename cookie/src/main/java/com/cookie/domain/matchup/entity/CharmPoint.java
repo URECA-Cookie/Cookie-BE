@@ -38,4 +38,14 @@ public class CharmPoint {
         this.acting = acting;
         this.specialEffects = specialEffects;
     }
+
+    public void updatePoints(long ost, long directing, long story, long dialogue, long visual, long acting, long specialEffects) {
+        this.ost += ost;
+        this.directing += directing;
+        this.story += story;
+        this.dialogue += dialogue;
+        this.visual += visual;
+        this.acting += acting;
+        this.specialEffects += specialEffects;
+    }
 }

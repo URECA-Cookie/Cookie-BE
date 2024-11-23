@@ -1,10 +1,18 @@
 package com.cookie.domain.matchup.service;
 
+import com.cookie.domain.matchup.dto.request.MatchUpVoteRequest;
 import com.cookie.domain.matchup.dto.response.*;
+import com.cookie.domain.matchup.entity.CharmPoint;
+import com.cookie.domain.matchup.entity.EmotionPoint;
 import com.cookie.domain.matchup.entity.MatchUp;
 import com.cookie.domain.matchup.entity.MatchUpMovie;
 import com.cookie.domain.matchup.entity.enums.MatchUpStatus;
+import com.cookie.domain.matchup.repository.MatchUpMovieRepository;
 import com.cookie.domain.matchup.repository.MatchUpRepository;
+import com.cookie.domain.user.entity.MatchUpParticipation;
+import com.cookie.domain.user.entity.User;
+import com.cookie.domain.user.repository.MatchUpParticipationRepository;
+import com.cookie.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -17,6 +25,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MatchUpService {
     private final MatchUpRepository matchUpRepository;
+    private final MatchUpMovieRepository matchUpMovieRepository;
+    private final MatchUpParticipationRepository matchUpParticipationRepository;
+    private final UserRepository userRepository;
 
     @Transactional(readOnly = true)
     public List<MatchUpHistoryResponse> getMatchUpHistoryList() {
@@ -56,6 +67,38 @@ public class MatchUpService {
                 movie2
         );
     }
+
+    @Transactional
+    public void addMatchUpVote(Long userId, Long matchUpId, Long matchUpMovieId, MatchUpVoteRequest matchUpVoteRequest) {
+        MatchUp matchUp = matchUpRepository.findById(matchUpId)
+                .orElseThrow(() -> new IllegalArgumentException("not found matchUpId: " + matchUpId));
+        log.info("Retrieved matchUp: matchUpId = {}", matchUpId);
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("not found userId: " + userId));
+        log.info("Retrieved user: userId = {}", userId);
+
+        MatchUpMovie selectedMovie = matchUpMovieRepository.findById(matchUpMovieId)
+                .orElseThrow(() -> new IllegalArgumentException("not found matchUpMovieId: " + matchUpMovieId));
+        log.info("Retrieved selected movie: matchUpMovieId = {}", matchUpMovieId);
+
+        checkIfUserAlreadyParticipated(userId, matchUp);
+        updatePoints(selectedMovie, matchUpVoteRequest);
+
+        MatchUpParticipation matchUpParticipation = MatchUpParticipation.builder()
+                .user(user)
+                .matchUpMovie(selectedMovie)
+                .build();
+
+        matchUpParticipationRepository.save(matchUpParticipation);
+        log.info("User added to matchUp participation: userId = {}, matchUpId = {}", userId, matchUpId);
+
+        selectedMovie.incrementVoteCount();
+        matchUpMovieRepository.save(selectedMovie);
+        log.info("Incremented like count for movie: matchUpMovieId = {}, new vote count = {}", matchUpMovieId, selectedMovie.getVoteCount());
+
+    }
+
 
     private CharmPointResponse calculateCharmPointProportions(MatchUpMovie matchUpMovie) {
         long total = matchUpMovie.getCharmPoint().getOst() +
@@ -104,5 +147,44 @@ public class MatchUpService {
                 (matchUpMovie.getEmotionPoint().getTension() * 100) / total
         );
     }
+
+    private void checkIfUserAlreadyParticipated(Long userId, MatchUp matchUp) {
+        boolean alreadyParticipated = matchUpParticipationRepository.existsByUserIdAndMatchUpMovie_Id(userId, matchUp.getMovie1().getId()) ||
+                matchUpParticipationRepository.existsByUserIdAndMatchUpMovie_Id(userId, matchUp.getMovie2().getId());
+
+        if (alreadyParticipated) {
+            throw new IllegalArgumentException("이미 매치업 투표에 참여했습니다!");
+        }
+    }
+
+    private void updatePoints(MatchUpMovie selectedMovie, MatchUpVoteRequest matchUpVoteRequest) {
+        CharmPoint charmPoint = selectedMovie.getCharmPoint();
+        EmotionPoint emotionPoint = selectedMovie.getEmotionPoint();
+
+        if (charmPoint != null && matchUpVoteRequest.getCharmPoint() != null) {
+            charmPoint.updatePoints(
+                    matchUpVoteRequest.getCharmPoint().getOst(),
+                    matchUpVoteRequest.getCharmPoint().getDirection(),
+                    matchUpVoteRequest.getCharmPoint().getStory(),
+                    matchUpVoteRequest.getCharmPoint().getDialogue(),
+                    matchUpVoteRequest.getCharmPoint().getVisual(),
+                    matchUpVoteRequest.getCharmPoint().getActing(),
+                    matchUpVoteRequest.getCharmPoint().getSpecialEffect()
+            );
+        }
+
+        if (emotionPoint != null && matchUpVoteRequest.getEmotionPoint() != null) {
+            emotionPoint.updatePoints(
+                    matchUpVoteRequest.getEmotionPoint().getTouching(),
+                    matchUpVoteRequest.getEmotionPoint().getAngry(),
+                    matchUpVoteRequest.getEmotionPoint().getJoy(),
+                    matchUpVoteRequest.getEmotionPoint().getImmersion(),
+                    matchUpVoteRequest.getEmotionPoint().getExcited(),
+                    matchUpVoteRequest.getEmotionPoint().getEmpathy(),
+                    matchUpVoteRequest.getEmotionPoint().getTension()
+            );
+        }
+    }
+
 }
 

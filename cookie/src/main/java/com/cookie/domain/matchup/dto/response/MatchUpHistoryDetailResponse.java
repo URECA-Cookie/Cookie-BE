@@ -23,7 +23,7 @@ public class MatchUpHistoryDetailResponse {
         return new MatchUpMovieResponse(
                 matchUpMovie.getMovieTitle(),
                 matchUpMovie.getMoviePoster(),
-                matchUpMovie.getMovieLike(),
+                matchUpMovie.getVoteCount(),
                 matchUpMovie.isWin(),
                 charmPointResponse,
                 emotionPointResponse

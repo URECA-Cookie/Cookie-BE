@@ -15,7 +15,7 @@ public class MatchUpMovie {
     private Long id;
     private String movieTitle;
     private String moviePoster;
-    private long movieLike;
+    private long voteCount;
     private boolean win;
 
     @OneToOne(mappedBy = "matchUpMovie", fetch = FetchType.LAZY)
@@ -23,4 +23,8 @@ public class MatchUpMovie {
 
     @OneToOne(mappedBy = "matchUpMovie", fetch = FetchType.LAZY)
     private EmotionPoint emotionPoint;
+
+    public void incrementVoteCount() {
+        this.voteCount++;
+    }
 }

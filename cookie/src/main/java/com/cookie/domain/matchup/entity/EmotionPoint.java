@@ -38,4 +38,14 @@ public class EmotionPoint {
         this.empathy = empathy;
         this.tension = tension;
     }
+
+    public void updatePoints(long touching, long angry, long joy, long immersion, long excited, long empathy, long tension) {
+        this.touching += touching;
+        this.angry += angry;
+        this.joy += joy;
+        this.immersion += immersion;
+        this.excited += excited;
+        this.empathy += empathy;
+        this.tension += tension;
+    }
 }
