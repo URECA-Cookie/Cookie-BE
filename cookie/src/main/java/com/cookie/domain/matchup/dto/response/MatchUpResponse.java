@@ -11,13 +11,15 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class MatchUpHistoryDetailResponse {
+public class MatchUpResponse {
+    private Long matchUpId;
     private String matchUpTitle;
     private MatchUpType type;
     private LocalDateTime startAt;
     private LocalDateTime entAt;
     private MatchUpMovieResponse movie1;
     private MatchUpMovieResponse movie2;
+    private boolean userVote;
 
     public static MatchUpMovieResponse fromEntity(MatchUpMovie matchUpMovie, CharmPointResponse charmPointResponse, EmotionPointResponse emotionPointResponse) {
         return new MatchUpMovieResponse(

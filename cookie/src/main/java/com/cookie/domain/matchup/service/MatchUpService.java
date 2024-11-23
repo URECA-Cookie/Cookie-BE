@@ -99,6 +99,36 @@ public class MatchUpService {
 
     }
 
+    @Transactional(readOnly = true)
+    public MatchUpResponse getOnGoingMatchUp(Long matchUpId, Long userId) {
+        MatchUp matchUp = matchUpRepository.findById(matchUpId)
+                .orElseThrow(() -> new IllegalArgumentException("not found matchUpId: " + matchUpId));
+        log.info("Retrieved matchUp: matchUpId = {}", matchUpId);
+
+        CharmPointResponse movie1CharmPoint = calculateCharmPointProportions(matchUp.getMovie1());
+        CharmPointResponse movie2CharmPoint = calculateCharmPointProportions(matchUp.getMovie1());
+
+        EmotionPointResponse movie1EmotionPoint = calculateEmotionPointProportions(matchUp.getMovie1());
+        EmotionPointResponse movie2EmotionPoint = calculateEmotionPointProportions(matchUp.getMovie2());
+
+        MatchUpMovieResponse movie1 = MatchUpResponse.fromEntity(matchUp.getMovie1(), movie1CharmPoint, movie1EmotionPoint);
+        MatchUpMovieResponse movie2 = MatchUpResponse.fromEntity(matchUp.getMovie2(), movie2CharmPoint, movie2EmotionPoint);
+
+        boolean isVoted = hasUserVoted(userId, matchUp);
+
+        return new MatchUpResponse(
+                matchUp.getId(),
+                matchUp.getTitle(),
+                matchUp.getType(),
+                matchUp.getStartAt(),
+                matchUp.getEndAt(),
+                movie1,
+                movie2,
+                isVoted
+        );
+
+    }
+
 
     private CharmPointResponse calculateCharmPointProportions(MatchUpMovie matchUpMovie) {
         long total = matchUpMovie.getCharmPoint().getOst() +
@@ -155,6 +185,11 @@ public class MatchUpService {
         if (alreadyParticipated) {
             throw new IllegalArgumentException("이미 매치업 투표에 참여했습니다!");
         }
+    }
+
+    private boolean hasUserVoted(Long userId, MatchUp matchUp) {
+        return matchUpParticipationRepository.existsByUserIdAndMatchUpMovie_Id(userId, matchUp.getMovie1().getId()) ||
+                matchUpParticipationRepository.existsByUserIdAndMatchUpMovie_Id(userId, matchUp.getMovie2().getId());
     }
 
     private void updatePoints(MatchUpMovie selectedMovie, MatchUpVoteRequest matchUpVoteRequest) {

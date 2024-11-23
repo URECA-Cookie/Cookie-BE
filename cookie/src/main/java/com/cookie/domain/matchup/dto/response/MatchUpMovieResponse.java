@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MatchUpMovieResponse {
+    private Long movieId;
     private String movieTitle;
     private String moviePoster;
     private long movieLike;
