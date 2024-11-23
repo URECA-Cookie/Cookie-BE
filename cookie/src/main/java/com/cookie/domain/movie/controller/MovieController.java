@@ -2,14 +2,16 @@ package com.cookie.domain.movie.controller;
 
 
 import com.cookie.domain.movie.dto.response.MovieResponse;
-import org.springframework.http.ResponseEntity;
 import com.cookie.domain.movie.dto.response.ReviewOfMovieResponse;
 import com.cookie.domain.movie.service.MovieService;
 import com.cookie.global.util.ApiUtil;
 import com.cookie.global.util.ApiUtil.ApiSuccess;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 
 @Slf4j

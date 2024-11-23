@@ -4,10 +4,10 @@ import com.cookie.admin.dto.response.AdminMovieCategoryResponse;
 import com.cookie.admin.dto.response.MovieCategories;
 import com.cookie.admin.exception.MovieNotFoundException;
 import com.cookie.admin.repository.CategoryRepository;
-import com.cookie.admin.repository.MovieCategoryRepository;
-import com.cookie.admin.repository.MovieRepository;
 import com.cookie.domain.category.entity.Category;
 import com.cookie.domain.movie.entity.Movie;
+import com.cookie.domain.movie.repository.MovieCategoryRepository;
+import com.cookie.domain.movie.repository.MovieRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

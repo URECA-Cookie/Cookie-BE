@@ -3,13 +3,11 @@ package com.cookie.admin.service;
 import com.cookie.admin.dto.response.AdminMoviesResponse;
 import com.cookie.admin.dto.response.MoviesResponse;
 import com.cookie.admin.exception.MovieNotFoundException;
-import com.cookie.admin.repository.MovieActorRepository;
-import com.cookie.admin.repository.MovieDirectorRepository;
-import com.cookie.admin.repository.MovieRepository;
-import com.cookie.domain.director.entity.Director;
 import com.cookie.domain.movie.entity.Movie;
 import com.cookie.domain.movie.entity.MovieActor;
-import com.cookie.domain.movie.entity.MovieDirector;
+import com.cookie.domain.movie.repository.MovieActorRepository;
+import com.cookie.domain.movie.repository.MovieDirectorRepository;
+import com.cookie.domain.movie.repository.MovieRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -18,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
