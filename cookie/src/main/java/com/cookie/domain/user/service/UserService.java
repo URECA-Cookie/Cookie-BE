@@ -40,7 +40,7 @@ public class UserService {
         String profileImage = user.getProfileImage();
 
         // 2. 유저의 뱃지 조회
-        List<BadgeResponse> badgeDtos = getAllBadgesByUserId(userId);
+        List<MyBadgeResponse> badgeDtos = getAllBadgesByUserId(userId);
 
         // 3. 유저의 장르 점수 조회
         List<GenreScoreResponse> genreScoreDtos = getGenreScoresByUserId(userId);
@@ -63,13 +63,14 @@ public class UserService {
     /**
      * 유저가 보유한 뱃지 조회
      */
-    public List<BadgeResponse> getAllBadgesByUserId(Long userId) {
+    public List<MyBadgeResponse> getAllBadgesByUserId(Long userId) {
         List<UserBadge> userBadges = userBadgeRepository.findAllByUserId(userId);
 
         return userBadges.stream()
-                .map(userBadge -> BadgeResponse.builder()
+                .map(userBadge -> MyBadgeResponse.builder()
                         .name(userBadge.getBadge().getName())
                         .badgeImage(userBadge.getBadge().getBadgeImage())
+                        .isMain(userBadge.isMain())
                         .build())
                 .collect(Collectors.toList());
     }
