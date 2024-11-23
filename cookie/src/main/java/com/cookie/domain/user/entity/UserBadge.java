@@ -4,13 +4,10 @@ package com.cookie.domain.user.entity;
 import com.cookie.domain.badge.entity.Badge;
 import com.cookie.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
-@Getter
+@Data
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class UserBadge extends BaseTimeEntity {
 

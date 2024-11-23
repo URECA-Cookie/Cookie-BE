@@ -9,6 +9,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 @Entity
 @Getter
@@ -35,6 +38,12 @@ public class Review extends BaseTimeEntity {
     private boolean isSpoiler;
     private long reviewLike;
 
+    @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ReviewLike> reviewLikes = new ArrayList<>();
+
+    @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ReviewComment> reviewComments = new ArrayList<>();
+
     @Builder
     public Review(Movie movie, User user, String content, double movieScore, boolean isHide, boolean isSpoiler, long reviewLike) {
         this.movie = movie;
@@ -44,5 +53,19 @@ public class Review extends BaseTimeEntity {
         this.isHide = isHide;
         this.isSpoiler = isSpoiler;
         this.reviewLike = reviewLike;
+    }
+
+    public void update(String content, double movieScore, boolean isSpoiler) {
+        this.content = content;
+        this.movieScore = movieScore;
+        this.isSpoiler = isSpoiler;
+    }
+
+    public void increaseLikeCount() {
+        this.reviewLike++;
+    }
+
+    public void decreaseLikeCount() {
+        if(this.reviewLike > 0) this.reviewLike--;
     }
 }

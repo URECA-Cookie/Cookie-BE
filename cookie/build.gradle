@@ -32,6 +32,15 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    // JUnit 5 기본 의존성
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'
+
+    // Mocking 라이브러리 (Mockito) 추가
+    testImplementation 'org.mockito:mockito-core:5.6.0'
+
+    // AssertJ (선택: 더 나은 Assertion 제공)
+    testImplementation 'org.assertj:assertj-core:3.24.2'
+
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
 }
 
