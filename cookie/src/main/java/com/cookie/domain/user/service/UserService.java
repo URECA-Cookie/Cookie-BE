@@ -9,6 +9,7 @@ import com.cookie.domain.user.entity.BadgeAccumulationPoint;
 import com.cookie.domain.user.entity.GenreScore;
 import com.cookie.domain.user.entity.User;
 import com.cookie.domain.user.entity.UserBadge;
+import com.cookie.domain.user.entity.enums.SocialProvider;
 import com.cookie.domain.user.repository.BadgeAccumulationPointRepository;
 import com.cookie.domain.user.repository.GenreScoreRepository;
 import com.cookie.domain.review.repository.ReviewRepository;
@@ -182,4 +183,17 @@ public class UserService {
                 .documentaryPoint(badgeAccumulationPoint.getDocumentaryPoint())
                 .build();
     }
+
+    public User saveUser(User user) {
+        return userRepository.save(user);
+    }
+
+    public boolean isDuplicateSocial(SocialProvider socialProvider, String socialId) {
+        return userRepository.existsBySocialProviderAndSocialId(socialProvider, socialId);
+    }
+
+    public boolean isDuplicateNickname(String nickname) {
+        return userRepository.existsByNickname(nickname);
+    }
+
 }
