@@ -15,9 +15,9 @@ public class EmotionPoint {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "matchup_id")
-    private MatchUp matchUp;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "matchup_movie_id")
+    private MatchUpMovie matchUpMovie;
 
     private long touching;
     private long angry;
@@ -28,8 +28,8 @@ public class EmotionPoint {
     private long tension;
 
     @Builder
-    public EmotionPoint(MatchUp matchUp, long touching, long angry, long joy, long immersion, long excited, long empathy, long tension) {
-        this.matchUp = matchUp;
+    public EmotionPoint(MatchUpMovie matchUpMovie, long touching, long angry, long joy, long immersion, long excited, long empathy, long tension) {
+        this.matchUpMovie = matchUpMovie;
         this.touching = touching;
         this.angry = angry;
         this.joy = joy;

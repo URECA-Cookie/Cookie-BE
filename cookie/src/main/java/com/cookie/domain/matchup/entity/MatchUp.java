@@ -25,10 +25,13 @@ public class MatchUp extends BaseTimeEntity {
     private MatchUpType type;
     private LocalDateTime startAt;
     private LocalDateTime endAt;
-    private String movieTitle;
-    private String moviePoster;
-    private long movieLike;
-    private boolean isWin;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "movie1_id")
+    private MatchUpMovie movie1;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "movie2_id")
+    private MatchUpMovie movie2;
+
     @Enumerated(EnumType.STRING)
     private MatchUpStatus status;
     @ManyToOne(fetch = FetchType.LAZY)
@@ -36,15 +39,13 @@ public class MatchUp extends BaseTimeEntity {
     private Chatroom chatroom;
 
     @Builder
-    public MatchUp(String title, MatchUpType type, LocalDateTime startAt, LocalDateTime endAt, String movieTitle, String moviePoster, long movieLike, boolean isWin, MatchUpStatus status, Chatroom chatroom) {
+    public MatchUp(String title, MatchUpType type, LocalDateTime startAt, LocalDateTime endAt, MatchUpMovie movie1, MatchUpMovie movie2, MatchUpStatus status, Chatroom chatroom) {
         this.title = title;
         this.type = type;
         this.startAt = startAt;
         this.endAt = endAt;
-        this.movieTitle = movieTitle;
-        this.moviePoster = moviePoster;
-        this.movieLike = movieLike;
-        this.isWin = isWin;
+        this.movie1 = movie1;
+        this.movie2 = movie2;
         this.status = status;
         this.chatroom = chatroom;
     }
