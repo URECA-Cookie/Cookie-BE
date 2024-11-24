@@ -12,6 +12,7 @@ import com.cookie.domain.movie.repository.MovieCountryRepository;
 import com.cookie.domain.movie.repository.MovieRepository;
 import com.cookie.domain.review.dto.response.MovieReviewResponse;
 import com.cookie.domain.review.entity.Review;
+import com.cookie.domain.review.repository.ReviewLikeRepository;
 import com.cookie.domain.review.repository.ReviewRepository;
 import com.cookie.domain.user.dto.response.MovieReviewUserResponse;
 import com.cookie.domain.user.entity.User;
@@ -36,11 +37,12 @@ public class MovieService {
     private final MovieCountryRepository movieCountryRepository;
     private final MovieCategoryRepository movieCategoryRepository;
     private final MovieLikeRepository movieLikeRepository;
+    private final ReviewLikeRepository reviewLikeRepository;
 //    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
 
     @Transactional(readOnly = true)
-    public ReviewOfMovieResponse getMovieReviewList(Long movieId) {
+    public ReviewOfMovieResponse getMovieReviewList(Long movieId, Long userId) {
         Movie movie = movieRepository.findById(movieId)
                 .orElseThrow(() -> new IllegalArgumentException("not found movieId: " + movieId));
 
@@ -59,13 +61,17 @@ public class MovieService {
                             user.getMainBadge() != null ? user.getMainBadge().getName() : null
                     );
 
+                    boolean likedByUser = userId != null && reviewLikeRepository.existsByReviewIdAndUserId(review.getId(), userId);
+
                     return new MovieReviewResponse(
+                            review.getId(),
                             review.getContent(),
                             review.getReviewLike(),
                             review.getMovieScore(),
                             review.getCreatedAt(),
                             review.getUpdatedAt(),
-                            userResponse
+                            userResponse,
+                            likedByUser
                     );
                 }).toList();
 
@@ -93,7 +99,7 @@ public class MovieService {
     }
 
     @Transactional(readOnly = true)
-    public ReviewOfMovieResponse getMovieSpoilerReviewList(Long movieId) {
+    public ReviewOfMovieResponse getMovieSpoilerReviewList(Long movieId, Long userId) {
         Movie movie = movieRepository.findById(movieId)
                 .orElseThrow(() -> new IllegalArgumentException("not found movieId: " + movieId));
 
@@ -112,13 +118,17 @@ public class MovieService {
                             user.getMainBadge() != null ? user.getMainBadge().getName() : null
                     );
 
+                    boolean likedByUser = userId != null && reviewLikeRepository.existsByReviewIdAndUserId(review.getId(), userId);
+
                     return new MovieReviewResponse(
+                            review.getId(),
                             review.getContent(),
                             review.getReviewLike(),
                             review.getMovieScore(),
                             review.getCreatedAt(),
                             review.getUpdatedAt(),
-                            userResponse
+                            userResponse,
+                            likedByUser
                     );
                 }).toList();
 

@@ -31,14 +31,14 @@ public class MovieController {
     @GetMapping("{movieId}/reviews")
     public ApiSuccess<?> getMovieReviewList(@PathVariable(name = "movieId") Long movieId) {
         // TODO: userId JWT 토큰으로 변경
-        ReviewOfMovieResponse movieReviews = movieService.getMovieReviewList(movieId);
+        ReviewOfMovieResponse movieReviews = movieService.getMovieReviewList(movieId, 1L);
         return ApiUtil.success(movieReviews);
     }
 
     @GetMapping("{movieId}/reviews/spoiler")
     public ApiSuccess<?> getMovieSpoilerReviewList(@PathVariable(name = "movieId") Long movieId) {
         // TODO: userId JWT 토큰으로 변경
-        ReviewOfMovieResponse movieReviews = movieService.getMovieSpoilerReviewList(movieId);
+        ReviewOfMovieResponse movieReviews = movieService.getMovieSpoilerReviewList(movieId, 1L);
         return ApiUtil.success(movieReviews);
 
     }
