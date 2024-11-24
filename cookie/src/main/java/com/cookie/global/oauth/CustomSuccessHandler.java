@@ -46,6 +46,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         if (isRegistrationRequired) {
             log.warn("사용자 등록이 필요함");
+
             String redirectUrl = clientUrl + "/register"
                     + "?socialProvider=" + customUserDetails.getSocialProvider()
                     + "&email=" + customUserDetails.getEmail()
@@ -54,8 +55,12 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
             response.sendRedirect(redirectUrl);
         } else {
             log.info("기존 사용자 로그인");
-            String token = jwtUtil.createJwt(nickname, role);
-            response.addCookie(createCookie("Authorization", token));
+
+            String accessToken = jwtUtil.createAccessToken(nickname, role);
+            String refreshToken = jwtUtil.createRefreshToken(nickname, role);
+
+            response.addCookie(createCookie("Authorization", accessToken));
+            response.addCookie(createCookie("RefreshToken", refreshToken));
 
             response.sendRedirect(clientUrl + "/retrieve-token");
         }

@@ -66,4 +66,18 @@ public class JWTUtil {
                 .signWith(secretKey)
                 .compact();
     }
+
+
+    public String createRefreshToken(String username, String role) {
+        long expiredMs = 1000L * 60 * 60 * 24 * 14; // 14일
+
+        return Jwts.builder()
+                .claim("username", username)
+                .claim("role", role)
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + expiredMs))
+                .signWith(secretKey)
+                .compact();
+    }
+
 }
