@@ -108,7 +108,7 @@ public class UserService {
         List<Review> reviews = reviewRepository.findAllByUserIdWithMovie(userId);
 
         return reviews.stream()
-                .map(ReviewResponse::fromReview)
+                .map(review -> ReviewResponse.fromReview(review, false))
                 .toList();
     }
 
