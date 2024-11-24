@@ -1,5 +1,6 @@
 package com.cookie.domain.user.controller;
 
+import com.cookie.domain.category.service.CategoryService;
 import com.cookie.domain.user.dto.request.auth.AdminLoginRequest;
 import com.cookie.domain.user.dto.request.auth.AdminRegisterRequest;
 import com.cookie.domain.user.dto.request.auth.RegisterRequest;
@@ -30,6 +31,7 @@ public class AuthController {
     private final JWTUtil jwtUtil;
     private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
+    private final CategoryService categoryService;
 
     @PostMapping("/register")
     public ResponseEntity<Object> registerUser(@RequestBody RegisterRequest registerRequest) {
@@ -50,10 +52,11 @@ public class AuthController {
                 .profileImage(registerRequest.getProfileImage())
                 .pushEnabled(registerRequest.isPushEnabled())
                 .emailEnabled(registerRequest.isEmailEnabled())
+                .category(categoryService.getCategoryById(registerRequest.getGenreId()))
                 .role(Role.USER)
                 .build();
 
-        userService.saveUser(newUser);
+        userService.registerUser(newUser);
 
         String accessToken = jwtUtil.createAccessToken(newUser.getNickname(), newUser.getRole().name());
         String refreshToken = jwtUtil.createRefreshToken(newUser.getNickname(), newUser.getRole().name());
@@ -160,7 +163,7 @@ public class AuthController {
                 .role(Role.ADMIN)
                 .build();
 
-        userService.saveUser(admin);
+        userService.registerAdmin(admin);
 
         return ResponseEntity.ok(ApiUtil.success("SUCCESS"));
     }
