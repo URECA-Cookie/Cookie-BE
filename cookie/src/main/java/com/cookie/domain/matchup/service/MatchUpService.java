@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
@@ -131,50 +132,54 @@ public class MatchUpService {
 
 
     private CharmPointResponse calculateCharmPointProportions(MatchUpMovie matchUpMovie) {
-        long total = matchUpMovie.getCharmPoint().getOst() +
-                matchUpMovie.getCharmPoint().getDirecting() +
-                matchUpMovie.getCharmPoint().getStory() +
-                matchUpMovie.getCharmPoint().getDialogue() +
-                matchUpMovie.getCharmPoint().getVisual() +
-                matchUpMovie.getCharmPoint().getActing() +
-                matchUpMovie.getCharmPoint().getSpecialEffects();
+        long max = Arrays.stream(new long[]{
+                matchUpMovie.getCharmPoint().getOst(),
+                matchUpMovie.getCharmPoint().getDirecting(),
+                matchUpMovie.getCharmPoint().getStory(),
+                matchUpMovie.getCharmPoint().getDialogue(),
+                matchUpMovie.getCharmPoint().getVisual(),
+                matchUpMovie.getCharmPoint().getActing(),
+                matchUpMovie.getCharmPoint().getSpecialEffects()
+        }).max().orElse(0);
 
-        if (total == 0) {
+        if (max == 0) {
             return new CharmPointResponse(0, 0, 0, 0, 0, 0, 0);
         }
 
         return new CharmPointResponse(
-                (matchUpMovie.getCharmPoint().getOst() * 100) / total,
-                (matchUpMovie.getCharmPoint().getDirecting() * 100) / total,
-                (matchUpMovie.getCharmPoint().getStory() * 100) / total,
-                (matchUpMovie.getCharmPoint().getDialogue() * 100) / total,
-                (matchUpMovie.getCharmPoint().getVisual() * 100) / total,
-                (matchUpMovie.getCharmPoint().getActing() * 100) / total,
-                (matchUpMovie.getCharmPoint().getSpecialEffects() * 100) / total
+                (int) ((matchUpMovie.getCharmPoint().getOst() * 100) / max),
+                (int) ((matchUpMovie.getCharmPoint().getDirecting() * 100) / max),
+                (int) ((matchUpMovie.getCharmPoint().getStory() * 100) / max),
+                (int) ((matchUpMovie.getCharmPoint().getDialogue() * 100) / max),
+                (int) ((matchUpMovie.getCharmPoint().getVisual() * 100) / max),
+                (int) ((matchUpMovie.getCharmPoint().getActing() * 100) / max),
+                (int) ((matchUpMovie.getCharmPoint().getSpecialEffects() * 100) / max)
         );
     }
 
     private EmotionPointResponse calculateEmotionPointProportions(MatchUpMovie matchUpMovie) {
-        long total = matchUpMovie.getEmotionPoint().getTouching() +
-                matchUpMovie.getEmotionPoint().getAngry() +
-                matchUpMovie.getEmotionPoint().getJoy() +
-                matchUpMovie.getEmotionPoint().getImmersion() +
-                matchUpMovie.getEmotionPoint().getExcited() +
-                matchUpMovie.getEmotionPoint().getEmpathy() +
-                matchUpMovie.getEmotionPoint().getTension();
+        long max = Arrays.stream(new long[]{
+                matchUpMovie.getEmotionPoint().getTouching(),
+                matchUpMovie.getEmotionPoint().getAngry(),
+                matchUpMovie.getEmotionPoint().getJoy(),
+                matchUpMovie.getEmotionPoint().getImmersion(),
+                matchUpMovie.getEmotionPoint().getExcited(),
+                matchUpMovie.getEmotionPoint().getEmpathy(),
+                matchUpMovie.getEmotionPoint().getTension()
+        }).max().orElse(0);
 
-        if (total == 0) {
+        if (max == 0) {
             return new EmotionPointResponse(0, 0, 0, 0, 0, 0, 0);
         }
 
         return new EmotionPointResponse(
-                (matchUpMovie.getEmotionPoint().getTouching() * 100) / total,
-                (matchUpMovie.getEmotionPoint().getAngry() * 100) / total,
-                (matchUpMovie.getEmotionPoint().getJoy() * 100) / total,
-                (matchUpMovie.getEmotionPoint().getImmersion() * 100) / total,
-                (matchUpMovie.getEmotionPoint().getExcited() * 100) / total,
-                (matchUpMovie.getEmotionPoint().getEmpathy() * 100) / total,
-                (matchUpMovie.getEmotionPoint().getTension() * 100) / total
+                (int) ((matchUpMovie.getEmotionPoint().getTouching() * 100) / max),
+                (int) ((matchUpMovie.getEmotionPoint().getAngry() * 100) / max),
+                (int) ((matchUpMovie.getEmotionPoint().getJoy() * 100) / max),
+                (int) ((matchUpMovie.getEmotionPoint().getImmersion() * 100) / max),
+                (int) ((matchUpMovie.getEmotionPoint().getExcited() * 100) / max),
+                (int) ((matchUpMovie.getEmotionPoint().getEmpathy() * 100) / max),
+                (int) ((matchUpMovie.getEmotionPoint().getTension() * 100) / max)
         );
     }
 

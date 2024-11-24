@@ -16,21 +16,4 @@ public class EmotionPointResponse {
     private long empathy;
     private long tension;
 
-    public EmotionPointResponse calculateProportions() {
-        long total = touching + angry + joy + immersion + excited + empathy + tension;
-
-        if (total == 0) {
-            return new EmotionPointResponse(0, 0, 0, 0, 0, 0, 0);
-        }
-
-        return new EmotionPointResponse(
-                (touching * 100) / total,
-                (angry * 100) / total,
-                (joy * 100) / total,
-                (immersion * 100) / total,
-                (excited * 100) / total,
-                (empathy * 100) / total,
-                (tension * 100) / total
-        );
-    }
 }
