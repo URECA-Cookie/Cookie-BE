@@ -2,6 +2,7 @@ package com.cookie.domain.matchup.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -18,13 +19,25 @@ public class MatchUpMovie {
     private long voteCount;
     private boolean win;
 
-    @OneToOne(mappedBy = "matchUpMovie", fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "charm_point_id")
     private CharmPoint charmPoint;
 
-    @OneToOne(mappedBy = "matchUpMovie", fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = " emotion_point_id")
     private EmotionPoint emotionPoint;
 
     public void incrementVoteCount() {
         this.voteCount++;
+    }
+
+    @Builder
+    public MatchUpMovie(String movieTitle, String moviePoster, long voteCount, boolean win, CharmPoint charmPoint, EmotionPoint emotionPoint) {
+        this.movieTitle = movieTitle;
+        this.moviePoster = moviePoster;
+        this.voteCount = voteCount;
+        this.win = win;
+        this.charmPoint = charmPoint;
+        this.emotionPoint = emotionPoint;
     }
 }

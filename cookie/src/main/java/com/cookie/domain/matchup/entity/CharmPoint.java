@@ -15,10 +15,6 @@ public class CharmPoint {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "matchup_movie_id")
-    private MatchUpMovie matchUpMovie;
-
     private long ost;
     private long directing;
     private long story;
@@ -28,8 +24,7 @@ public class CharmPoint {
     private long specialEffects;
 
     @Builder
-    public CharmPoint(MatchUpMovie matchUpMovie, long ost, long directing, long story, long dialogue, long visual, long acting, long specialEffects) {
-        this.matchUpMovie = matchUpMovie;
+    public CharmPoint(long ost, long directing, long story, long dialogue, long visual, long acting, long specialEffects) {
         this.ost = ost;
         this.directing = directing;
         this.story = story;
