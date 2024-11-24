@@ -51,7 +51,7 @@ public class MatchUpService {
                 .orElseThrow(() -> new IllegalArgumentException("not found matchUpId: " + matchUpId));
 
         CharmPointResponse movie1CharmPoint = calculateCharmPointProportions(matchUp.getMovie1());
-        CharmPointResponse movie2CharmPoint = calculateCharmPointProportions(matchUp.getMovie1());
+        CharmPointResponse movie2CharmPoint = calculateCharmPointProportions(matchUp.getMovie2());
 
         EmotionPointResponse movie1EmotionPoint = calculateEmotionPointProportions(matchUp.getMovie1());
         EmotionPointResponse movie2EmotionPoint = calculateEmotionPointProportions(matchUp.getMovie2());
