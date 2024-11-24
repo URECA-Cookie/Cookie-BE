@@ -1,6 +1,7 @@
 package com.cookie.domain.user.entity;
 
 import com.cookie.domain.matchup.entity.MatchUp;
+import com.cookie.domain.matchup.entity.MatchUpMovie;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -21,12 +22,12 @@ public class MatchUpParticipation {
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "matchup_id")
-    private MatchUp matchUp;
+    @JoinColumn(name = "matchup_movie_id")
+    private MatchUpMovie matchUpMovie;
 
     @Builder
-    public MatchUpParticipation(User user, MatchUp matchUp) {
+    public MatchUpParticipation(User user, MatchUpMovie matchUpMovie) {
         this.user = user;
-        this.matchUp = matchUp;
+        this.matchUpMovie = matchUpMovie;
     }
 }
