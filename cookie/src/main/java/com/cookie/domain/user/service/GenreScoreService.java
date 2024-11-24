@@ -38,7 +38,7 @@ public class GenreScoreService {
                 .family(0)
                 .history(0)
                 .mistery(0)
-                .tv_movie(0)
+                .tvMovie(0)
                 .western(0)
                 .adventure(0);
 
@@ -59,7 +59,7 @@ public class GenreScoreService {
             case 14 -> builder.family(5);
             case 15 -> builder.history(5);
             case 16 -> builder.mistery(5);
-            case 17 -> builder.tv_movie(5);
+            case 17 -> builder.tvMovie(5);
             case 18 -> builder.western(5);
             case 19 -> builder.adventure(5);
             default -> throw new IllegalArgumentException("Invalid category ID: " + categoryId);
