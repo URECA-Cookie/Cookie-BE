@@ -48,8 +48,8 @@ public class AuthController {
                 .email(registerRequest.getEmail())
                 .nickname(registerRequest.getNickname())
                 .profileImage(registerRequest.getProfileImage())
-                .isPushEnabled(registerRequest.isPushEnabled())
-                .isEmailEnabled(registerRequest.isEmailEnabled())
+                .pushEnabled(registerRequest.isPushEnabled())
+                .emailEnabled(registerRequest.isEmailEnabled())
                 .role(Role.USER)
                 .build();
 

@@ -27,8 +27,8 @@ public class User extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private Role role;
     private String socialId;
-    private boolean isPushEnabled;
-    private boolean isEmailEnabled;
+    private boolean pushEnabled;
+    private boolean emailEnabled;
     private String password;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -44,15 +44,15 @@ public class User extends BaseTimeEntity {
     }
 
     @Builder
-    public User(String nickname, String profileImage, SocialProvider socialProvider, String email, Role role, String socialId, boolean isPushEnabled, boolean isEmailEnabled, String password) {
+    public User(String nickname, String profileImage, SocialProvider socialProvider, String email, Role role, String socialId, boolean pushEnabled, boolean emailEnabled, String password) {
         this.nickname = nickname;
         this.profileImage = profileImage;
         this.socialProvider = socialProvider;
         this.email = email;
         this.role = role;
         this.socialId = socialId;
-        this.isPushEnabled = isPushEnabled;
-        this.isEmailEnabled = isEmailEnabled;
+        this.pushEnabled = pushEnabled;
+        this.emailEnabled = emailEnabled;
         this.password = password;
     }
 
