@@ -21,5 +21,6 @@ public class ReviewDetailResponse {
     private ReviewMovieResponse movie;
     private ReviewUserResponse user;
     private List<ReviewCommentResponse> comments;
+    private boolean likedByUser;
 
 }

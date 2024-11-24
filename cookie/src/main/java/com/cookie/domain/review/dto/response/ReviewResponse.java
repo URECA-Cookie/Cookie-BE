@@ -25,8 +25,9 @@ public class ReviewResponse {
     private LocalDateTime updatedAt;
     private ReviewMovieResponse movie;
     private ReviewUserResponse user;
+    private boolean likedByUser;
 
-    public static ReviewResponse fromReview(Review review) {
+    public static ReviewResponse fromReview(Review review, boolean likedByUser) {
         return new ReviewResponse(
                 review.getId(),
                 review.getContent(),
@@ -37,14 +38,15 @@ public class ReviewResponse {
                 review.getCreatedAt(),
                 review.getUpdatedAt(),
                 new ReviewMovieResponse(
-                        review.getMovie().getPoster(),
-                        review.getMovie().getTitle()
+                        review.getMovie().getTitle(),
+                        review.getMovie().getPoster()
                 ),
                 new ReviewUserResponse(
                         review.getUser().getNickname(),
                         review.getUser().getProfileImage(),
                         review.getUser().getMainBadge() != null ? review.getUser().getMainBadge().getBadgeImage() : null
-                )
+                ),
+                likedByUser
         );
     }
 
