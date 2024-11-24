@@ -47,7 +47,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         if (isRegistrationRequired) {
             log.warn("사용자 등록이 필요함");
 
-            String redirectUrl = clientUrl + "/register"
+            String redirectUrl = clientUrl + "/sign-up-profile"
                     + "?socialProvider=" + customUserDetails.getSocialProvider()
                     + "&email=" + customUserDetails.getEmail()
                     + "&socialId=" + customUserDetails.getSocialId();

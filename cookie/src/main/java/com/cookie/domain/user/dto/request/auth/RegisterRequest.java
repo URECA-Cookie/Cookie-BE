@@ -12,6 +12,7 @@ public class RegisterRequest {
     private String email;
     private String nickname;
     private String profileImage;
-    private boolean isPushEnabled;
-    private boolean isEmailEnabled;
+    private boolean pushEnabled;
+    private boolean emailEnabled;
+    private Long genreId;
 }
