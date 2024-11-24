@@ -31,6 +31,7 @@ public class UserService {
     private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
     private final BadgeAccumulationPointRepository badgeAccumulationPointRepository;
+    private final GenreScoreService genreScoreService;
 
 
     public MyPageResponse getMyPage(Long userId) {
@@ -94,7 +95,6 @@ public class UserService {
                         .crime(genreScore.getCrime())
                         .music(genreScore.getMusic())
                         .thriller(genreScore.getThriller())
-                        .queer(genreScore.getQueer())
                         .war(genreScore.getWar())
                         .documentary(genreScore.getDocumentary())
                         .build())
@@ -185,8 +185,14 @@ public class UserService {
                 .build();
     }
 
-    public User saveUser(User user) {
-        return userRepository.save(user);
+    @Transactional
+    public void registerUser(User user) {
+        userRepository.save(user);
+        genreScoreService.createAndSaveGenreScore(user);
+    }
+
+    public void registerAdmin(User user) {
+        userRepository.save(user);
     }
 
     public boolean isDuplicateSocial(SocialProvider socialProvider, String socialId) {
