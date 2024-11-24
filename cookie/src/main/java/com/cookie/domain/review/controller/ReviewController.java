@@ -53,7 +53,8 @@ public class ReviewController {
 
     @GetMapping
     public ApiSuccess<?> getReviewList() {
-        List<ReviewResponse> reviewList = reviewService.getReviewList();
+        Long userId = 2L;
+        List<ReviewResponse> reviewList = reviewService.getReviewList(userId);
         return ApiUtil.success(reviewList);
     }
 
@@ -65,7 +66,8 @@ public class ReviewController {
 
     @GetMapping("/{reviewId}")
     public ApiSuccess<?> getReviewDetail(@PathVariable(name = "reviewId") Long reviewId) {
-        ReviewDetailResponse reviewDetailResponse = reviewService.getReviewDetail(reviewId);
+        Long userId = 2L;
+        ReviewDetailResponse reviewDetailResponse = reviewService.getReviewDetail(reviewId, userId);
         return ApiUtil.success(reviewDetailResponse);
     }
 

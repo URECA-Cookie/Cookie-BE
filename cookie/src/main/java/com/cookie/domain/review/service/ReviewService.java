@@ -63,7 +63,7 @@ public class ReviewService {
     }
 
     private void sendReviewCreatedEvent(Review review, CopyOnWriteArrayList<SseEmitter> emitters) {
-        ReviewResponse reviewResponse = ReviewResponse.fromReview(review);
+        ReviewResponse reviewResponse = ReviewResponse.fromReview(review, false);
 
         for (SseEmitter emitter : emitters) {
             try {
@@ -89,12 +89,17 @@ public class ReviewService {
     }
 
     @Transactional(readOnly = true)
-    public List<ReviewResponse> getReviewList() {
+    public List<ReviewResponse> getReviewList(Long userId) {
         List<Review> reviewList = reviewRepository.findAllWithMovieAndUser();
         log.info("Total reviews: {}", reviewList.size());
 
         return reviewList.stream()
-                .map(ReviewResponse::fromReview)
+                .map(review -> {
+                    boolean likedByUser = userId != null &&
+                            review.getReviewLikes().stream() // 수정 필요
+                                    .anyMatch(like -> like.getUser().getId().equals(userId));
+                    return ReviewResponse.fromReview(review, likedByUser);
+                })
                 .toList();
 
     }
@@ -110,7 +115,7 @@ public class ReviewService {
     }
 
     @Transactional(readOnly = true)
-    public ReviewDetailResponse getReviewDetail(Long reviewId) {
+    public ReviewDetailResponse getReviewDetail(Long reviewId, Long userId) {
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new IllegalArgumentException("not found reviewId: " + reviewId));
         log.info("Retrieved review: reviewId = {}", reviewId);
@@ -126,6 +131,8 @@ public class ReviewService {
                         comment.getComment()))
                 .toList();
 
+        boolean likedByUser = userId != null && reviewLikeRepository.existsByReviewIdAndUserId(reviewId, userId);
+
         return new ReviewDetailResponse(
                 review.getContent(),
                 review.getMovieScore(),
@@ -138,7 +145,8 @@ public class ReviewService {
                         review.getUser().getProfileImage(),
                         review.getUser().getMainBadge() != null ? review.getUser().getMainBadge().getBadgeImage() : null),
 
-                comments
+                comments,
+                likedByUser
         );
 
     }
@@ -225,7 +233,7 @@ public class ReviewService {
         return likedReviews.stream()
                 .map(reviewLike -> {
                     Review review = reviewLike.getReview();
-                    return ReviewResponse.fromReview(review);
+                    return ReviewResponse.fromReview(review, true);
                 })
                 .toList();
     }

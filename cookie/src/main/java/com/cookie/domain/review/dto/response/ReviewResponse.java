@@ -38,8 +38,8 @@ public class ReviewResponse {
                 review.getCreatedAt(),
                 review.getUpdatedAt(),
                 new ReviewMovieResponse(
-                        review.getMovie().getPoster(),
-                        review.getMovie().getTitle()
+                        review.getMovie().getTitle(),
+                        review.getMovie().getPoster()
                 ),
                 new ReviewUserResponse(
                         review.getUser().getNickname(),
