@@ -3,6 +3,7 @@ package com.cookie.domain.user.controller;
 import com.cookie.domain.user.dto.request.auth.AdminLoginRequest;
 import com.cookie.domain.user.dto.request.auth.AdminRegisterRequest;
 import com.cookie.domain.user.dto.request.auth.RegisterRequest;
+import com.cookie.domain.user.dto.response.auth.TokenResponse;
 import com.cookie.domain.user.entity.User;
 import com.cookie.domain.user.entity.enums.Role;
 import com.cookie.domain.user.service.UserService;
@@ -10,7 +11,6 @@ import com.cookie.global.jwt.JWTUtil;
 import com.cookie.global.util.ApiUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -55,32 +55,86 @@ public class AuthController {
 
         userService.saveUser(newUser);
 
-        String token = jwtUtil.createJwt(newUser.getNickname(), newUser.getRole().name());
+        String accessToken = jwtUtil.createAccessToken(newUser.getNickname(), newUser.getRole().name());
+        String refreshToken = jwtUtil.createRefreshToken(newUser.getNickname(), newUser.getRole().name());
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", token);
+        if (accessToken == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiUtil.error(401, "MISSING_ACCESS_TOKEN"));
+        }
+
+        if (refreshToken == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiUtil.error(401, "MISSING_REFRESH_TOKEN"));
+        }
+
+        if (!jwtUtil.validateToken(accessToken)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiUtil.error(401, "INVALID_ACCESS_TOKEN"));
+        }
+
+        if (!jwtUtil.validateToken(refreshToken)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiUtil.error(401, "INVALID_REFRESH_TOKEN"));
+        }
+
+        TokenResponse response = TokenResponse.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
 
         return ResponseEntity.ok()
-                .headers(headers)
-                .body(ApiUtil.success("SUCCESS"));
+                .body(ApiUtil.success(response));
     }
 
     @GetMapping("/retrieve-token")
-    public ResponseEntity<?> retrieveToken(@CookieValue(name = "Authorization", required = false) String token) {
-        if (token == null || !jwtUtil.validateToken(token)) {
+    public ResponseEntity<?> retrieveToken(@CookieValue(name = "Authorization", required = false) String accessToken,
+                                           @CookieValue(name = "RefreshToken", required = false) String refreshToken) {
+        if (accessToken == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiUtil.error(401, "MISSING_ACCESS_TOKEN"));
+        }
+
+        if (refreshToken == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiUtil.error(401, "MISSING_REFRESH_TOKEN"));
+        }
+
+        if (!jwtUtil.validateToken(accessToken)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiUtil.error(401, "INVALID_ACCESS_TOKEN"));
+        }
+
+        if (!jwtUtil.validateToken(refreshToken)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiUtil.error(401, "INVALID_REFRESH_TOKEN"));
+        }
+
+        TokenResponse response = TokenResponse.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
+
+        return ResponseEntity.ok()
+                .body(ApiUtil.success(response));
+    }
+
+    @PostMapping("/refresh-token")
+    public ResponseEntity<?> refreshToken(@RequestHeader("Authorization") String refreshTokenHeader) {
+        if (refreshTokenHeader == null || !refreshTokenHeader.startsWith("Bearer ")) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiUtil.error(401, "MISSING_TOKEN"));
         }
 
-        if (!jwtUtil.validateToken(token)) {
+        String refreshToken = refreshTokenHeader.substring(7);
+
+        if (jwtUtil.isExpired(refreshToken)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiUtil.error(401, "TOKEN_EXPIRED"));
+        }
+
+        if (!jwtUtil.validateToken(refreshToken)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiUtil.error(401, "INVALID_TOKEN"));
         }
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", token);
+        String username = jwtUtil.getUsername(refreshToken);
+        String role = jwtUtil.getRole(refreshToken);
+
+        String newAccessToken = jwtUtil.createAccessToken(username, role);
+        TokenResponse response = TokenResponse.builder().accessToken(newAccessToken).build();
 
         return ResponseEntity.ok()
-                .headers(headers)
-                .body(ApiUtil.success("SUCCESS"));
+                .body(ApiUtil.success(response));
     }
 
     @GetMapping("/check-nickname")
@@ -117,17 +171,23 @@ public class AuthController {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.getId(), request.getPassword()));
 
-            String token = jwtUtil.createJwt(
+            String accessToken = jwtUtil.createAccessToken(
                     authentication.getName(),
                     authentication.getAuthorities().iterator().next().getAuthority()
             );
 
-            HttpHeaders headers = new HttpHeaders();
-            headers.set("Authorization", token);
+            String refreshToken = jwtUtil.createRefreshToken(
+                    authentication.getName(),
+                    authentication.getAuthorities().iterator().next().getAuthority()
+            );
+
+            TokenResponse response = TokenResponse.builder()
+                    .accessToken(accessToken)
+                    .refreshToken(refreshToken)
+                    .build();
 
             return ResponseEntity.ok()
-                    .headers(headers)
-                    .body(ApiUtil.success("SUCCESS"));
+                    .body(ApiUtil.success(response));
 
         } catch (AuthenticationException e) {
             return ResponseEntity.status(401).body(ApiUtil.error(401, "INVALID_CREDENTIALS"));

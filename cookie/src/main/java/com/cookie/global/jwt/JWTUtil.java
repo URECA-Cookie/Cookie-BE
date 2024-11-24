@@ -1,6 +1,9 @@
 package com.cookie.global.jwt;
 
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -10,6 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 @Component
+@Slf4j
 public class JWTUtil {
 
     private SecretKey secretKey;
@@ -21,9 +25,25 @@ public class JWTUtil {
     public boolean validateToken(String token) {
         try {
             Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token);
-            return !isExpired(token);
-        } catch (Exception e) {
+            return true;
+        } catch (ExpiredJwtException e) {
+            log.info("Token is expired: {}", e.getMessage());
             return false;
+        } catch (Exception e) {
+            log.error("Invalid token: {}", e.getMessage());
+            return false;
+        }
+    }
+
+    public boolean isExpired(String token) {
+        try {
+            Claims claims = Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getBody();
+            return claims.getExpiration().before(new Date());
+        } catch (ExpiredJwtException e) {
+            return true;
+        } catch (Exception e) {
+            log.error("Error checking token expiration: {}", e.getMessage());
+            return true;
         }
     }
 
@@ -35,12 +55,8 @@ public class JWTUtil {
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("role", String.class);
     }
 
-    public Boolean isExpired(String token) {
-        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().getExpiration().before(new Date());
-    }
-
-    public String createJwt(String username, String role) {
-        Long expiredMs = 1000L * 60 * 60 * 24 * 30; // 30일
+    public String createAccessToken(String username, String role) {
+        long expiredMs = 1000L * 60 * 15; // 15분
 
         return Jwts.builder()
                 .claim("username", username)
@@ -50,4 +66,18 @@ public class JWTUtil {
                 .signWith(secretKey)
                 .compact();
     }
+
+
+    public String createRefreshToken(String username, String role) {
+        long expiredMs = 1000L * 60 * 60 * 24 * 14; // 14일
+
+        return Jwts.builder()
+                .claim("username", username)
+                .claim("role", role)
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + expiredMs))
+                .signWith(secretKey)
+                .compact();
+    }
+
 }

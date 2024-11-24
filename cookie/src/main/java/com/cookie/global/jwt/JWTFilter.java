@@ -38,10 +38,20 @@ public class JWTFilter extends OncePerRequestFilter {
         String token = authorizationHeader.substring(7);
 
         try {
-            // 토큰 유효성 검사
-            if (jwtUtil.isExpired(token)) {
-                log.info("Token is expired");
-                filterChain.doFilter(request, response);
+            if (!jwtUtil.validateToken(token)) {
+                if (jwtUtil.isExpired(token)) {
+                    log.info("Access token is expired");
+
+                    response.setContentType("application/json");
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.getWriter().write("{\"statusCode\": \"401\", \"message\": \"TOKEN_EXPIRED\"}");
+                    return;
+                }
+
+                log.error("Invalid token detected");
+                response.setContentType("application/json");
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write("{\"statusCode\": \"401\", \"message\": \"UNAUTHORIZED\"}");
                 return;
             }
 
@@ -60,7 +70,11 @@ public class JWTFilter extends OncePerRequestFilter {
             SecurityContextHolder.getContext().setAuthentication(authToken);
 
         } catch (Exception e) {
-            log.error("Failed to process JWT token", e);
+            log.error("Error processing JWT", e);
+            response.setContentType("application/json");
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("{\"statusCode\": \"401\", \"message\": \"UNAUTHORIZED\"}");
+            return;
         }
 
         filterChain.doFilter(request, response);
