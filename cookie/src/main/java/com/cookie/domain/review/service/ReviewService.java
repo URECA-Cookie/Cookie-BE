@@ -9,6 +9,7 @@ import com.cookie.domain.review.dto.request.ReviewCommentRequest;
 import com.cookie.domain.review.dto.request.CreateReviewRequest;
 import com.cookie.domain.review.dto.response.ReviewCommentResponse;
 import com.cookie.domain.review.dto.response.ReviewDetailResponse;
+import com.cookie.domain.review.dto.response.ReviewListResponse;
 import com.cookie.domain.review.dto.response.ReviewResponse;
 import com.cookie.domain.review.dto.request.UpdateReviewRequest;
 import com.cookie.domain.review.entity.Review;
@@ -23,6 +24,9 @@ import com.cookie.domain.user.entity.User;
 import com.cookie.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -89,20 +93,48 @@ public class ReviewService {
     }
 
     @Transactional(readOnly = true)
-    public List<ReviewResponse> getReviewList(Long userId) {
-        List<Review> reviewList = reviewRepository.findAllWithMovieAndUser();
-        log.info("Total reviews: {}", reviewList.size());
+    public ReviewListResponse getReviewList(Long userId, Pageable pageable) {
+        Page<Review> reviewList = reviewRepository.findAllWithMovieAndUser(pageable);
+        log.info("Total reviews: {}", reviewList.getTotalElements());
 
-        return reviewList.stream()
+        List<ReviewResponse> reviewResponses = reviewList.stream()
                 .map(review -> {
                     boolean likedByUser = userId != null &&
-                            review.getReviewLikes().stream() // 수정 필요
+                            review.getReviewLikes().stream()
                                     .anyMatch(like -> like.getUser().getId().equals(userId));
                     return ReviewResponse.fromReview(review, likedByUser);
                 })
                 .toList();
 
+        return new ReviewListResponse(
+                reviewResponses,
+                reviewList.getTotalElements(),
+                reviewList.getTotalPages()
+        );
+
     }
+
+    @Transactional(readOnly = true)
+    public ReviewListResponse getSpoilerReviewList(Long userId, Pageable pageable) {
+        Page<Review> reviewList = reviewRepository.findAllWithMovieAndUserWithSpoilers(pageable);
+        log.info("Total reviews: {}", reviewList.getTotalElements());
+
+        List<ReviewResponse> reviewResponses = reviewList.stream()
+                .map(review -> {
+                    boolean likedByUser = userId != null &&
+                            review.getReviewLikes().stream()
+                                    .anyMatch(like -> like.getUser().getId().equals(userId));
+                    return ReviewResponse.fromReview(review, likedByUser);
+                })
+                .toList();
+
+        return new ReviewListResponse(
+                reviewResponses,
+                reviewList.getTotalElements(),
+                reviewList.getTotalPages()
+        );
+    }
+
 
     @Transactional
     public void deleteReview(Long reviewId) {
