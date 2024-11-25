@@ -19,4 +19,6 @@ public class ReviewOfMovieResponse {
     private List<String> countries;
     private String releasedAt;
     private List<MovieReviewResponse> reviews;
+    private long totalReviews;
+    private long totalReviewPages;
 }

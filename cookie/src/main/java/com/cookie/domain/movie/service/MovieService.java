@@ -18,6 +18,8 @@ import com.cookie.domain.user.dto.response.MovieReviewUserResponse;
 import com.cookie.domain.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,16 +44,16 @@ public class MovieService {
 
 
     @Transactional(readOnly = true)
-    public ReviewOfMovieResponse getMovieReviewList(Long movieId, Long userId) {
+    public ReviewOfMovieResponse getMovieReviewList(Long movieId, Long userId, Pageable pageable) {
         Movie movie = movieRepository.findById(movieId)
                 .orElseThrow(() -> new IllegalArgumentException("not found movieId: " + movieId));
 
         log.info("Retrieved movie: movieId = {}", movieId);
 
-        List<Review> reviews = reviewRepository.findReviewsByMovieId(movieId);
-        log.info("Retrieved {} reviews for movieId = {}", reviews.size(), movieId);
+        Page<Review> reviewsPage = reviewRepository.findReviewsByMovieId(movieId, pageable);
+        log.info("Retrieved {} reviews for movieId = {}", reviewsPage.getContent().size(), movieId);
 
-        List<MovieReviewResponse> reviewResponses = reviews.stream()
+        List<MovieReviewResponse> reviewResponses = reviewsPage.stream()
                 .map(review -> {
                     User user = review.getUser();
                     MovieReviewUserResponse userResponse = new MovieReviewUserResponse(
@@ -94,21 +96,23 @@ public class MovieService {
                 subCategories,
                 countries,
                 movie.getReleasedAt(),
-                reviewResponses
+                reviewResponses,
+                reviewsPage.getTotalElements(),
+                reviewsPage.getTotalPages()
         );
     }
 
     @Transactional(readOnly = true)
-    public ReviewOfMovieResponse getMovieSpoilerReviewList(Long movieId, Long userId) {
+    public ReviewOfMovieResponse getMovieSpoilerReviewList(Long movieId, Long userId, Pageable pageable) {
         Movie movie = movieRepository.findById(movieId)
                 .orElseThrow(() -> new IllegalArgumentException("not found movieId: " + movieId));
 
         log.info("Retrieved movie: movieId = {}", movieId);
 
-        List<Review> reviews = reviewRepository.findSpoilerReviewsByMovieId(movieId);
-        log.info("Retrieved {} reviews for movieId = {}", reviews.size(), movieId);
+        Page<Review> reviewsPage = reviewRepository.findSpoilerReviewsByMovieId(movieId, pageable);
+        log.info("Retrieved {} reviews for movieId = {}", reviewsPage.getContent().size(), movieId);
 
-        List<MovieReviewResponse> reviewResponses = reviews.stream()
+        List<MovieReviewResponse> reviewResponses = reviewsPage.stream()
                 .map(review -> {
                     User user = review.getUser();
                     MovieReviewUserResponse userResponse = new MovieReviewUserResponse(
@@ -151,7 +155,10 @@ public class MovieService {
                 subCategories,
                 countries,
                 movie.getReleasedAt(),
-                reviewResponses
+                reviewResponses,
+                reviewsPage.getTotalElements(),
+                reviewsPage.getTotalPages()
+
         );
     }
 
