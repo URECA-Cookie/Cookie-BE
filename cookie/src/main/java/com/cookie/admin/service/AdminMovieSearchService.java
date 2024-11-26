@@ -6,7 +6,6 @@ import com.cookie.admin.exception.MovieNotFoundException;
 import com.cookie.domain.movie.entity.Movie;
 import com.cookie.domain.movie.entity.MovieActor;
 import com.cookie.domain.movie.repository.MovieActorRepository;
-import com.cookie.domain.movie.repository.MovieDirectorRepository;
 import com.cookie.domain.movie.repository.MovieRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -23,7 +22,6 @@ public class AdminMovieSearchService {
 
     private final MovieRepository movieRepository;
     private final MovieActorRepository movieActorRepository;
-    private final MovieDirectorRepository movieDirectorRepository;
 
     @Transactional(readOnly = true)
     public AdminMoviesResponse getMoviesByName(String movieName, Integer pageNumber) {
@@ -72,17 +70,13 @@ public class AdminMovieSearchService {
                             .map(movieActor -> movieActor.getActor().getName())
                             .toList();
 
-                    String movieDirector = movieDirectorRepository.findMovieDirectorByMovieId(movie.getId())
-                            .map(director -> director.getDirector().getName())
-                            .orElse("N/A");
-
                     return MoviesResponse.builder()
                             .movieId(movie.getId())
                             .title(movie.getTitle())
                             .releaseDate(movie.getReleasedAt())
                             .plot(movie.getPlot())
                             .actors(actorsName)
-                            .director(movieDirector)
+                            .director(movie.getDirector().getName())
                             .build();
                 })
                 .toList();

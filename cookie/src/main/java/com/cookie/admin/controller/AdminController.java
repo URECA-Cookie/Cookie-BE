@@ -2,7 +2,6 @@ package com.cookie.admin.controller;
 
 import com.cookie.admin.dto.response.*;
 import com.cookie.admin.service.*;
-import com.cookie.domain.movie.entity.Movie;
 import com.cookie.global.util.ApiUtil;
 import com.cookie.global.util.ApiUtil.ApiSuccess;
 import lombok.RequiredArgsConstructor;
@@ -41,8 +40,8 @@ public class AdminController {
 
     @PostMapping("/movie")
     public ApiSuccess<?> createMovie(@RequestBody AdminMovieDetailResponse movie) {
-        Movie data = adminMovieCreateService.createMovie(movie);
-        return ApiUtil.success(data);
+        adminMovieCreateService.createMovie(movie);
+        return ApiUtil.success("SUCCESS");
     }
 
     @GetMapping("/movie/{movieId}")
@@ -58,10 +57,10 @@ public class AdminController {
         return ApiUtil.success(data);
     }
 
-    @DeleteMapping("/movie/{movieId}")
-    public ApiSuccess<?> deleteMovie(@PathVariable("movieId") Long movieId) {
-        AdminMovieDeleteResponse data = adminMovieModifyService.deleteMovie(movieId);
-        return ApiUtil.success(data);
+    @DeleteMapping("/movies")
+    public ApiSuccess<?> deleteMovie(@RequestBody List<Long> movieIds) {
+        List<Long> ids = adminMovieModifyService.deleteMovie(movieIds);
+        return ApiUtil.success(ids);
     }
 
     @GetMapping("/movies/{movieName}/{pageNumber}")

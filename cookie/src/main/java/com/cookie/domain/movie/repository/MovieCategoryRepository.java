@@ -1,7 +1,6 @@
 package com.cookie.domain.movie.repository;
 
 import com.cookie.domain.movie.entity.MovieCategory;
-import com.cookie.domain.movie.entity.MovieCountry;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
