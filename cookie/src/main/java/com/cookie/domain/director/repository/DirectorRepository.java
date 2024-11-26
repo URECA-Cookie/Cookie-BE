@@ -1,6 +1,5 @@
 package com.cookie.domain.director.repository;
 
-import com.cookie.domain.director.dto.response.DirectorResponse;
 import com.cookie.domain.director.entity.Director;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
