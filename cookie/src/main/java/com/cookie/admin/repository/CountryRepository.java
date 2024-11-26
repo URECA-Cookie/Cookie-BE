@@ -12,7 +12,7 @@ public interface CountryRepository extends JpaRepository<Country, Long> {
     @Query("""
         SELECT c
         FROM Country c
-        WHERE c.country = :country
+        WHERE c.name = :country
     """)
     Optional<Country> findByCountry(@Param("country") String country);
 }
