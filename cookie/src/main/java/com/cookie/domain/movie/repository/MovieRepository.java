@@ -42,4 +42,6 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
         WHERE m.id = :movieId
     """)
     void deleteByMovieId(@Param("movieId") Long movieId);
+
+    Page<Movie> findByTitleContainingIgnoreCase(String keyword, Pageable pageable);
 }
