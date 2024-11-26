@@ -7,6 +7,7 @@ import com.cookie.domain.movie.entity.Movie;
 import com.cookie.domain.movie.repository.MovieRepository;
 import com.cookie.domain.review.dto.request.ReviewCommentRequest;
 import com.cookie.domain.review.dto.request.CreateReviewRequest;
+import com.cookie.domain.review.dto.response.PushNotification;
 import com.cookie.domain.review.dto.response.ReviewCommentResponse;
 import com.cookie.domain.review.dto.response.ReviewDetailResponse;
 import com.cookie.domain.review.dto.response.ReviewListResponse;
@@ -27,6 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -45,7 +47,7 @@ public class ReviewService {
     private final ReviewLikeRepository reviewLikeRepository;
 
     @Transactional
-    public void createReview(Long userId, CreateReviewRequest createReviewRequest, CopyOnWriteArrayList<SseEmitter> emitters) {
+    public void createReview(Long userId, CreateReviewRequest createReviewRequest, CopyOnWriteArrayList<SseEmitter> reviewEmitters, CopyOnWriteArrayList<SseEmitter> pushNotificationEmitters) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("not found userId: " + userId));
         log.info("Retrieved user: userId = {}", userId);
@@ -60,23 +62,65 @@ public class ReviewService {
         }
 
         Review review = createReviewRequest.toEntity(user, movie);
-        reviewRepository.save(review);
+        Review savedReview = reviewRepository.save(review);
         log.info("Created review: userId = {}, movieId = {}", userId, movieId);
 
-        sendReviewCreatedEvent(review, emitters);
+        sendReviewCreatedEvent(savedReview, reviewEmitters); // 리뷰 피드에 실시간으로 리뷰 추가
+        sendPushNotification(userId, movie, savedReview, pushNotificationEmitters); // 장르를 좋아하는 유저들에게 푸시 알림
     }
 
-    private void sendReviewCreatedEvent(Review review, CopyOnWriteArrayList<SseEmitter> emitters) {
-        ReviewResponse reviewResponse = ReviewResponse.fromReview(review, false);
+    @Async
+    public void sendReviewCreatedEvent(Review review, CopyOnWriteArrayList<SseEmitter> reviewEmitters) {
+        ReviewResponse reviewResponse = ReviewResponse.fromReview(review);
 
-        for (SseEmitter emitter : emitters) {
+        for (SseEmitter emitter : reviewEmitters) {
             try {
                 emitter.send(SseEmitter.event()
                         .name("review-created")
                         .data(reviewResponse)); // ReviewResponse 전송
             } catch (Exception e) {
                 log.error("Failed to send event to emitter: {}", e.getMessage());
-                emitters.remove(emitter);
+                reviewEmitters.remove(emitter);
+            }
+        }
+    }
+
+    @Async
+    public void sendPushNotification(Long userId, Movie movie, Review review, CopyOnWriteArrayList<SseEmitter> pushNotificationEmitters) {
+        log.info("movie title: {}", movie.getTitle());
+
+        List<String> genres = movieRepository.findGenresByMovieId(movie.getId());
+        log.info("영화 [{}]의 장르 정보: {}", movie.getTitle(), genres);
+
+        List<User> genreFans = userRepository.findUsersByFavoriteGenresInAndExcludeUserId(genres, userId);
+        log.info("장르를 좋아하는 유저 {}명", genreFans.size());
+
+        PushNotification pushNotification = new PushNotification(review.getMovie().getId(), review.getMovie().getTitle(), review.getUser().getNickname());
+
+        sendNotificationToUser(genreFans, pushNotification, pushNotificationEmitters);
+    }
+    private void sendNotificationToUser(List<User> genreFans, PushNotification pushNotification, CopyOnWriteArrayList<SseEmitter> pushNotificationEmitters) {
+        for (User fan : genreFans) {
+            if (fan.isPushEnabled()) { // pushEnabled 가 true 인 경우에만 알림 전송
+                try {
+                    String notificationMessage = String.format("[%s]님 새로운 리뷰가 등록되었습니다! [%s]", fan.getNickname(), pushNotification.getMovieTitle());
+                    log.info("푸시 알림 전송 성공: {}", notificationMessage);
+
+                    for (SseEmitter emitter : pushNotificationEmitters) {
+                        try {
+                            emitter.send(SseEmitter.event()
+                                    .name("push-notification")
+                                    .data(pushNotification));
+                        } catch (Exception e) {
+                            log.error("Failed to send event to emitter for user [{}]: {}", fan.getId(), e.getMessage());
+                            pushNotificationEmitters.remove(emitter);
+                        }
+                    }
+                } catch (Exception e) {
+                    log.error("Failed to send push notification to user: {}", fan.getId(), e);
+                }
+            } else {
+                log.info("유저 [{}]는 푸시 알림을 비활성화 했습니다.", fan.getId());
             }
         }
     }
@@ -265,7 +309,7 @@ public class ReviewService {
         return likedReviews.stream()
                 .map(reviewLike -> {
                     Review review = reviewLike.getReview();
-                    return ReviewResponse.fromReview(review, true);
+                    return ReviewResponse.fromReview(review);
                 })
                 .toList();
     }
