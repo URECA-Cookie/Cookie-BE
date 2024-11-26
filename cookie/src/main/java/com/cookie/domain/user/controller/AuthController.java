@@ -168,9 +168,9 @@ public class AuthController {
     }
 
     @GetMapping("/check-nickname")
-    public ResponseEntity<?> validateNickname(String nickname) {
+    public ResponseEntity<?> validateNickname(@RequestParam("nickname") String nickname) {
         if (userService.isDuplicateNickname(nickname)) {
-            return ResponseEntity.badRequest().body(ApiUtil.error(400, "DUPLICATED_NICKNAME"));
+            return ResponseEntity.ok().body(ApiUtil.success("DUPLICATED_NICKNAME"));
         }
 
         return ResponseEntity.ok(ApiUtil.success("SUCCESS"));
