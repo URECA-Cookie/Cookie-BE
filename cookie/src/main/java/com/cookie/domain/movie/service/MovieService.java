@@ -148,20 +148,25 @@ public class MovieService {
         );
     }
 
+
+    private String title;
+    private String poster;
+    private String releasedAt;
+    private String country;
+    private Long likes;
+    private Long reviews;
     @Transactional(readOnly = true)
-    public List<MovieResponse> getLikedMoviesByUserId(Long userId) {
+    public List<MovieSimpleResponse> getLikedMoviesByUserId(Long userId) {
         List<MovieLike> likedMovies = movieLikeRepository.findAllByUserIdWithMovies(userId);
 
         return likedMovies.stream()
-                .map(movieLike -> MovieResponse.builder()
-                        .id(movieLike.getMovie().getId())
+                .map(movieLike -> MovieSimpleResponse.builder()
                         .title(movieLike.getMovie().getTitle())
                         .poster(movieLike.getMovie().getPoster())
-                        .plot(movieLike.getMovie().getPlot())
                         .releasedAt(movieLike.getMovie().getReleasedAt())
-                        .runtime(movieLike.getMovie().getRuntime())
-                        .score(movieLike.getMovie().getScore())
-                        .certification(movieLike.getMovie().getCertification()) // Enum -> String 변환
+                        .country(movieLike.getMovie().getCountry().getName())
+                        .likes(movieLike.getMovie().getMovieLikes())
+                        .reviews((long) (movieLike.getMovie().getReviews() != null ? movieLike.getMovie().getReviews().size() : 0)) // 리뷰 수
                         .build())
                 .collect(Collectors.toList());
     }
@@ -205,19 +210,12 @@ public class MovieService {
                 .map(movie -> MovieSimpleResponse.builder()
                         .title(movie.getTitle()) // 영화 제목
                         .poster(movie.getPoster()) // 포스터 URL
-                        .releasedAt(movie.getReleasedAt() != null
-                                ? movie.getReleasedAt().toString() // 개봉일 (문자열로 변환)
-                                : null)
-                        .countries(movie.getMovieCountry() != null
-                                ? movie.getMovieCountries().stream()
-                                .map(mc -> mc.getCountry().getCountry()) // 국가 이름 리스트
-                                .collect(Collectors.toList())
-                                : null)
-                        .likes((long) (movie.getMovieLikes() != null ? movie.getMovieLikes() : 0)) // 좋아요 수
+                        .releasedAt(movie.getReleasedAt())
+                        .country(movie.getCountry().getName())
+                        .likes(0L) // Movie 엔티티에 likes 관련 정보 없음
                         .reviews((long) (movie.getReviews() != null ? movie.getReviews().size() : 0)) // 리뷰 수
                         .build())
                 .collect(Collectors.toList());
     }
-
 
 }

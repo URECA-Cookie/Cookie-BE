@@ -15,7 +15,7 @@ public class MovieSimpleResponse {
     private String title;
     private String poster;
     private String releasedAt;
-    private List<String> countries;
+    private String country;
     private Long likes;
     private Long reviews;
 }
