@@ -2,6 +2,7 @@ package com.cookie.domain.movie.service;
 
 
 import com.cookie.domain.movie.dto.response.MovieResponse;
+import com.cookie.domain.movie.dto.response.MovieSimpleResponse;
 import com.cookie.domain.movie.dto.response.ReviewOfMovieResponse;
 import com.cookie.domain.movie.entity.Movie;
 import com.cookie.domain.movie.entity.MovieImage;
@@ -166,7 +167,7 @@ public class MovieService {
     }
 
     @Transactional(readOnly = true)
-    public MovieResponse getMovieDetails(Long movieId) {
+    public MovieResponse getMovieDetails(Long movieId, Long userId) {
         // 1. 기본 영화 정보 가져오기
         Movie movie = movieRepository.findById(movieId)
                 .orElseThrow(() -> new IllegalArgumentException("Movie not found with id: " + movieId));
@@ -193,4 +194,30 @@ public class MovieService {
                 .country(movie.getCountry().getName())
                 .build();
     }
+
+
+    public List<MovieSimpleResponse> getMoviesByCategoryId(Long categoryId) {
+        // 카테고리 ID로 영화 리스트 조회
+        List<Movie> movies = movieCategoryRepository.findMoviesByCategoryId(categoryId);
+
+        // 조회된 영화 데이터를 MovieSimpleResponse DTO로 변환
+        return movies.stream()
+                .map(movie -> MovieSimpleResponse.builder()
+                        .title(movie.getTitle()) // 영화 제목
+                        .poster(movie.getPoster()) // 포스터 URL
+                        .releasedAt(movie.getReleasedAt() != null
+                                ? movie.getReleasedAt().toString() // 개봉일 (문자열로 변환)
+                                : null)
+                        .countries(movie.getMovieCountry() != null
+                                ? movie.getMovieCountries().stream()
+                                .map(mc -> mc.getCountry().getCountry()) // 국가 이름 리스트
+                                .collect(Collectors.toList())
+                                : null)
+                        .likes((long) (movie.getMovieLikes() != null ? movie.getMovieLikes() : 0)) // 좋아요 수
+                        .reviews((long) (movie.getReviews() != null ? movie.getReviews().size() : 0)) // 리뷰 수
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+
 }

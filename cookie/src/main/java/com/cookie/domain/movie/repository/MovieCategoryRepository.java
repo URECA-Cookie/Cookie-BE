@@ -1,5 +1,6 @@
 package com.cookie.domain.movie.repository;
 
+import com.cookie.domain.movie.entity.Movie;
 import com.cookie.domain.movie.entity.MovieCategory;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -42,4 +43,7 @@ public interface MovieCategoryRepository extends JpaRepository<MovieCategory, Lo
         WHERE mc.movie.id = :movieId
     """)
     void deleteByMovieId(@Param("movieId") Long movieId);
+
+    @Query("SELECT mc.movie FROM MovieCategory mc WHERE mc.category.id = :categoryId")
+    List<Movie> findMoviesByCategoryId(@Param("categoryId") Long categoryId);
 }

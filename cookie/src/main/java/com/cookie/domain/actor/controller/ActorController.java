@@ -11,14 +11,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/movies/actor")
+@RequestMapping("/api/actor")
 @RequiredArgsConstructor
 public class ActorController {
 
     private final ActorService actorService;
 
     @GetMapping("/{actorId}")
-    public ResponseEntity<?> getActorDetails(@PathVariable Long actorId) {
+    public ResponseEntity<?> getActorDetails(@PathVariable(name="actorId") Long actorId) {
         ActorDetailResponse actorDetailResponse = actorService.getActorDetails(actorId);
         return ResponseEntity.ok(ApiUtil.success(actorDetailResponse));
     }

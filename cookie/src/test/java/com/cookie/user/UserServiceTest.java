@@ -1,7 +1,9 @@
 package com.cookie.user;
 
+import com.cookie.domain.badge.dto.MyBadgeResponse;
 import com.cookie.domain.badge.entity.Badge;
 import com.cookie.domain.movie.entity.Movie;
+import com.cookie.domain.review.dto.response.ReviewDetailResponse;
 import com.cookie.domain.review.dto.response.ReviewResponse;
 import com.cookie.domain.review.entity.Review;
 import com.cookie.domain.review.repository.ReviewRepository;
@@ -157,7 +159,7 @@ class UserServiceTest {
         Mockito.when(userBadgeRepository.findAllByUserId(userId)).thenReturn(userBadges);
 
         // When
-        List<BadgeResponse> badgeResponses = userService.getAllBadgesByUserId(userId);
+        List<MyBadgeResponse> badgeResponses = userService.getAllBadgesByUserId(userId);
 
         // Then
         assertNotNull(badgeResponses);
@@ -283,16 +285,33 @@ class UserServiceTest {
         // Given
         Long userId = 1L;
 
-        // Mock 데이터 생성
+        // Mock Badge 데이터 생성
+        Badge badge = Badge.builder()
+                .name("Super Reviewer")
+                .badgeImage("badge.jpg")
+                .needPoint(1000)
+                .build();
+
+        // Mock User 데이터 생성
         User user = User.builder()
                 .nickname("JohnDoe")
                 .profileImage("profile.jpg")
                 .build();
         ReflectionTestUtils.setField(user, "id", userId);
 
+        // Mock UserBadge 데이터 생성
+        UserBadge userBadge = UserBadge.builder()
+                .user(user)
+                .badge(badge)
+                .isMain(true)
+                .build();
+        user.getUserBadges().add(userBadge);
+
+        // Mock Movie 데이터 생성
         Movie movie = new Movie("Inception", "inception.jpg", "Great movie", "Warner Bros", null, 120, 9.0, null);
         ReflectionTestUtils.setField(movie, "id", 1L);
 
+        // Mock Review 데이터 생성
         Review review = Review.builder()
                 .movie(movie)
                 .user(user)
@@ -302,6 +321,7 @@ class UserServiceTest {
                 .isSpoiler(false)
                 .reviewLike(100)
                 .build();
+        ReflectionTestUtils.setField(review, "id", 1L);
         ReflectionTestUtils.setField(review, "createdAt", LocalDateTime.now());
         ReflectionTestUtils.setField(review, "updatedAt", LocalDateTime.now());
 
@@ -315,11 +335,37 @@ class UserServiceTest {
         assertNotNull(responses);
         assertEquals(1, responses.size());
         ReviewResponse response = responses.get(0);
+
+        // Assert Review details
+        assertEquals(1L, response.getReviewId());
         assertEquals("Amazing movie!", response.getContent());
-        assertEquals(9.0, response.getMovieScore());
-        assertEquals(LocalDate.now(), response.getCreatedAt());
-        assertEquals(LocalDate.now(), response.getUpdatedAt());
-        assertEquals("Inception", response.getMovieTitle());
+        assertEquals(9.0, response.getMovieScore(), 0.01);
+        assertFalse(response.isHide());
+        assertFalse(response.isSpoiler());
+        assertEquals(100, response.getReviewLike());
+
+        // Assert Movie details
+        assertNotNull(response.getMovie());
+        assertEquals("Inception", response.getMovie().getTitle());
+        assertEquals("inception.jpg", response.getMovie().getPoster());
+
+        // Assert User details
+        assertNotNull(response.getUser());
+        assertEquals("JohnDoe", response.getUser().getNickname());
+        assertEquals("profile.jpg", response.getUser().getProfileImage());
+        assertEquals("badge.jpg", response.getUser().getMainBadgeImage());
+
+        // Assert Timestamps
+        assertNotNull(response.getCreatedAt());
+        assertNotNull(response.getUpdatedAt());
+        assertEquals(review.getCreatedAt(), response.getCreatedAt());
+        assertEquals(review.getUpdatedAt(), response.getUpdatedAt());
     }
+
+
+
+
+
+
 
 }
