@@ -1,4 +1,4 @@
-package com.cookie.admin.service;
+package com.cookie.admin.service.movie;
 
 import com.cookie.admin.dto.response.AdminMovieCategoryResponse;
 import com.cookie.admin.dto.response.MovieCategories;

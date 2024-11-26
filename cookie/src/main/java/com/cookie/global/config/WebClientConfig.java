@@ -1,4 +1,4 @@
-package com.cookie.admin.config;
+package com.cookie.global.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

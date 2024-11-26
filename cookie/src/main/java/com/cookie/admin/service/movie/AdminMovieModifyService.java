@@ -1,4 +1,4 @@
-package com.cookie.admin.service;
+package com.cookie.admin.service.movie;
 
 import com.cookie.admin.dto.response.AdminMovieCategoryResponse;
 import com.cookie.admin.dto.response.MovieCategories;
@@ -83,29 +83,32 @@ public class AdminMovieModifyService {
     }
 
     @Transactional
-    public List<Long> deleteMovie(List<Long> movieId) {
+    public List<Long> deleteMovie(List<Long> movieIds) {
 
-        List<Movie> movies = movieRepository.findAllById(movieId);
+        if (movieIds.isEmpty()) {
+            throw new MovieNotFoundException("빈 배열이 요청 되었습니다.");
+        }
+
+        List<Movie> movies = movieRepository.findAllById(movieIds);
 
         if (movies.isEmpty()) {
-            throw new MovieNotFoundException("영화 id를 다시 한 번 확인해주세요.");
+            throw new MovieNotFoundException("존재하지 않는 영화 정보들 입니다.");
+        }
+
+        if (movies.size() != movieIds.size()) {
+            throw new MovieNotFoundException("유효하지 않은 영화 id가 포함되어 있습니다.");
         }
 
         List<Long> deleteMovieIds = new ArrayList<>();
 
-        try {
-            for (Movie movie : movies) {
+        for (Movie movie : movies) {
+            movieActorRepository.deleteByMovieId(movie.getId());
+            movieCategoryRepository.deleteByMovieId(movie.getId());
+            movieImageRepository.deleteByMovieId(movie.getId());
 
-                movieActorRepository.deleteByMovieId(movie.getId());
-                movieCategoryRepository.deleteByMovieId(movie.getId());
-                movieImageRepository.deleteByMovieId(movie.getId());
+            movieRepository.deleteByMovieId(movie.getId());
 
-                movieRepository.deleteByMovieId(movie.getId());
-
-                deleteMovieIds.add(movie.getId());
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("영화 삭제 중 문제가 발생했습니다. 영화 ID: " + movieId, e);
+            deleteMovieIds.add(movie.getId());
         }
 
         return deleteMovieIds;

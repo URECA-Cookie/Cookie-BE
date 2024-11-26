@@ -3,16 +3,12 @@ package com.cookie.admin.dto.response;
 import lombok.Builder;
 import lombok.Getter;
 
-import java.util.List;
-
 @Getter
 @Builder
-public class MoviesResponse {
+public class RecommendResponse {
+
+    private Long id;
     private Long movieId;
     private String title;
-    private String releaseDate;
     private String posterPath;
-    private String plot;
-    private String director;
-    private List<String> actors;
 }
