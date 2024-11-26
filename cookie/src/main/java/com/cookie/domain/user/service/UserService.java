@@ -1,6 +1,10 @@
 package com.cookie.domain.user.service;
 
 import com.cookie.domain.badge.dto.MyBadgeResponse;
+import com.cookie.domain.movie.entity.Movie;
+import com.cookie.domain.movie.entity.MovieLike;
+import com.cookie.domain.movie.repository.MovieLikeRepository;
+import com.cookie.domain.movie.repository.MovieRepository;
 import com.cookie.domain.review.dto.response.ReviewResponse;
 import com.cookie.domain.user.dto.request.MyProfileRequest;
 import com.cookie.domain.user.dto.response.*;
@@ -15,11 +19,13 @@ import com.cookie.domain.user.repository.GenreScoreRepository;
 import com.cookie.domain.review.repository.ReviewRepository;
 import com.cookie.domain.user.repository.UserBadgeRepository;
 import com.cookie.domain.user.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -32,6 +38,8 @@ public class UserService {
     private final UserRepository userRepository;
     private final BadgeAccumulationPointRepository badgeAccumulationPointRepository;
     private final GenreScoreService genreScoreService;
+    private final MovieRepository movieRepository;
+    private final MovieLikeRepository movieLikeRepository;
 
 
     public MyPageResponse getMyPage(Long userId) {
@@ -202,5 +210,30 @@ public class UserService {
     public boolean isDuplicateNickname(String nickname) {
         return userRepository.existsByNickname(nickname);
     }
+    public boolean toggleMovieLike(Long movieId, Long userId) {
+        // 사용자가 존재하는지 확인
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
 
+        // 영화가 존재하는지 확인
+        Movie movie = movieRepository.findById(movieId)
+                .orElseThrow(() -> new EntityNotFoundException("Movie not found with id: " + movieId));
+
+        // 좋아요 기록이 있는지 확인
+        Optional<MovieLike> existingLike = movieLikeRepository.findByMovieAndUser(movie, user);
+
+        if (existingLike.isPresent()) {
+            // 이미 좋아요를 눌렀다면 삭제
+            movieLikeRepository.delete(existingLike.get());
+            return false; // 좋아요 취소
+        } else {
+            // 좋아요를 누르지 않았다면 새로 추가
+            MovieLike movieLike = MovieLike.builder()
+                    .user(user)
+                    .movie(movie)
+                    .build();
+            movieLikeRepository.save(movieLike);
+            return true; // 좋아요 등록
+        }
+    }
 }
