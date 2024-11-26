@@ -15,10 +15,6 @@ public class CharmPoint {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "matchup_id")
-    private MatchUp matchUp;
-
     private long ost;
     private long directing;
     private long story;
@@ -28,8 +24,7 @@ public class CharmPoint {
     private long specialEffects;
 
     @Builder
-    public CharmPoint(MatchUp matchUp, long ost, long directing, long story, long dialogue, long visual, long acting, long specialEffects) {
-        this.matchUp = matchUp;
+    public CharmPoint(long ost, long directing, long story, long dialogue, long visual, long acting, long specialEffects) {
         this.ost = ost;
         this.directing = directing;
         this.story = story;
@@ -37,5 +32,15 @@ public class CharmPoint {
         this.visual = visual;
         this.acting = acting;
         this.specialEffects = specialEffects;
+    }
+
+    public void updatePoints(long ost, long directing, long story, long dialogue, long visual, long acting, long specialEffects) {
+        this.ost += ost;
+        this.directing += directing;
+        this.story += story;
+        this.dialogue += dialogue;
+        this.visual += visual;
+        this.acting += acting;
+        this.specialEffects += specialEffects;
     }
 }

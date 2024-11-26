@@ -11,12 +11,13 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MovieReviewResponse {
-
+    private long reviewId;
     private String content;
     private long reviewLike;
     private double movieScore;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private MovieReviewUserResponse user;
+    private boolean likedByUser;
 
 }

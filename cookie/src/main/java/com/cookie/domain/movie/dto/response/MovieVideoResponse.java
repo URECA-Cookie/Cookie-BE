@@ -11,5 +11,4 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class MovieVideoResponse {
     private String url;   // 비디오 URL
-    private String title; // 비디오 제목
 }

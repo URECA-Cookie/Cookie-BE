@@ -27,8 +27,12 @@ public class User extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private Role role;
     private String socialId;
-    private boolean pushEnabled;
-    private boolean emailEnabled;
+    private boolean isPushEnabled;
+    private boolean isEmailEnabled;
+    private String password;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
+    private Category category;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserBadge> userBadges = new ArrayList<>();
@@ -46,14 +50,19 @@ public class User extends BaseTimeEntity {
     }
 
     @Builder
-    public User(String nickname, String profileImage, SocialProvider socialProvider, String email, Role role, String socialId) {
+    public User(String nickname, String profileImage, SocialProvider socialProvider, String email, Role role, String socialId, boolean isPushEnabled, boolean isEmailEnabled, String password, Category category) {
         this.nickname = nickname;
         this.profileImage = profileImage;
         this.socialProvider = socialProvider;
         this.email = email;
         this.role = role;
         this.socialId = socialId;
+        this.isPushEnabled = isPushEnabled;
+        this.isEmailEnabled = isEmailEnabled;
+        this.password = password;
+        this.category = category;
     }
+
 
     public void updateProfile(String profileImage, String nickname) {
         this.profileImage = profileImage;
@@ -62,3 +71,4 @@ public class User extends BaseTimeEntity {
 
 
 }
+

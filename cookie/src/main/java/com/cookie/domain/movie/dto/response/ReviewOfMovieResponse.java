@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -14,10 +13,12 @@ import java.util.List;
 public class ReviewOfMovieResponse {
     private String title;
     private String poster;
-    private String rating;
+    private String certification;
     private int runtime;
     private List<String> subCategories;
-    private List<String> countries;
-    private LocalDateTime releasedAt;
+    private String country;
+    private String releasedAt;
     private List<MovieReviewResponse> reviews;
+    private long totalReviews;
+    private long totalReviewPages;
 }
