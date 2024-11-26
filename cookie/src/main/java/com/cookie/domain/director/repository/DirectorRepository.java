@@ -12,12 +12,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface DirectorRepository extends JpaRepository<Director, Long> {
-    @Query("SELECT new com.cookie.domain.director.dto.response.DirectorResponse("
-            + "d.name, d.profileImage) "
-            + "FROM Director d "
-            + "JOIN MovieDirector md ON md.director.id = d.id "
-            + "WHERE md.movie.id = :movieId")
-    List<DirectorResponse> findDirectorsByMovieId(@Param("movieId") Long movieId);
 
     @Query("""
             SELECT d
