@@ -1,6 +1,7 @@
 package com.cookie.domain.user.entity;
 
 import com.cookie.domain.badge.entity.Badge;
+import com.cookie.domain.category.entity.Category;
 import com.cookie.domain.user.entity.enums.Role;
 import com.cookie.domain.user.entity.enums.SocialProvider;
 import com.cookie.global.entity.BaseTimeEntity;

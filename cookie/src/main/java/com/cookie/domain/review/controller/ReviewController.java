@@ -39,7 +39,15 @@ public class ReviewController {
     // 푸시 알림 실시간 연결
     @GetMapping("/subscribe/push-notification")
     public SseEmitter subscribePushNotification() {
-        return getSseEmitter(pushNotificationEmitters);
+        log.info("푸시알림 실시간 연결 시작");
+        SseEmitter emitter = getSseEmitter(pushNotificationEmitters);
+        try {
+            emitter.send(SseEmitter.event().name("connected").data("푸시 알림 실시간 연결이 성공적으로 열렸습니다."));
+        } catch (Exception e) {
+            log.error("푸시 알림 연결 오류", e);
+            emitter.completeWithError(e);
+        }
+        return emitter;
     }
 
     private SseEmitter getSseEmitter(CopyOnWriteArrayList<SseEmitter> emitters) {

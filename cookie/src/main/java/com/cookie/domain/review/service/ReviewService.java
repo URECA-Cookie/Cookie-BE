@@ -71,7 +71,7 @@ public class ReviewService {
 
     @Async
     public void sendReviewCreatedEvent(Review review, CopyOnWriteArrayList<SseEmitter> reviewEmitters) {
-        ReviewResponse reviewResponse = ReviewResponse.fromReview(review);
+        ReviewResponse reviewResponse = ReviewResponse.fromReview(review, false);
 
         for (SseEmitter emitter : reviewEmitters) {
             try {
@@ -302,17 +302,17 @@ public class ReviewService {
         log.info("Deleted comment: commentId = {}", commentId);
     }
   
-    @Transactional(readOnly = true)
-    public List<ReviewResponse> getLikedReviewsByUserId(Long userId) {
-        List<ReviewLike> likedReviews = reviewLikeRepository.findAllByUserIdWithReviews(userId);
-
-        return likedReviews.stream()
-                .map(reviewLike -> {
-                    Review review = reviewLike.getReview();
-                    return ReviewResponse.fromReview(review);
-                })
-                .toList();
-    }
+//    @Transactional(readOnly = true)
+//    public List<ReviewResponse> getLikedReviewsByUserId(Long userId) {
+//        List<ReviewLike> likedReviews = reviewLikeRepository.findAllByUserIdWithReviews(userId);
+//
+//        return likedReviews.stream()
+//                .map(reviewLike -> {
+//                    Review review = reviewLike.getReview();
+//                    return ReviewResponse.fromReview(review);
+//                })
+//                .toList();
+//    }
 
 }
 
