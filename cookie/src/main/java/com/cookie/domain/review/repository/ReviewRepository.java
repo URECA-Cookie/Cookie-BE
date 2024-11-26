@@ -1,5 +1,6 @@
 package com.cookie.domain.review.repository;
 
+import com.cookie.domain.review.dto.response.ReviewResponse;
 import com.cookie.domain.review.entity.Review;
 import com.cookie.domain.movie.entity.Movie;
 import com.cookie.domain.user.entity.User;
@@ -33,4 +34,6 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     @Query("SELECT r FROM Review r JOIN FETCH r.movie WHERE r.user.id = :userId")
     List<Review> findAllByUserIdWithMovie(Long userId);
 
+
+    Long countByMovieId(Long movieId);
 }

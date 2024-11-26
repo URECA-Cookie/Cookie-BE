@@ -2,6 +2,7 @@ package com.cookie.domain.movie.service;
 
 
 import com.cookie.domain.movie.dto.response.MovieResponse;
+import com.cookie.domain.movie.dto.response.MovieSimpleResponse;
 import com.cookie.domain.movie.dto.response.ReviewOfMovieResponse;
 import com.cookie.domain.movie.entity.Movie;
 import com.cookie.domain.movie.entity.MovieImage;
@@ -147,26 +148,31 @@ public class MovieService {
         );
     }
 
+
+    private String title;
+    private String poster;
+    private String releasedAt;
+    private String country;
+    private Long likes;
+    private Long reviews;
     @Transactional(readOnly = true)
-    public List<MovieResponse> getLikedMoviesByUserId(Long userId) {
+    public List<MovieSimpleResponse> getLikedMoviesByUserId(Long userId) {
         List<MovieLike> likedMovies = movieLikeRepository.findAllByUserIdWithMovies(userId);
 
         return likedMovies.stream()
-                .map(movieLike -> MovieResponse.builder()
-                        .id(movieLike.getMovie().getId())
+                .map(movieLike -> MovieSimpleResponse.builder()
                         .title(movieLike.getMovie().getTitle())
                         .poster(movieLike.getMovie().getPoster())
-                        .plot(movieLike.getMovie().getPlot())
                         .releasedAt(movieLike.getMovie().getReleasedAt())
-                        .runtime(movieLike.getMovie().getRuntime())
-                        .score(movieLike.getMovie().getScore())
-                        .certification(movieLike.getMovie().getCertification()) // Enum -> String 변환
+                        .country(movieLike.getMovie().getCountry().getName())
+                        .likes(movieLike.getMovie().getMovieLikes())
+                        .reviews((long) (movieLike.getMovie().getReviews() != null ? movieLike.getMovie().getReviews().size() : 0)) // 리뷰 수
                         .build())
                 .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
-    public MovieResponse getMovieDetails(Long movieId) {
+    public MovieResponse getMovieDetails(Long movieId, Long userId) {
         // 1. 기본 영화 정보 가져오기
         Movie movie = movieRepository.findById(movieId)
                 .orElseThrow(() -> new IllegalArgumentException("Movie not found with id: " + movieId));
@@ -193,4 +199,23 @@ public class MovieService {
                 .country(movie.getCountry().getName())
                 .build();
     }
+
+
+    public List<MovieSimpleResponse> getMoviesByCategoryId(Long categoryId) {
+        // 카테고리 ID로 영화 리스트 조회
+        List<Movie> movies = movieCategoryRepository.findMoviesByCategoryId(categoryId);
+
+        // 조회된 영화 데이터를 MovieSimpleResponse DTO로 변환
+        return movies.stream()
+                .map(movie -> MovieSimpleResponse.builder()
+                        .title(movie.getTitle()) // 영화 제목
+                        .poster(movie.getPoster()) // 포스터 URL
+                        .releasedAt(movie.getReleasedAt())
+                        .country(movie.getCountry().getName())
+                        .likes(0L) // Movie 엔티티에 likes 관련 정보 없음
+                        .reviews((long) (movie.getReviews() != null ? movie.getReviews().size() : 0)) // 리뷰 수
+                        .build())
+                .collect(Collectors.toList());
+    }
+
 }

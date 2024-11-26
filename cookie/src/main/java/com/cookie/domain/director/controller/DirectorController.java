@@ -19,7 +19,7 @@ public class DirectorController {
     private final DirectorService directorService;
 
     @GetMapping("/{directorId}")
-    public ResponseEntity<?> getDirectorDetails(@PathVariable Long directorId) {
+    public ResponseEntity<?> getDirectorDetails(@PathVariable(name="directorId") Long directorId) {
         DirectorDetailResponse directorDetailResponse = directorService.getDirectorDetails(directorId);
         return ResponseEntity.ok(ApiUtil.success(directorDetailResponse));
     }
