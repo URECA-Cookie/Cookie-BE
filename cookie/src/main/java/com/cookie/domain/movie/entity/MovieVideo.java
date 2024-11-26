@@ -15,16 +15,14 @@ public class MovieVideo {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String url;
-    private String title;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "movie_id")
     private Movie movie;
 
     @Builder
-    public MovieVideo(String url, String title, Movie movie) {
+    public MovieVideo(String url, Movie movie) {
         this.url = url;
-        this.title = title;
         this.movie = movie;
     }
 }

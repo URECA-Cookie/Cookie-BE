@@ -34,7 +34,7 @@ public class DirectorService {
                     return PersonDetailMovieInfo.builder()
                             .title(movie.getTitle())
                             .poster(movie.getPoster())
-                            .released(movie.getReleasedAt().toLocalDate().toString()) // LocalDateTime -> LocalDate 변환
+                            .released(movie.getReleasedAt())
                             .build();
                 })
                 .collect(Collectors.toList());

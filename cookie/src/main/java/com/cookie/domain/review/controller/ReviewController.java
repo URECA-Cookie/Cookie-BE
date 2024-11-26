@@ -4,6 +4,7 @@ package com.cookie.domain.review.controller;
 import com.cookie.domain.review.dto.request.ReviewCommentRequest;
 import com.cookie.domain.review.dto.request.CreateReviewRequest;
 import com.cookie.domain.review.dto.response.ReviewDetailResponse;
+import com.cookie.domain.review.dto.response.ReviewListResponse;
 import com.cookie.domain.review.dto.response.ReviewResponse;
 import com.cookie.domain.review.dto.request.UpdateReviewRequest;
 import com.cookie.domain.review.service.ReviewService;
@@ -11,6 +12,7 @@ import com.cookie.global.util.ApiUtil;
 import com.cookie.global.util.ApiUtil.ApiSuccess;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -52,8 +54,16 @@ public class ReviewController {
     }
 
     @GetMapping
-    public ApiSuccess<?> getReviewList() {
-        List<ReviewResponse> reviewList = reviewService.getReviewList();
+    public ApiSuccess<?> getReviewList(Pageable pageable) {
+        Long userId = 1L;
+        ReviewListResponse reviewList = reviewService.getReviewList(userId, pageable);
+        return ApiUtil.success(reviewList);
+    }
+
+    @GetMapping("/spoiler")
+    public ApiSuccess<?> getSpoilerReviewList(Pageable pageable) {
+        Long userId = 1L;
+        ReviewListResponse reviewList = reviewService.getSpoilerReviewList(userId, pageable);
         return ApiUtil.success(reviewList);
     }
 
@@ -65,7 +75,8 @@ public class ReviewController {
 
     @GetMapping("/{reviewId}")
     public ApiSuccess<?> getReviewDetail(@PathVariable(name = "reviewId") Long reviewId) {
-        ReviewDetailResponse reviewDetailResponse = reviewService.getReviewDetail(reviewId);
+        Long userId = 2L;
+        ReviewDetailResponse reviewDetailResponse = reviewService.getReviewDetail(reviewId, userId);
         return ApiUtil.success(reviewDetailResponse);
     }
 

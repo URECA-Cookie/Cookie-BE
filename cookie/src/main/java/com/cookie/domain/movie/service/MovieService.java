@@ -12,11 +12,14 @@ import com.cookie.domain.movie.repository.MovieCountryRepository;
 import com.cookie.domain.movie.repository.MovieRepository;
 import com.cookie.domain.review.dto.response.MovieReviewResponse;
 import com.cookie.domain.review.entity.Review;
+import com.cookie.domain.review.repository.ReviewLikeRepository;
 import com.cookie.domain.review.repository.ReviewRepository;
 import com.cookie.domain.user.dto.response.MovieReviewUserResponse;
 import com.cookie.domain.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,20 +39,21 @@ public class MovieService {
     private final MovieCountryRepository movieCountryRepository;
     private final MovieCategoryRepository movieCategoryRepository;
     private final MovieLikeRepository movieLikeRepository;
-    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private final ReviewLikeRepository reviewLikeRepository;
+//    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
 
     @Transactional(readOnly = true)
-    public ReviewOfMovieResponse getMovieReviewList(Long movieId) {
+    public ReviewOfMovieResponse getMovieReviewList(Long movieId, Long userId, Pageable pageable) {
         Movie movie = movieRepository.findById(movieId)
                 .orElseThrow(() -> new IllegalArgumentException("not found movieId: " + movieId));
 
         log.info("Retrieved movie: movieId = {}", movieId);
 
-        List<Review> reviews = reviewRepository.findReviewsByMovieId(movieId);
-        log.info("Retrieved {} reviews for movieId = {}", reviews.size(), movieId);
+        Page<Review> reviewsPage = reviewRepository.findReviewsByMovieId(movieId, pageable);
+        log.info("Retrieved {} reviews for movieId = {}", reviewsPage.getContent().size(), movieId);
 
-        List<MovieReviewResponse> reviewResponses = reviews.stream()
+        List<MovieReviewResponse> reviewResponses = reviewsPage.stream()
                 .map(review -> {
                     User user = review.getUser();
                     MovieReviewUserResponse userResponse = new MovieReviewUserResponse(
@@ -59,13 +63,17 @@ public class MovieService {
                             user.getMainBadge() != null ? user.getMainBadge().getName() : null
                     );
 
+                    boolean likedByUser = userId != null && reviewLikeRepository.existsByReviewIdAndUserId(review.getId(), userId);
+
                     return new MovieReviewResponse(
+                            review.getId(),
                             review.getContent(),
                             review.getReviewLike(),
                             review.getMovieScore(),
                             review.getCreatedAt(),
                             review.getUpdatedAt(),
-                            userResponse
+                            userResponse,
+                            likedByUser
                     );
                 }).toList();
 
@@ -83,26 +91,28 @@ public class MovieService {
         return new ReviewOfMovieResponse(
                 movie.getTitle(),
                 movie.getPoster(),
-                movie.getRating().name(),
+                movie.getCertification(),
                 movie.getRuntime(),
                 subCategories,
                 countries,
                 movie.getReleasedAt(),
-                reviewResponses
+                reviewResponses,
+                reviewsPage.getTotalElements(),
+                reviewsPage.getTotalPages()
         );
     }
 
     @Transactional(readOnly = true)
-    public ReviewOfMovieResponse getMovieSpoilerReviewList(Long movieId) {
+    public ReviewOfMovieResponse getMovieSpoilerReviewList(Long movieId, Long userId, Pageable pageable) {
         Movie movie = movieRepository.findById(movieId)
                 .orElseThrow(() -> new IllegalArgumentException("not found movieId: " + movieId));
 
         log.info("Retrieved movie: movieId = {}", movieId);
 
-        List<Review> reviews = reviewRepository.findSpoilerReviewsByMovieId(movieId);
-        log.info("Retrieved {} reviews for movieId = {}", reviews.size(), movieId);
+        Page<Review> reviewsPage = reviewRepository.findSpoilerReviewsByMovieId(movieId, pageable);
+        log.info("Retrieved {} reviews for movieId = {}", reviewsPage.getContent().size(), movieId);
 
-        List<MovieReviewResponse> reviewResponses = reviews.stream()
+        List<MovieReviewResponse> reviewResponses = reviewsPage.stream()
                 .map(review -> {
                     User user = review.getUser();
                     MovieReviewUserResponse userResponse = new MovieReviewUserResponse(
@@ -112,13 +122,17 @@ public class MovieService {
                             user.getMainBadge() != null ? user.getMainBadge().getName() : null
                     );
 
+                    boolean likedByUser = userId != null && reviewLikeRepository.existsByReviewIdAndUserId(review.getId(), userId);
+
                     return new MovieReviewResponse(
+                            review.getId(),
                             review.getContent(),
                             review.getReviewLike(),
                             review.getMovieScore(),
                             review.getCreatedAt(),
                             review.getUpdatedAt(),
-                            userResponse
+                            userResponse,
+                            likedByUser
                     );
                 }).toList();
 
@@ -136,15 +150,18 @@ public class MovieService {
         return new ReviewOfMovieResponse(
                 movie.getTitle(),
                 movie.getPoster(),
-                movie.getRating().name(),
+                movie.getCertification(),
                 movie.getRuntime(),
                 subCategories,
                 countries,
                 movie.getReleasedAt(),
-                reviewResponses
+                reviewResponses,
+                reviewsPage.getTotalElements(),
+                reviewsPage.getTotalPages()
+
         );
     }
-    
+
     @Transactional(readOnly = true)
     public List<MovieResponse> getLikedMoviesByUserId(Long userId) {
         List<MovieLike> likedMovies = movieLikeRepository.findAllByUserIdWithMovies(userId);
@@ -155,13 +172,10 @@ public class MovieService {
                         .title(movieLike.getMovie().getTitle())
                         .poster(movieLike.getMovie().getPoster())
                         .plot(movieLike.getMovie().getPlot())
-                        .company(movieLike.getMovie().getCompany())
-                        .releasedAt(movieLike.getMovie().getReleasedAt() != null
-                                ? movieLike.getMovie().getReleasedAt().format(DATE_FORMATTER)
-                                : null) // LocalDateTime -> String 변환
-                        .runtime(movieLike.getMovie().getRuntime() + " minutes") // int -> String 변환
+                        .releasedAt(movieLike.getMovie().getReleasedAt())
+                        .runtime(movieLike.getMovie().getRuntime())
                         .score(movieLike.getMovie().getScore())
-                        .rating(movieLike.getMovie().getRating().name()) // Enum -> String 변환
+                        .certification(movieLike.getMovie().getCertification()) // Enum -> String 변환
                         .build())
                 .collect(Collectors.toList());
     }
@@ -193,18 +207,16 @@ public class MovieService {
                 .title(movie.getTitle())
                 .poster(movie.getPoster())
                 .plot(movie.getPlot())
-                .company(movie.getCompany())
-                .releasedAt(movie.getReleasedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
-                .runtime(movie.getRuntime() + " minutes")
+                .releasedAt(movie.getReleasedAt())
+                .runtime(movie.getRuntime())
                 .score(movie.getScore())
-                .rating(movie.getRating().name())
+                .certification(movie.getCertification())
                 .images(movieImages.stream()
                         .map(MovieImage::getUrl)
                         .collect(Collectors.toList()))
                 .videos(movieVideos.stream()
                         .map(video -> MovieVideoResponse.builder()
                                 .url(video.getUrl())
-                                .title(video.getTitle())
                                 .build())
                         .collect(Collectors.toList()))
                 .countries(movieCountries.stream()

@@ -9,6 +9,7 @@ import com.cookie.domain.user.entity.BadgeAccumulationPoint;
 import com.cookie.domain.user.entity.GenreScore;
 import com.cookie.domain.user.entity.User;
 import com.cookie.domain.user.entity.UserBadge;
+import com.cookie.domain.user.entity.enums.SocialProvider;
 import com.cookie.domain.user.repository.BadgeAccumulationPointRepository;
 import com.cookie.domain.user.repository.GenreScoreRepository;
 import com.cookie.domain.review.repository.ReviewRepository;
@@ -30,6 +31,7 @@ public class UserService {
     private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
     private final BadgeAccumulationPointRepository badgeAccumulationPointRepository;
+    private final GenreScoreService genreScoreService;
 
 
     public MyPageResponse getMyPage(Long userId) {
@@ -40,7 +42,7 @@ public class UserService {
         String profileImage = user.getProfileImage();
 
         // 2. 유저의 뱃지 조회
-        List<BadgeResponse> badgeDtos = getAllBadgesByUserId(userId);
+        List<MyBadgeResponse> badgeDtos = getAllBadgesByUserId(userId);
 
         // 3. 유저의 장르 점수 조회
         List<GenreScoreResponse> genreScoreDtos = getGenreScoresByUserId(userId);
@@ -63,13 +65,14 @@ public class UserService {
     /**
      * 유저가 보유한 뱃지 조회
      */
-    public List<BadgeResponse> getAllBadgesByUserId(Long userId) {
+    public List<MyBadgeResponse> getAllBadgesByUserId(Long userId) {
         List<UserBadge> userBadges = userBadgeRepository.findAllByUserId(userId);
 
         return userBadges.stream()
-                .map(userBadge -> BadgeResponse.builder()
+                .map(userBadge -> MyBadgeResponse.builder()
                         .name(userBadge.getBadge().getName())
                         .badgeImage(userBadge.getBadge().getBadgeImage())
+                        .isMain(userBadge.isMain())
                         .build())
                 .collect(Collectors.toList());
     }
@@ -92,7 +95,6 @@ public class UserService {
                         .crime(genreScore.getCrime())
                         .music(genreScore.getMusic())
                         .thriller(genreScore.getThriller())
-                        .queer(genreScore.getQueer())
                         .war(genreScore.getWar())
                         .documentary(genreScore.getDocumentary())
                         .build())
@@ -106,7 +108,7 @@ public class UserService {
         List<Review> reviews = reviewRepository.findAllByUserIdWithMovie(userId);
 
         return reviews.stream()
-                .map(ReviewResponse::fromReview)
+                .map(review -> ReviewResponse.fromReview(review, false))
                 .toList();
     }
 
@@ -182,4 +184,23 @@ public class UserService {
                 .documentaryPoint(badgeAccumulationPoint.getDocumentaryPoint())
                 .build();
     }
+
+    @Transactional
+    public void registerUser(User user) {
+        userRepository.save(user);
+        genreScoreService.createAndSaveGenreScore(user);
+    }
+
+    public void registerAdmin(User user) {
+        userRepository.save(user);
+    }
+
+    public boolean isDuplicateSocial(SocialProvider socialProvider, String socialId) {
+        return userRepository.existsBySocialProviderAndSocialId(socialProvider, socialId);
+    }
+
+    public boolean isDuplicateNickname(String nickname) {
+        return userRepository.existsByNickname(nickname);
+    }
+
 }
