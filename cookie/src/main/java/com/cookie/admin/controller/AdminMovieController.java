@@ -1,7 +1,7 @@
 package com.cookie.admin.controller;
 
 import com.cookie.admin.dto.response.*;
-import com.cookie.admin.service.*;
+import com.cookie.admin.service.movie.*;
 import com.cookie.global.util.ApiUtil;
 import com.cookie.global.util.ApiUtil.ApiSuccess;
 import lombok.RequiredArgsConstructor;
@@ -12,9 +12,9 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/admin")
-public class AdminController {
+public class AdminMovieController {
 
-    private final TMDBService TMDBService;
+    private final com.cookie.admin.service.movie.TMDBService TMDBService;
     private final AdminMovieCreateService adminMovieCreateService;
     private final AdminMovieReadService adminMovieReadService;
     private final AdminMovieModifyService adminMovieModifyService;
@@ -75,4 +75,5 @@ public class AdminController {
         AdminMoviesResponse data = adminMovieSearchService.getMovies(pageNumber);
         return ApiUtil.success(data);
     }
+
 }
