@@ -2,6 +2,7 @@ package com.cookie.admin.service;
 
 import com.cookie.admin.dto.response.AdminMovieBaseAddResponse;
 import com.cookie.admin.dto.response.AdminMovieDetailResponse;
+import com.cookie.admin.dto.response.tmdb.TMDBCasts;
 import com.cookie.admin.dto.response.tmdb.TMDBMovieSearchResponse;
 import com.cookie.admin.exception.MovieAlreadyExistsException;
 import com.cookie.admin.repository.CategoryRepository;
@@ -12,8 +13,14 @@ import com.cookie.domain.category.entity.Category;
 import com.cookie.domain.country.entity.Country;
 import com.cookie.domain.director.entity.Director;
 import com.cookie.domain.director.repository.DirectorRepository;
-import com.cookie.domain.movie.entity.*;
-import com.cookie.domain.movie.repository.*;
+import com.cookie.domain.movie.entity.Movie;
+import com.cookie.domain.movie.entity.MovieActor;
+import com.cookie.domain.movie.entity.MovieCategory;
+import com.cookie.domain.movie.entity.MovieImage;
+import com.cookie.domain.movie.repository.MovieActorRepository;
+import com.cookie.domain.movie.repository.MovieCategoryRepository;
+import com.cookie.domain.movie.repository.MovieImageRepository;
+import com.cookie.domain.movie.repository.MovieRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,6 +32,7 @@ import reactor.core.publisher.Mono;
 import reactor.util.retry.Retry;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -42,22 +50,19 @@ public class AdminMovieCreateService {
     private final MovieRepository movieRepository;
     private final DirectorRepository directorRepository;
     private final ActorRepository actorRepository;
-    private final MovieVideoRepository movieVideoRepository;
     private final MovieImageRepository movieImageRepository;
     private final CountryRepository countryRepository;
     private final CategoryRepository categoryRepository;
 
     private final MovieActorRepository movieActorRepository;
-    private final MovieDirectorRepository movieDirectorRepository;
-    private final MovieCountryRepository movieCountryRepository;
     private final MovieCategoryRepository movieCategoryRepository;
 
     @Transactional
     public AdminMovieBaseAddResponse defaultMoviesAdd() {
         long movieAddCount = 0;
 
-        for (int year = 2024; year >= 1980; year--) {
-            for (int page = 1; page <= 5; page++) {
+        for (int year = 2024; year >= 2024; year--) {
+            for (int page = 1; page <= 2; page++) {
                 String urlDiscover = createDiscoverUrl(year, page);
                 System.out.println("urlDiscover = " + urlDiscover);
 
@@ -124,42 +129,34 @@ public class AdminMovieCreateService {
             throw new MovieAlreadyExistsException("이미 해당 영화 정보가 있습니다");
         }
 
-        Movie movieData = createMovieData(movie);
+        Director directorData = createDirector(movie);
+        Country countryData = createCountry(movie);
+        Movie movieData = createMovieData(movie, directorData, countryData);
         movieRepository.save(movieData);
+
+        List<MovieImage> movieImageDates = createMovieImages(movie, movieData);
+        movieImageRepository.saveAll(movieImageDates);
 
         List<Actor> actorDates = createActors(movie);
         List<MovieActor> movieActors = createMovieActors(movieData, actorDates);
         movieActorRepository.saveAll(movieActors);
 
-        Director directorData = createDirector(movie);
-        MovieDirector movieDirector = createMovieDirector(movieData, directorData);
-        movieDirectorRepository.save(movieDirector);
-
-        List<MovieImage> movieImageDates = createMovieImages(movie, movieData);
-        movieImageRepository.saveAll(movieImageDates);
-
-        MovieVideo movieVideoData = createMovieVideo(movie, movieData);
-        movieVideoRepository.save(movieVideoData);
-
-        Country country = createCountry(movie);
-        MovieCountry movieCountryData = createMovieCountry(movieData, country);
-        movieCountryRepository.save(movieCountryData);
-
         List<Category> categories = createCategories(movie);
         List<MovieCategory> movieCategoryDates = createMovieCategories(movieData, categories);
         movieCategoryRepository.saveAll(movieCategoryDates);
 
-//        movieData.updateMovieDetails(movieImageDates, movieVideoData, movieCountryData, movieCategoryDates);
-
         return movieData;
     }
 
-    private Movie createMovieData(AdminMovieDetailResponse movie) {
+    private Movie createMovieData(AdminMovieDetailResponse movie, Director director, Country country) {
 
         return Movie.builder()
+                .director(director)
+                .country(country)
                 .TMDBMovieId(movie.getMovieId())
                 .title(movie.getTitle())
                 .poster(movie.getPosterPath())
+                .youtubeUrl(movie.getYoutube())
                 .plot(movie.getPlot())
                 .releasedAt(movie.getReleaseDate())
                 .runtime(movie.getRuntime())
@@ -168,16 +165,24 @@ public class AdminMovieCreateService {
     }
 
     private List<Actor> createActors(AdminMovieDetailResponse movie) {
+        List<Long> actorIds = movie.getActors().stream().map(TMDBCasts::getTmdbCasterId).toList();
+        List<Actor> existingActors = actorRepository.findAllByTmdbCasterIdIn(actorIds);
 
-        return movie.getActors().stream()
-                .map(data -> actorRepository.findByTMDBCasterId(data.getTmdbCasterId())
-                        .orElseGet(() -> actorRepository.save(
-                                Actor.builder()
-                                        .tmdbCasterId(data.getTmdbCasterId())
-                                        .name(data.getName())
-                                        .profileImage(data.getProfilePath())
-                                        .build())))
+        List<Actor> newActors = movie.getActors().stream()
+                .filter(data -> existingActors.stream().noneMatch(actor -> actor.getTmdbCasterId().equals(data.getTmdbCasterId())))
+                .map(data -> actorRepository.save(
+                        Actor.builder()
+                                .tmdbCasterId(data.getTmdbCasterId())
+                                .name(data.getName())
+                                .profileImage(data.getProfilePath())
+                                .build()))
                 .toList();
+
+        List<Actor> allActors = new ArrayList<>();
+        allActors.addAll(existingActors);
+        allActors.addAll(newActors);
+
+        return allActors;
     }
 
     private List<MovieActor> createMovieActors(Movie movieData, List<Actor> actorDates) {
@@ -203,14 +208,6 @@ public class AdminMovieCreateService {
                 });
     }
 
-    private MovieDirector createMovieDirector(Movie movieData, Director directorData) {
-
-        return MovieDirector.builder()
-                .movie(movieData)
-                .director(directorData)
-                .build();
-    }
-
     private List<MovieImage> createMovieImages(AdminMovieDetailResponse movie, Movie movieData) {
 
         return movie.getStillCuts().stream()
@@ -221,14 +218,6 @@ public class AdminMovieCreateService {
                 .collect(Collectors.toList());
     }
 
-    private MovieVideo createMovieVideo(AdminMovieDetailResponse movie, Movie movieData) {
-
-        return MovieVideo.builder()
-                .movie(movieData)
-                .url(movie.getYoutube())
-                .build();
-    }
-
     private Country createCountry(AdminMovieDetailResponse movie) {
 
         return countryRepository.findByCountry(movie.getCountry())
@@ -236,20 +225,16 @@ public class AdminMovieCreateService {
                         .orElseThrow(() -> new EntityNotFoundException("해당 영화 국가를 찾지 못했습니다")));
     }
 
-    private MovieCountry createMovieCountry(Movie movieData, Country country) {
-
-        return MovieCountry.builder()
-                .movie(movieData)
-                .country(country)
-                .build();
-    }
-
     private List<Category> createCategories(AdminMovieDetailResponse movie) {
+        List<String> categoryNames = movie.getCategories();
+        List<Category> categories = categoryRepository.findAllByNameIn(categoryNames);
 
-        return movie.getCategories().stream()
-                .map(category -> categoryRepository.findCategory(category)
-                        .orElseGet(() -> categoryRepository.findCategory("N/A")
-                            .orElseThrow(() -> new EntityNotFoundException("해당 영화 카테고리를 찾지 못했습니다"))))
+        return categoryNames.stream()
+                .map(categoryName -> categories.stream()
+                        .filter(category -> category.getSubCategory().equals(categoryName))
+                        .findFirst()
+                        .orElseGet(() -> categoryRepository.findCategoryByName("N/A")
+                                .orElseThrow(() -> new EntityNotFoundException("해당 영화 카테고리를 찾지 못했습니다"))))
                 .toList();
     }
 

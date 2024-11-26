@@ -16,7 +16,7 @@ public class ReviewOfMovieResponse {
     private String certification;
     private int runtime;
     private List<String> subCategories;
-    private List<String> countries;
+    private String country;
     private String releasedAt;
     private List<MovieReviewResponse> reviews;
     private long totalReviews;

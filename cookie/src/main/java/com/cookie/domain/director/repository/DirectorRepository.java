@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface DirectorRepository extends JpaRepository<Director, Long> {
@@ -15,4 +16,12 @@ public interface DirectorRepository extends JpaRepository<Director, Long> {
             WHERE d.tmdbCasterId =:tmdbCasterId
            """)
     Optional<Director> findByTMDBCasterId(@Param("tmdbCasterId") Long tmdbCasterId);
+
+    @Query("""
+            SELECT d
+            FROM Director d
+            LEFT JOIN FETCH d.movies
+            WHERE d.id =:directorId
+           """)
+    List<Director> findAllMoviesByDirectorId(@Param("directorId")Long directorId);
 }

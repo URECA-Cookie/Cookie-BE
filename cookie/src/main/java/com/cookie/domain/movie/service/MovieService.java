@@ -2,13 +2,12 @@ package com.cookie.domain.movie.service;
 
 
 import com.cookie.domain.movie.dto.response.MovieResponse;
-import com.cookie.domain.movie.dto.response.MovieVideoResponse;
-import com.cookie.domain.movie.entity.*;
-import com.cookie.domain.movie.repository.MovieLikeRepository;
 import com.cookie.domain.movie.dto.response.ReviewOfMovieResponse;
 import com.cookie.domain.movie.entity.Movie;
+import com.cookie.domain.movie.entity.MovieImage;
+import com.cookie.domain.movie.entity.MovieLike;
 import com.cookie.domain.movie.repository.MovieCategoryRepository;
-import com.cookie.domain.movie.repository.MovieCountryRepository;
+import com.cookie.domain.movie.repository.MovieLikeRepository;
 import com.cookie.domain.movie.repository.MovieRepository;
 import com.cookie.domain.review.dto.response.MovieReviewResponse;
 import com.cookie.domain.review.entity.Review;
@@ -23,11 +22,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
 import java.util.List;
 import java.util.stream.Collectors;
-
-import java.time.format.DateTimeFormatter;
 
 
 @Slf4j
@@ -36,11 +32,9 @@ import java.time.format.DateTimeFormatter;
 public class MovieService {
     private final MovieRepository movieRepository;
     private final ReviewRepository reviewRepository;
-    private final MovieCountryRepository movieCountryRepository;
     private final MovieCategoryRepository movieCategoryRepository;
     private final MovieLikeRepository movieLikeRepository;
     private final ReviewLikeRepository reviewLikeRepository;
-//    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
 
     @Transactional(readOnly = true)
@@ -83,10 +77,7 @@ public class MovieService {
 
         log.info("Categories for movieId = {}: {}", movieId, subCategories);
 
-        List<String> countries = movieCountryRepository.findByMovieIdWithCountry(movieId).stream()
-                .map(movieCountry -> movieCountry.getCountry().getCountry())
-                .toList();
-        log.info("Countries for movieId = {}: {}", movieId, countries);
+        log.info("Countries for movieId = {}: {}", movieId, movie.getCountry().getName());
 
         return new ReviewOfMovieResponse(
                 movie.getTitle(),
@@ -94,7 +85,7 @@ public class MovieService {
                 movie.getCertification(),
                 movie.getRuntime(),
                 subCategories,
-                countries,
+                movie.getCountry().getName(),
                 movie.getReleasedAt(),
                 reviewResponses,
                 reviewsPage.getTotalElements(),
@@ -142,23 +133,17 @@ public class MovieService {
 
         log.info("Categories for movieId = {}: {}", movieId, subCategories);
 
-        List<String> countries = movieCountryRepository.findByMovieIdWithCountry(movieId).stream()
-                .map(movieCountry -> movieCountry.getCountry().getCountry())
-                .toList();
-        log.info("Countries for movieId = {}: {}", movieId, countries);
-
         return new ReviewOfMovieResponse(
                 movie.getTitle(),
                 movie.getPoster(),
                 movie.getCertification(),
                 movie.getRuntime(),
                 subCategories,
-                countries,
+                movie.getCountry().getName(),
                 movie.getReleasedAt(),
                 reviewResponses,
                 reviewsPage.getTotalElements(),
                 reviewsPage.getTotalPages()
-
         );
     }
 
@@ -191,16 +176,6 @@ public class MovieService {
                 .orElseThrow(() -> new IllegalArgumentException("Movie Images not found"))
                 .getMovieImages();
 
-        // 3. 영화 비디오 가져오기
-        List<MovieVideo> movieVideos = movieRepository.findByIdWithVideos(movieId)
-                .orElseThrow(() -> new IllegalArgumentException("Movie Videos not found"))
-                .getMovieVideos();
-
-        // 4. 영화 국가 가져오기
-        List<MovieCountry> movieCountries = movieRepository.findByIdWithCountries(movieId)
-                .orElseThrow(() -> new IllegalArgumentException("Movie Countries not found"))
-                .getMovieCountries();
-
         // 5. MovieResponse 생성
         return MovieResponse.builder()
                 .id(movie.getId())
@@ -214,14 +189,8 @@ public class MovieService {
                 .images(movieImages.stream()
                         .map(MovieImage::getUrl)
                         .collect(Collectors.toList()))
-                .videos(movieVideos.stream()
-                        .map(video -> MovieVideoResponse.builder()
-                                .url(video.getUrl())
-                                .build())
-                        .collect(Collectors.toList()))
-                .countries(movieCountries.stream()
-                        .map(mc -> mc.getCountry().getCountry())
-                        .collect(Collectors.toList()))
+                .videos(movie.getYoutubeUrl())
+                .country(movie.getCountry().getName())
                 .build();
     }
 }

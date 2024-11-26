@@ -1,19 +1,22 @@
 package com.cookie.admin.service;
 
 import com.cookie.admin.dto.response.AdminMovieCategoryResponse;
-import com.cookie.admin.dto.response.AdminMovieDeleteResponse;
 import com.cookie.admin.dto.response.MovieCategories;
 import com.cookie.admin.exception.MovieNotFoundException;
 import com.cookie.admin.repository.CategoryRepository;
 import com.cookie.domain.category.entity.Category;
 import com.cookie.domain.movie.entity.Movie;
 import com.cookie.domain.movie.entity.MovieCategory;
-import com.cookie.domain.movie.repository.*;
+import com.cookie.domain.movie.repository.MovieActorRepository;
+import com.cookie.domain.movie.repository.MovieCategoryRepository;
+import com.cookie.domain.movie.repository.MovieImageRepository;
+import com.cookie.domain.movie.repository.MovieRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -27,10 +30,7 @@ public class AdminMovieModifyService {
 
     private final MovieActorRepository movieActorRepository;
     private final MovieCategoryRepository movieCategoryRepository;
-    private final MovieCountryRepository movieCountryRepository;
-    private final MovieDirectorRepository movieDirectorRepository;
     private final MovieImageRepository movieImageRepository;
-    private final MovieVideoRepository movieVideoRepository;
 
     @Transactional
     public AdminMovieCategoryResponse updateMovieCategory(Long movieId, List<MovieCategories> categories) {
@@ -83,28 +83,31 @@ public class AdminMovieModifyService {
     }
 
     @Transactional
-    public AdminMovieDeleteResponse deleteMovie(Long movieId) {
+    public List<Long> deleteMovie(List<Long> movieId) {
 
-        movieRepository.findById(movieId)
-                .orElseThrow(() -> new MovieNotFoundException("해당 영화 정보가 존재하지 않습니다."));
+        List<Movie> movies = movieRepository.findAllById(movieId);
+
+        if (movies.isEmpty()) {
+            throw new MovieNotFoundException("영화 id를 다시 한 번 확인해주세요.");
+        }
+
+        List<Long> deleteMovieIds = new ArrayList<>();
 
         try {
-            movieActorRepository.deleteByMovieId(movieId);
-            movieCategoryRepository.deleteByMovieId(movieId);
-            movieCountryRepository.deleteByMovieId(movieId);
-            movieDirectorRepository.deleteByMovieId(movieId);
-            movieImageRepository.deleteByMovieId(movieId);
-            movieVideoRepository.deleteByMovieId(movieId);
-            // 리뷰 (리뷰 좋아요, 리뷰 댓글), 영화 좋아요, 레파지토리 바탕으로 추후에 전부 삭제 기능 개발 필요
+            for (Movie movie : movies) {
 
-            movieRepository.deleteByMovieId(movieId);
+                movieActorRepository.deleteByMovieId(movie.getId());
+                movieCategoryRepository.deleteByMovieId(movie.getId());
+                movieImageRepository.deleteByMovieId(movie.getId());
 
-            return AdminMovieDeleteResponse.builder()
-                    .movieId(movieId)
-                    .message(movieId + " 번 영화가 정상적으로 삭제되었습니다.")
-                    .build();
+                movieRepository.deleteByMovieId(movie.getId());
+
+                deleteMovieIds.add(movie.getId());
+            }
         } catch (Exception e) {
             throw new RuntimeException("영화 삭제 중 문제가 발생했습니다. 영화 ID: " + movieId, e);
         }
+
+        return deleteMovieIds;
     }
 }
