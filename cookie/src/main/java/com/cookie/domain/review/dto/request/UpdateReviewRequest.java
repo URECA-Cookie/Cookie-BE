@@ -9,6 +9,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class UpdateReviewRequest {
     private String content;
-    private double movieScore;
+    private Integer movieScore;
     private Boolean isSpoiler;
 }
