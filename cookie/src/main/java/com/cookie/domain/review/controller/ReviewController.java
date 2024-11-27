@@ -33,7 +33,14 @@ public class ReviewController {
     // 리뷰 피드 실시간 연결
     @GetMapping("/subscribe/feed")
     public SseEmitter subscribe() {
-        return getSseEmitter(reviewEmitters);
+        SseEmitter emitter = getSseEmitter(reviewEmitters);
+        try {
+            emitter.send(SseEmitter.event().name("connected").data("리뷰피드 실시간 연결이 성공적으로 열렸습니다."));
+        } catch (Exception e) {
+            log.error("리뷰피드 연결 오류", e);
+            emitter.completeWithError(e);
+        }
+        return emitter;
     }
 
     // 푸시 알림 실시간 연결
