@@ -33,7 +33,7 @@ public class Review extends BaseTimeEntity {
     @Lob
     private String content;
 
-    private double movieScore;
+    private Integer movieScore;
     private boolean isHide;
     private boolean isSpoiler;
     private long reviewLike;
@@ -45,7 +45,7 @@ public class Review extends BaseTimeEntity {
     private List<ReviewComment> reviewComments = new ArrayList<>();
 
     @Builder
-    public Review(Movie movie, User user, String content, double movieScore, boolean isHide, boolean isSpoiler, long reviewLike) {
+    public Review(Movie movie, User user, String content, Integer movieScore, boolean isHide, boolean isSpoiler, long reviewLike) {
         this.movie = movie;
         this.user = user;
         this.content = content;
@@ -55,10 +55,18 @@ public class Review extends BaseTimeEntity {
         this.reviewLike = reviewLike;
     }
 
-    public void update(String content, double movieScore, boolean isSpoiler) {
+    public void update(String content, Integer movieScore, boolean isSpoiler) {
         this.content = content;
         this.movieScore = movieScore;
         this.isSpoiler = isSpoiler;
+    }
+
+    public void updateIsHide(boolean newHideStatus) {
+        this.isHide = newHideStatus;
+    }
+
+    public void updateIsSpoiler(boolean newSpoilerStatus) {
+        this.isSpoiler = newSpoilerStatus;
     }
 
     public void increaseLikeCount() {

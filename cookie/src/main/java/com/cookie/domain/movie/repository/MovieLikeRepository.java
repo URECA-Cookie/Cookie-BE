@@ -20,4 +20,12 @@ public interface MovieLikeRepository extends JpaRepository<MovieLike, Long> {
     boolean isMovieLikedByUser(@Param("movieId") Long movieId, @Param("userId") Long userId);
 
     Optional<MovieLike> findByMovieAndUser(Movie movie, User user);
+
+    @Query("""
+    SELECT ml
+    FROM MovieLike ml
+    JOIN FETCH ml.user mu
+    WHERE ml.movie.id = :movieId
+    """)
+    List<MovieLike> findAllByMovieId(@Param("movieId") Long movieId);
 }

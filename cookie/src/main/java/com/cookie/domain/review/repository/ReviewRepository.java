@@ -1,10 +1,9 @@
 package com.cookie.domain.review.repository;
 
-import com.cookie.domain.review.dto.response.ReviewResponse;
 import com.cookie.domain.review.entity.Review;
 import com.cookie.domain.movie.entity.Movie;
-import com.cookie.domain.user.entity.User;
 import org.springframework.data.domain.Page;
+import com.cookie.domain.user.entity.User;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -34,6 +33,13 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     @Query("SELECT r FROM Review r JOIN FETCH r.movie WHERE r.user.id = :userId")
     List<Review> findAllByUserIdWithMovie(Long userId);
 
+    @Query("""
+        SELECT r
+        FROM Review r
+        JOIN FETCH r.user u
+        WHERE r.movie.id = :movieId
+    """)
+    List<Review> findReviewsByMovieId(@Param("movieId") Long movieId);
 
     Long countByMovieId(Long movieId);
 }
