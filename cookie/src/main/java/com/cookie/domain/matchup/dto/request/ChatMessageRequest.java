@@ -1,4 +1,4 @@
-package com.cookie.domain.review.dto.request;
+package com.cookie.domain.matchup.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -7,8 +7,6 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class UpdateReviewRequest {
+public class ChatMessageRequest {
     private String content;
-    private Integer movieScore;
-    private Boolean isSpoiler;
 }

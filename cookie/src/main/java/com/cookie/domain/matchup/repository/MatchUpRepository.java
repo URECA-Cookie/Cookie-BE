@@ -26,4 +26,9 @@ public interface MatchUpRepository extends JpaRepository<MatchUp, Long> {
             WHERE m.id = :matchUpId""")
     Optional<MatchUp> findMatchUpWithMoviesAndPoints(@Param("matchUpId") Long matchUpId);
 
+    List<MatchUp> findByStatus(MatchUpStatus status);
+
+    List<MatchUp> findTop2ByStatusOrderByEndAtDesc(MatchUpStatus status);
+
+
 }

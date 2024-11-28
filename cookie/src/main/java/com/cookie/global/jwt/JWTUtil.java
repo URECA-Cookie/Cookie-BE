@@ -47,6 +47,10 @@ public class JWTUtil {
         }
     }
 
+    public Long getId(String token) {
+        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("id", Long.class);
+    }
+
     public String getUsername(String token) {
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("username", String.class);
     }
@@ -55,10 +59,11 @@ public class JWTUtil {
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("role", String.class);
     }
 
-    public String createAccessToken(String username, String role) {
+    public String createAccessToken(Long id, String username, String role) {
         long expiredMs = 1000L * 60 * 15; // 15분
 
         return Jwts.builder()
+                .claim("id", id)
                 .claim("username", username)
                 .claim("role", role)
                 .issuedAt(new Date(System.currentTimeMillis()))
@@ -68,10 +73,11 @@ public class JWTUtil {
     }
 
 
-    public String createRefreshToken(String username, String role) {
+    public String createRefreshToken(Long id, String username, String role) {
         long expiredMs = 1000L * 60 * 60 * 24 * 14; // 14일
 
         return Jwts.builder()
+                .claim("id", id)
                 .claim("username", username)
                 .claim("role", role)
                 .issuedAt(new Date())

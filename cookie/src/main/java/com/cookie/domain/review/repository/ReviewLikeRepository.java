@@ -9,7 +9,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @Repository
@@ -23,4 +22,12 @@ public interface ReviewLikeRepository extends JpaRepository<ReviewLike, Long> {
     ReviewLike findByUserAndReview(@Param("user")User user, @Param("review") Review review);
 
     Optional<ReviewLike> findByReviewAndUser(Review review, User user);
+
+    @Query("""
+        SELECT rl
+        FROM ReviewLike rl
+        JOIN FETCH rl.user u
+        WHERE rl.review.id = :reviewId
+    """)
+    List<ReviewLike> findAllByReviewId(@Param("reviewId") Long reviewId);
 }

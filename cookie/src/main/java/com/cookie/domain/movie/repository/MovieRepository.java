@@ -16,9 +16,8 @@ import java.util.Optional;
 @Repository
 public interface MovieRepository extends JpaRepository<Movie, Long> {
     // 기본 영화 정보
-//    @Query("SELECT m FROM Movie m WHERE m.id = :movieId")
-//    Optional<Movie> findById(Long movieId);
-    // 기본적으로 제공하는건 여기서 쿼리 짤 필요없음
+    @Query("SELECT m FROM Movie m WHERE m.id = :movieId")
+    Optional<Movie> findById(Long movieId);
 
     // 영화 이미지 가져오기
     @Query("SELECT m FROM Movie m LEFT JOIN FETCH m.movieImages WHERE m.id = :movieId")
@@ -46,4 +45,9 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
     void deleteByMovieId(@Param("movieId") Long movieId);
 
     Page<Movie> findByTitleContainingIgnoreCase(String keyword, Pageable pageable);
+
+    @Query("SELECT c.subCategory FROM MovieCategory mc " +
+            "JOIN mc.category c " +
+            "WHERE mc.movie.id = :movieId AND c.mainCategory = '장르'")
+    List<String> findGenresByMovieId(@Param("movieId") Long movieId);
 }
