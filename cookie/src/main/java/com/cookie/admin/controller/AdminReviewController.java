@@ -33,6 +33,12 @@ public class AdminReviewController {
         return ApiUtil.success(data);
     }
 
+    @DeleteMapping("/reviews/detail/{reviewId}")
+    public ApiSuccess<?> deleteReviewAdmin(@PathVariable("reviewId") Long reviewId) {
+        reviewService.deleteReview(reviewId);
+        return ApiUtil.success("SUCCESS");
+    }
+
     @GetMapping("/reviews/detail/{reviewId}/comments")
     public ApiSuccess<?> getMovieReviewsDetailComments(@PathVariable("reviewId") Long reviewId) {
         List<AdminReviewDetailCommentsResponse> data = adminReviewAndLikeService.getMovieReviewsDetailComments(reviewId);

@@ -25,10 +25,10 @@ public class MatchUp extends BaseTimeEntity {
     private MatchUpType type;
     private LocalDateTime startAt;
     private LocalDateTime endAt;
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "movie1_id")
     private MatchUpMovie movie1;
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "movie2_id")
     private MatchUpMovie movie2;
 
@@ -63,6 +63,22 @@ public class MatchUp extends BaseTimeEntity {
             this.movie1.changeWinStatus(false);
             this.movie2.changeWinStatus(false);
         }
+    }
+
+    public void updateTitle(String newTitle) {
+        this.title = newTitle;
+    }
+
+    public void updateType(MatchUpType newType) {
+        this.type = newType;
+    }
+
+    public void updateStartAt(LocalDateTime newStartAt) {
+        this.startAt = newStartAt;
+    }
+
+    public void updateEndAt(LocalDateTime newEndAt) {
+        this.endAt = newEndAt;
     }
 
 }
