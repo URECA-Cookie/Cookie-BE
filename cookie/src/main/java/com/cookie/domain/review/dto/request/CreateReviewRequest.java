@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 public class CreateReviewRequest {
     private long movieId;
     private String content;
-    private double movieScore;
+    private Integer movieScore;
     private boolean isSpoiler;
 
     public Review toEntity(User user, Movie movie) {

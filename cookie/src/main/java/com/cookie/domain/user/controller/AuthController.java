@@ -3,6 +3,8 @@ package com.cookie.domain.user.controller;
 import com.cookie.domain.category.service.CategoryService;
 import com.cookie.domain.user.dto.request.auth.AdminLoginRequest;
 import com.cookie.domain.user.dto.request.auth.AdminRegisterRequest;
+import com.cookie.domain.user.dto.response.auth.CustomOAuth2User;
+import com.cookie.domain.user.dto.response.auth.CustomUserDetails;
 import com.cookie.domain.user.dto.response.auth.TokenResponse;
 import com.cookie.domain.user.entity.User;
 import com.cookie.domain.user.entity.enums.Role;
@@ -19,6 +21,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -80,8 +83,8 @@ public class AuthController {
         userService.registerUser(newUser);
 
         // JWT 토큰 생성
-        String accessToken = jwtUtil.createAccessToken(newUser.getNickname(), newUser.getRole().name());
-        String refreshToken = jwtUtil.createRefreshToken(newUser.getNickname(), newUser.getRole().name());
+        String accessToken = jwtUtil.createAccessToken(newUser.getId(), newUser.getNickname(), newUser.getRole().name());
+        String refreshToken = jwtUtil.createRefreshToken(newUser.getId(), newUser.getNickname(), newUser.getRole().name());
 
         // 토큰이 생성되지 않았을 경우 처리
         if (accessToken == null) {
@@ -157,10 +160,11 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiUtil.error(401, "INVALID_TOKEN"));
         }
 
+        Long id = jwtUtil.getId(refreshToken);
         String username = jwtUtil.getUsername(refreshToken);
         String role = jwtUtil.getRole(refreshToken);
 
-        String newAccessToken = jwtUtil.createAccessToken(username, role);
+        String newAccessToken = jwtUtil.createAccessToken(id, username, role);
         TokenResponse response = TokenResponse.builder().accessToken(newAccessToken).build();
 
         return ResponseEntity.ok()
@@ -201,14 +205,18 @@ public class AuthController {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.getId(), request.getPassword()));
 
+            CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
+
             String accessToken = jwtUtil.createAccessToken(
-                    authentication.getName(),
-                    authentication.getAuthorities().iterator().next().getAuthority()
+                    customUserDetails.getId(),
+                    customUserDetails.getUsername(),
+                    customUserDetails.getAuthorities().iterator().next().getAuthority()
             );
 
             String refreshToken = jwtUtil.createRefreshToken(
-                    authentication.getName(),
-                    authentication.getAuthorities().iterator().next().getAuthority()
+                    customUserDetails.getId(),
+                    customUserDetails.getUsername(),
+                    customUserDetails.getAuthorities().iterator().next().getAuthority()
             );
 
             TokenResponse response = TokenResponse.builder()
@@ -224,4 +232,17 @@ public class AuthController {
         }
     }
 
+    // USER 정보 확인용 (소셜로그인)
+    @GetMapping(value = "/me/user", produces = "application/json")
+    public ResponseEntity<Object> getCurrentUserId(@AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
+        log.info("user info: {} {} {}", customOAuth2User.getId(), customOAuth2User.getNickname(), customOAuth2User.getRole());
+        return ResponseEntity.ok().body("AuthenticationPrincipal ID: " + customOAuth2User.getId());
+    }
+
+    // ADMIN 정보 확인용 (일반로그인)
+    @GetMapping(value = "/me/admin", produces = "application/json")
+    public ResponseEntity<Object> getCurrentAdminId(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        log.info("admin info: {} {} {}", customUserDetails.getId(), customUserDetails.getUsername(), customUserDetails.getAuthorities().iterator().next().getAuthority());
+        return ResponseEntity.ok().body("AuthenticationPrincipal ID: " + customUserDetails.getId());
+    }
 }
