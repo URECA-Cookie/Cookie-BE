@@ -38,6 +38,9 @@ public class User extends BaseTimeEntity {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserBadge> userBadges = new ArrayList<>();
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserCategory> userCategories = new ArrayList<>();
+
     // mainBadge 반환 메서드
     public Badge getMainBadge() {
         return userBadges.stream()
