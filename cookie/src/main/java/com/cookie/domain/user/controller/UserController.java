@@ -41,6 +41,7 @@ public class UserController {
         return ApiUtil.success(likedMovies);
     }
 
+
     @GetMapping("/{userId}/likedReviewList")
     public ApiSuccess<?> getLikedReviewsByUserId(@PathVariable(name="userId") Long userId) {
         List<ReviewResponse> likedReviews = reviewService.getLikedReviewsByUserId(userId);
