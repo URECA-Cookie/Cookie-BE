@@ -1,5 +1,6 @@
 package com.cookie.domain.movie.repository;
 
+import com.cookie.domain.movie.dto.response.MovieResponse;
 import com.cookie.domain.movie.entity.Movie;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

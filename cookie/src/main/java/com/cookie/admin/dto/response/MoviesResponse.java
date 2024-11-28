@@ -11,6 +11,7 @@ public class MoviesResponse {
     private Long movieId;
     private String title;
     private String releaseDate;
+    private String posterPath;
     private String plot;
     private String director;
     private List<String> actors;

@@ -49,4 +49,20 @@ public class MatchUp extends BaseTimeEntity {
         this.status = status;
         this.chatroom = chatroom;
     }
+
+    public void changeStatus(MatchUpStatus newStatus) {
+        this.status = newStatus;
+    }
+
+    public void updateWinner() {
+        if (this.movie1.getVoteCount() > this.movie2.getVoteCount()) {
+            this.movie1.changeWinStatus(true);
+        } else if (this.movie1.getVoteCount() < this.movie2.getVoteCount()) {
+            this.movie2.changeWinStatus(true);
+        } else {
+            this.movie1.changeWinStatus(false);
+            this.movie2.changeWinStatus(false);
+        }
+    }
+
 }

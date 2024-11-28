@@ -2,6 +2,7 @@ package com.cookie.domain.matchup.service;
 
 import com.cookie.domain.matchup.dto.request.MatchUpVoteRequest;
 import com.cookie.domain.matchup.dto.response.*;
+import com.cookie.domain.matchup.dto.response.MainMatchUpsResponse.MainMatchUpResponse;
 import com.cookie.domain.matchup.entity.CharmPoint;
 import com.cookie.domain.matchup.entity.EmotionPoint;
 import com.cookie.domain.matchup.entity.MatchUp;
@@ -224,6 +225,49 @@ public class MatchUpService {
                     matchUpVoteRequest.getEmotionPoint().getTension()
             );
         }
+    }
+
+    @Transactional
+    public void updateMatchUpStatusToNow() {
+        List<MatchUp> pendingMatchUps = matchUpRepository.findByStatus(MatchUpStatus.PENDING);
+        for (MatchUp matchUp : pendingMatchUps) {
+            matchUp.changeStatus(MatchUpStatus.NOW);
+            matchUpRepository.save(matchUp);
+        }
+    }
+
+    @Transactional
+    public void updateMatchUpStatusToExpired() {
+        List<MatchUp> nowMatchUps = matchUpRepository.findByStatus(MatchUpStatus.NOW);
+        for (MatchUp matchUp : nowMatchUps) {
+            matchUp.updateWinner(); // 우승자 갱신
+            matchUp.changeStatus(MatchUpStatus.EXPIRATION);
+            matchUpRepository.save(matchUp);
+        }
+    }
+
+    public MainMatchUpsResponse getMainMatchUps() {
+        List<MatchUp> nowMatchUps = matchUpRepository.findByStatus(MatchUpStatus.NOW);
+
+        if (!nowMatchUps.isEmpty()) {
+            List<MainMatchUpResponse> matchUps = nowMatchUps.stream()
+                    .map(MainMatchUpResponse::fromEntity)
+                    .toList();
+
+            return new MainMatchUpsResponse(matchUps, true);
+        }
+
+        List<MatchUp> mostRecentExpiredMatchUps = matchUpRepository.findTop2ByStatusOrderByEndAtDesc(MatchUpStatus.EXPIRATION);
+
+        if (!mostRecentExpiredMatchUps.isEmpty()) {
+            List<MainMatchUpResponse> matchUps = mostRecentExpiredMatchUps.stream()
+                    .map(MainMatchUpResponse::fromEntity)
+                    .toList();
+
+            return new MainMatchUpsResponse(matchUps, false);
+        }
+
+        return null;
     }
 
 }

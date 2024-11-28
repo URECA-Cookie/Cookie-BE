@@ -30,6 +30,9 @@ public class MatchUpMovie {
     public void incrementVoteCount() {
         this.voteCount++;
     }
+    public void changeWinStatus(boolean winStatus) {
+        this.win = winStatus;
+    }
 
     @Builder
     public MatchUpMovie(String movieTitle, String moviePoster, long voteCount, boolean win, CharmPoint charmPoint, EmotionPoint emotionPoint) {
@@ -40,4 +43,5 @@ public class MatchUpMovie {
         this.charmPoint = charmPoint;
         this.emotionPoint = emotionPoint;
     }
+
 }

@@ -7,6 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class OAuth2UserResponse {
+    private Long id;
     private SocialProvider socialProvider;
     private String email;
     private String socialId;

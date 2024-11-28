@@ -32,6 +32,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         CustomOAuth2User customUserDetails = (CustomOAuth2User) authentication.getPrincipal();
 
+        Long id = customUserDetails.getId();
         String nickname = customUserDetails.getNickname();
         boolean isRegistrationRequired = customUserDetails.isRegistrationRequired();
 
@@ -56,8 +57,8 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         } else {
             log.info("기존 사용자 로그인");
 
-            String accessToken = jwtUtil.createAccessToken(nickname, role);
-            String refreshToken = jwtUtil.createRefreshToken(nickname, role);
+            String accessToken = jwtUtil.createAccessToken(id, nickname, role);
+            String refreshToken = jwtUtil.createRefreshToken(id, nickname, role);
 
             response.addCookie(createCookie("Authorization", accessToken));
             response.addCookie(createCookie("RefreshToken", refreshToken));

@@ -23,10 +23,10 @@ import com.cookie.domain.user.dto.response.CommentUserResponse;
 import com.cookie.domain.user.dto.response.ReviewUserResponse;
 import com.cookie.domain.user.entity.User;
 import com.cookie.domain.user.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -34,6 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 @Slf4j
@@ -179,7 +180,6 @@ public class ReviewService {
         );
     }
 
-
     @Transactional
     public void deleteReview(Long reviewId) {
         Review review = reviewRepository.findById(reviewId)
@@ -313,6 +313,32 @@ public class ReviewService {
 //                })
 //                .toList();
 //    }
+
+    @Transactional
+    public boolean toggleReviewLike(Long reviewId, Long userId) {
+        // Fetch user and review entities
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
+
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new EntityNotFoundException("Review not found with id: " + reviewId));
+
+        // Find existing like by review and user
+        Optional<ReviewLike> existingLike = reviewLikeRepository.findByReviewAndUser(review, user);
+
+        if (existingLike.isPresent()) {
+            // If like exists, remove it
+            reviewLikeRepository.delete(existingLike.get());
+            return false; // Indicates the like was removed
+        } else {
+            // If no like exists, add a new like
+            reviewLikeRepository.save(ReviewLike.builder()
+                    .user(user)
+                    .review(review)
+                    .build());
+            return true; // Indicates the like was added
+        }
+    }
 
 }
 

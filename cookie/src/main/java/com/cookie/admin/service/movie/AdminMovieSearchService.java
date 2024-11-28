@@ -1,4 +1,4 @@
-package com.cookie.admin.service;
+package com.cookie.admin.service.movie;
 
 import com.cookie.admin.dto.response.AdminMoviesResponse;
 import com.cookie.admin.dto.response.MoviesResponse;
@@ -74,6 +74,7 @@ public class AdminMovieSearchService {
                             .movieId(movie.getId())
                             .title(movie.getTitle())
                             .releaseDate(movie.getReleasedAt())
+                            .posterPath(movie.getPoster())
                             .plot(movie.getPlot())
                             .actors(actorsName)
                             .director(movie.getDirector().getName())

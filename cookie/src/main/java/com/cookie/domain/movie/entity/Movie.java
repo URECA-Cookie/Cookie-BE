@@ -30,6 +30,7 @@ public class Movie {
     private Integer runtime;
     private double score;
     private String certification;
+    private Long movieLikes;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "director_id")
