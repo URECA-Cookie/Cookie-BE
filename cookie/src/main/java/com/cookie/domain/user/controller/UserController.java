@@ -41,12 +41,11 @@ public class UserController {
         return ApiUtil.success(likedMovies);
     }
 
-
-    @GetMapping("/{userId}/likedReviewList")
-    public ApiSuccess<?> getLikedReviewsByUserId(@PathVariable(name="userId") Long userId) {
-        List<ReviewResponse> likedReviews = reviewService.getLikedReviewsByUserId(userId);
-        return ApiUtil.success(likedReviews);
-    }
+//    @GetMapping("/{userId}/likedReviewList")
+//    public ApiSuccess<?> getLikedReviewsByUserId(@PathVariable(name="userId") Long userId) {
+//        List<ReviewResponse> likedReviews = reviewService.getLikedReviewsByUserId(userId);
+//        return ApiUtil.success(likedReviews);
+//    }
 
     @GetMapping("/{userId}/profileData")
     public ApiSuccess<?> getUserProfile(@PathVariable(name="userId") Long userId) {
