@@ -18,6 +18,7 @@ public class CustomOAuth2User implements OAuth2User {
     @Override
     public Map<String, Object> getAttributes() {
         Map<String, Object> attributes = new HashMap<>();
+        attributes.put("id", getId());
         attributes.put("nickname", getNickname());
         attributes.put("email", getEmail());
         attributes.put("socialId", getSocialId());
@@ -63,5 +64,13 @@ public class CustomOAuth2User implements OAuth2User {
 
     public boolean isRegistrationRequired() {
         return oAuth2UserResponse.isRegistrationRequired();
+    }
+
+    public String getRole() {
+        return oAuth2UserResponse.getRole();
+    }
+
+    public Long getId() {
+        return oAuth2UserResponse.getId();
     }
 }

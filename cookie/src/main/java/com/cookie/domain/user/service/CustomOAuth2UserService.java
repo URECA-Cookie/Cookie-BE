@@ -6,7 +6,6 @@ import com.cookie.domain.user.entity.enums.SocialProvider;
 import com.cookie.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -59,7 +58,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             user.setRegistrationRequired(true);
 
         } else {
-            log.info("기존 사용자 로그인 성공: Nickname={}, Role={}", existData.getNickname(), existData.getRole());
+            log.info("기존 사용자 로그인 성공: Id={}, Nickname={}, Role={}", existData.getId(), existData.getNickname(), existData.getRole());
+            user.setId(existData.getId());
             user.setSocialProvider(existData.getSocialProvider());
             user.setEmail(existData.getEmail());
             user.setSocialId(existData.getSocialId());
