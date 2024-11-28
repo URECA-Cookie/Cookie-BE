@@ -34,12 +34,12 @@ public class AdminMovieController {
 
     @GetMapping("/movie/tmdb/choice/{movieId}")
     public ApiSuccess<?> getMovieInfoById(@PathVariable("movieId") Long movieId) {
-        AdminMovieDetailResponse data = TMDBService.getMovieInfoById(movieId);
+        AdminMovieTMDBDetailResponse data = TMDBService.getMovieInfoById(movieId);
         return ApiUtil.success(data);
     }
 
     @PostMapping("/movie")
-    public ApiSuccess<?> createMovie(@RequestBody AdminMovieDetailResponse movie) {
+    public ApiSuccess<?> createMovie(@RequestBody AdminMovieTMDBDetailResponse movie) {
         adminMovieCreateService.createMovie(movie);
         return ApiUtil.success("SUCCESS");
     }
@@ -50,9 +50,15 @@ public class AdminMovieController {
         return ApiUtil.success(data);
     }
 
+    @GetMapping("/movie/{movieId}/detail")
+    public ApiSuccess<?> getMovieDetail(@PathVariable("movieId") Long movieId) {
+        AdminMovieDetailResponse data = adminMovieReadService.getMovieDetail(movieId);
+        return ApiUtil.success(data);
+    }
+
     @PutMapping("/movie/{movieId}")
     public ApiSuccess<?> updateMovieCategory(@PathVariable("movieId") Long movieId,
-                                                     @RequestBody List<MovieCategories> categories) {
+                                             @RequestBody List<MovieCategories> categories) {
         AdminMovieCategoryResponse data = adminMovieModifyService.updateMovieCategory(movieId, categories);
         return ApiUtil.success(data);
     }

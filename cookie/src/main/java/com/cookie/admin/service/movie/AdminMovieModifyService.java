@@ -107,7 +107,7 @@ public class AdminMovieModifyService {
             movieImageRepository.deleteByMovieId(movie.getId());
 
             movieRepository.deleteByMovieId(movie.getId());
-
+            // 추가 삭제 로직 기능 구현 필요
             deleteMovieIds.add(movie.getId());
         }
 
