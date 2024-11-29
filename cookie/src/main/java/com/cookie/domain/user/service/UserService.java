@@ -1,12 +1,14 @@
 package com.cookie.domain.user.service;
 
+import com.cookie.admin.repository.CategoryRepository;
 import com.cookie.domain.badge.dto.MyBadgeResponse;
+import com.cookie.domain.badge.repository.BadgeRepository;
+import com.cookie.domain.category.entity.Category;
 import com.cookie.domain.movie.entity.Movie;
 import com.cookie.domain.movie.entity.MovieLike;
 import com.cookie.domain.movie.repository.MovieLikeRepository;
 import com.cookie.domain.movie.repository.MovieRepository;
 import com.cookie.domain.review.dto.response.ReviewResponse;
-import com.cookie.domain.user.dto.request.MyProfileRequest;
 import com.cookie.domain.user.dto.response.*;
 import com.cookie.domain.review.entity.Review;
 import com.cookie.domain.user.entity.BadgeAccumulationPoint;
@@ -20,15 +22,19 @@ import com.cookie.domain.user.repository.GenreScoreRepository;
 import com.cookie.domain.review.repository.ReviewRepository;
 import com.cookie.domain.user.repository.UserBadgeRepository;
 import com.cookie.domain.user.repository.UserRepository;
+import com.cookie.global.service.AWSS3Service;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -42,7 +48,9 @@ public class UserService {
     private final MovieRepository movieRepository;
     private final MovieLikeRepository movieLikeRepository;
     private final DailyGenreScoreService dailyGenreScoreService;
-
+    private final AWSS3Service awss3Service;
+    private final BadgeRepository badgeRepository;
+    private final CategoryRepository categoryRepository;
 
     public MyPageResponse getMyPage(Long userId) {
         // 1. 유저의 닉네임 및 프로필 이미지 조회
@@ -155,30 +163,63 @@ public class UserService {
                 .build();
     }
 
-    public void updateMyProfile(Long userId, MyProfileRequest request) {
-        // 1. 유저 조회
+    @Transactional
+    public void updateMyProfile(Long userId, MultipartFile profileImage, String nickname, String mainBadgeIdStr, String genreIdStr) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + userId));
+                .orElseThrow(() -> new IllegalArgumentException("not found user: " + userId));
 
-        // 2. 프로필 이미지와 닉네임 업데이트
-        user.setProfileImage(request.getProfileImage());
-        user.setNickname(request.getNickname());
-
-        // 3. 유저의 모든 뱃지 조회
-        List<UserBadge> userBadges = userBadgeRepository.findAllByUserId(userId);
-
-        // 4. mainBadge 처리
-        userBadges.forEach(userBadge -> {
-            if (userBadge.getBadge().getName().equals(request.getMainBadge())) {
-                userBadge.setMain(true); // mainBadge로 설정
-            } else if (userBadge.isMain()) {
-                userBadge.setMain(false); // 기존 mainBadge 해제
+        Long mainBadgeId = null;
+        if (mainBadgeIdStr != null && !mainBadgeIdStr.isEmpty()) { // 메인 뱃지가 없을 경우 (유저가 획득한 뱃지가 존재하지 않을 경우)
+            try {
+                mainBadgeId = Long.parseLong(mainBadgeIdStr);
+                badgeRepository.findById(mainBadgeId)
+                        .orElseThrow(() -> new IllegalArgumentException("not found badge: " + mainBadgeIdStr));
+            } catch (NumberFormatException e) {
+                throw new IllegalArgumentException("Invalid badge ID: " + mainBadgeIdStr);
             }
-        });
+        }
 
-        // 5. 유저 정보와 뱃지 업데이트
+        if (!user.getNickname().equals(nickname) && userRepository.existsByNickname(nickname)) {
+            throw new IllegalArgumentException(nickname + "은(는) 이미 존재하는 닉네임입니다.");
+        }
+
+        if (nickname == null || nickname.trim().isEmpty()) {
+            throw new IllegalArgumentException("닉네임을 입력해 주세요.");
+        }
+
+        String profileImageUrl = user.getProfileImage();
+        if (profileImage != null && !profileImage.isEmpty()) { // profile null 이 아닐 경우
+            profileImageUrl = awss3Service.uploadImage(profileImage);
+        }
+
+        List<UserBadge> userBadges = userBadgeRepository.findAllByUserId(userId);
+        log.info("user badge list: {}", userBadges == null ? 0 : userBadges.size());
+
+        if (userBadges != null && !userBadges.isEmpty()) {
+            Long finalMainBadgeId = mainBadgeId;
+            userBadges.forEach(userBadge -> {
+                if (userBadge.getBadge().getId().equals(finalMainBadgeId)) {
+                    userBadge.updateMainBadge(true); // mainBadge로 설정
+                } else if (userBadge.isMain()) {
+                    userBadge.updateMainBadge(false); // 기존 mainBadge 해제
+                }
+            });
+        }
+        log.info("Updated user main badge: {}", user.getMainBadge() != null ? user.getMainBadge().getName() : "No main badge");
+
+        // 장르 선택
+        Long genreId = Long.parseLong(genreIdStr);
+        Category genre = categoryRepository.findById(genreId)
+                .orElseThrow(() -> new IllegalArgumentException("not found genre: " + genreId));
+
+        user.updateProfile(profileImageUrl, nickname.trim(), genre);
         userRepository.save(user);
-        userBadgeRepository.saveAll(userBadges);
+
+        if (userBadges != null && !userBadges.isEmpty()) {
+            userBadgeRepository.saveAll(userBadges);
+        }
+
+        log.info("Updated user info");
     }
 
     public BadgeAccResponse getBadgeAccumulationPoint(Long userId) {

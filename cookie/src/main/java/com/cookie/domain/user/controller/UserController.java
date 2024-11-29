@@ -7,7 +7,6 @@ import com.cookie.domain.movie.service.MovieService;
 import com.cookie.domain.review.dto.response.ReviewPagenationResponse;
 import com.cookie.domain.review.dto.response.ReviewResponse;
 import com.cookie.domain.review.service.ReviewService;
-import com.cookie.domain.user.dto.request.MyProfileRequest;
 import com.cookie.domain.user.dto.response.BadgeAccResponse;
 import com.cookie.domain.user.dto.response.MyPageResponse;
 import com.cookie.domain.user.dto.response.MyProfileDataResponse;
@@ -19,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -72,9 +72,13 @@ public class UserController {
     }
 
     @PostMapping
-    public ApiSuccess<?> updateMyProfile(@AuthenticationPrincipal CustomOAuth2User customOAuth2User, @RequestBody MyProfileRequest request) {
+    public ApiSuccess<?> updateMyProfile(@AuthenticationPrincipal CustomOAuth2User customOAuth2User,
+                                         @RequestPart(value = "profileImage", required = false) MultipartFile profileImage,
+                                         @RequestPart(value = "nickname") String nickname,
+                                         @RequestPart(value = "mainBadgeId", required = false) String mainBadgeId,
+                                         @RequestPart(value = "genreId") String genreIdStr) {
         Long userId = customOAuth2User.getId();
-        userService.updateMyProfile(userId, request);
+        userService.updateMyProfile(userId, profileImage, nickname, mainBadgeId, genreIdStr);
         return ApiUtil.success("SUCCESS");
     }
 
