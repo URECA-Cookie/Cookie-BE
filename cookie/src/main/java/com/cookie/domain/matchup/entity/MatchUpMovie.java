@@ -19,11 +19,11 @@ public class MatchUpMovie {
     private long voteCount;
     private boolean win;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "charm_point_id")
     private CharmPoint charmPoint;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = " emotion_point_id")
     private EmotionPoint emotionPoint;
 
@@ -44,4 +44,8 @@ public class MatchUpMovie {
         this.emotionPoint = emotionPoint;
     }
 
+    public void updateMatchMovie(String newMovieTitle, String newMoviePoster) {
+        this.movieTitle = newMovieTitle;
+        this.moviePoster = newMoviePoster;
+    }
 }

@@ -1,6 +1,7 @@
 package com.cookie.admin.service.movie;
 
-import com.cookie.admin.dto.response.AdminMovieDetailResponse;
+import com.cookie.admin.dto.response.AdminMatchUpSearchResponse;
+import com.cookie.admin.dto.response.AdminMovieTMDBDetailResponse;
 import com.cookie.admin.dto.response.AdminSearchResponse;
 import com.cookie.admin.dto.response.tmdb.*;
 import lombok.RequiredArgsConstructor;
@@ -33,21 +34,8 @@ public class TMDBService {
 
     @Transactional(readOnly = true)
     public List<AdminSearchResponse> getMoviesByName(String movieName) {
-        String searchUlr = createSearchUrl(movieName);
 
-        TMDBMovieSearchResponse TMDBDates = webClient.get()
-                .uri(searchUlr)
-                .header("accept", "application/json")
-                .retrieve()
-                .onStatus(HttpStatusCode::is4xxClientError, clientResponse ->
-                        Mono.error(new RuntimeException("잘못된 TMDB API 요청입니다. 요청 URL 또는 매개변수를 확인하세요."))
-                )
-                .onStatus(HttpStatusCode::is5xxServerError, clientResponse ->
-                        Mono.error(new RuntimeException("TMDB 요청 중 서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요."))
-                )
-                .bodyToMono(TMDBMovieSearchResponse.class)
-                .retryWhen(Retry.backoff(2, Duration.ofSeconds(1)))
-                .block();
+        TMDBMovieSearchResponse TMDBDates = getTMDBMovieByName(movieName);
 
         if (TMDBDates == null || TMDBDates.getResults().isEmpty()) {
             return Collections.emptyList();
@@ -64,7 +52,25 @@ public class TMDBService {
     }
 
     @Transactional(readOnly = true)
-    public AdminMovieDetailResponse getMovieInfoById(Long movieId) {
+    public List<AdminMatchUpSearchResponse> getMoviesByNameForMatchUp(String movieName) {
+
+        TMDBMovieSearchResponse TMDBDates = getTMDBMovieByName(movieName);
+
+        if (TMDBDates == null || TMDBDates.getResults().isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        return TMDBDates.getResults().stream()
+                .sorted(Comparator.comparing(TMDBMovieResponse::getVoteCount).reversed())
+                .map(data -> AdminMatchUpSearchResponse.builder()
+                        .title(data.getTitle())
+                        .posterPath(imageUrl + data.getPosterPath())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public AdminMovieTMDBDetailResponse getMovieInfoById(Long movieId) {
         String movieInfoUrl = createMovieDetailUrl(movieId);
         String creditsUrl = createMovieAboutUrl(movieId, "credits");
         String imagesUrl = createMovieImagesUrl(movieId);
@@ -98,7 +104,7 @@ public class TMDBService {
         Optional<String> video = videoFuture.join();
         String certification = certificationFuture.join();
 
-        return AdminMovieDetailResponse.builder()
+        return AdminMovieTMDBDetailResponse.builder()
                 .movieId(movieId)
                 .title(detail.getTitle())
                 .director(director.orElseGet(() -> TMDBCasts.builder().name("N/A").profilePath("N/A").build()))
@@ -113,6 +119,23 @@ public class TMDBService {
                 .actors(actors)
                 .categories(detail.getGenres().stream().map(TMDBGenre::getName).collect(Collectors.toList()))
                 .build();
+    }
+
+    private TMDBMovieSearchResponse getTMDBMovieByName(String movieName) {
+        String searchUrl = createSearchUrl(movieName);
+        return webClient.get()
+                .uri(searchUrl)
+                .header("accept", "application/json")
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, clientResponse ->
+                        Mono.error(new RuntimeException("잘못된 TMDB API 요청입니다. 요청 URL 또는 매개변수를 확인하세요."))
+                )
+                .onStatus(HttpStatusCode::is5xxServerError, clientResponse ->
+                        Mono.error(new RuntimeException("TMDB 요청 중 서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요."))
+                )
+                .bodyToMono(TMDBMovieSearchResponse.class)
+                .retryWhen(Retry.backoff(2, Duration.ofSeconds(1)))
+                .block();
     }
 
     private TMDBMovieDetailResponse getMovieDetail(String url) {

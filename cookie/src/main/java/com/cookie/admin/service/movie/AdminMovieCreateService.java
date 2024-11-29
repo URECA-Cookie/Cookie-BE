@@ -1,7 +1,7 @@
 package com.cookie.admin.service.movie;
 
 import com.cookie.admin.dto.response.AdminMovieBaseAddResponse;
-import com.cookie.admin.dto.response.AdminMovieDetailResponse;
+import com.cookie.admin.dto.response.AdminMovieTMDBDetailResponse;
 import com.cookie.admin.dto.response.tmdb.TMDBCasts;
 import com.cookie.admin.dto.response.tmdb.TMDBMovieSearchResponse;
 import com.cookie.admin.exception.MovieAlreadyExistsException;
@@ -87,7 +87,7 @@ public class AdminMovieCreateService {
                 List<Movie> movies = response.getResults().stream()
                         .map(movie -> {
                             try {
-                                AdminMovieDetailResponse movieDetail = TMDBService.getMovieInfoById(movie.getId());
+                                AdminMovieTMDBDetailResponse movieDetail = TMDBService.getMovieInfoById(movie.getId());
                                 return createMovie(movieDetail);
                             } catch (MovieAlreadyExistsException e) {
                                 System.out.println("이미 등록된 영화입니다: " + movie.getId());
@@ -121,7 +121,7 @@ public class AdminMovieCreateService {
 
 
     @Transactional
-    public Movie createMovie(AdminMovieDetailResponse movie) {
+    public Movie createMovie(AdminMovieTMDBDetailResponse movie) {
 
         Optional<Movie> findMovie = movieRepository.findMovieByTMDBMovieId(movie.getMovieId());
 
@@ -148,7 +148,7 @@ public class AdminMovieCreateService {
         return movieData;
     }
 
-    private Movie createMovieData(AdminMovieDetailResponse movie, Director director, Country country) {
+    private Movie createMovieData(AdminMovieTMDBDetailResponse movie, Director director, Country country) {
 
         return Movie.builder()
                 .director(director)
@@ -164,7 +164,7 @@ public class AdminMovieCreateService {
                 .build();
     }
 
-    private List<Actor> createActors(AdminMovieDetailResponse movie) {
+    private List<Actor> createActors(AdminMovieTMDBDetailResponse movie) {
         List<Long> actorIds = movie.getActors().stream().map(TMDBCasts::getTmdbCasterId).toList();
         List<Actor> existingActors = actorRepository.findAllByTmdbCasterIdIn(actorIds);
 
@@ -195,7 +195,7 @@ public class AdminMovieCreateService {
                 .toList();
     }
 
-    private Director createDirector(AdminMovieDetailResponse movie) {
+    private Director createDirector(AdminMovieTMDBDetailResponse movie) {
 
         return directorRepository.findByTMDBCasterId(movie.getDirector().getTmdbCasterId())
                 .orElseGet(() -> {
@@ -208,7 +208,7 @@ public class AdminMovieCreateService {
                 });
     }
 
-    private List<MovieImage> createMovieImages(AdminMovieDetailResponse movie, Movie movieData) {
+    private List<MovieImage> createMovieImages(AdminMovieTMDBDetailResponse movie, Movie movieData) {
 
         return movie.getStillCuts().stream()
                 .map(url -> MovieImage.builder()
@@ -218,14 +218,14 @@ public class AdminMovieCreateService {
                 .collect(Collectors.toList());
     }
 
-    private Country createCountry(AdminMovieDetailResponse movie) {
+    private Country createCountry(AdminMovieTMDBDetailResponse movie) {
 
         return countryRepository.findByCountry(movie.getCountry())
                 .orElseGet(() -> countryRepository.findByCountry("N/A")
                         .orElseThrow(() -> new EntityNotFoundException("해당 영화 국가를 찾지 못했습니다")));
     }
 
-    private List<Category> createCategories(AdminMovieDetailResponse movie) {
+    private List<Category> createCategories(AdminMovieTMDBDetailResponse movie) {
         List<String> categoryNames = movie.getCategories();
         List<Category> categories = categoryRepository.findAllByNameIn(categoryNames);
 

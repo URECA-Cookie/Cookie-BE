@@ -47,7 +47,6 @@ public class UserController {
         return ApiUtil.success(response);
     }
 
-
     @GetMapping("/{userId}/likedReviewList")
     public ApiSuccess<?> getLikedReviewsByUserId(
             @PathVariable(name = "userId") Long userId,
@@ -57,7 +56,6 @@ public class UserController {
         ReviewPagenationResponse response = reviewService.getLikedReviewsByUserId(userId, page, size);
         return ApiUtil.success(response);
     }
-
 
     @GetMapping("/{userId}/profileData")
     public ApiSuccess<?> getUserProfile(@PathVariable(name="userId") Long userId) {
