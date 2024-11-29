@@ -52,6 +52,7 @@ public class UserService {
     private final BadgeRepository badgeRepository;
     private final CategoryRepository categoryRepository;
 
+    @Transactional(readOnly = true)
     public MyPageResponse getMyPage(Long userId) {
         // 1. 유저의 닉네임 및 프로필 이미지 조회
         User user = userRepository.findById(userId)
@@ -83,6 +84,7 @@ public class UserService {
     /**
      * 유저가 보유한 뱃지 조회
      */
+    @Transactional(readOnly = true)
     public List<MyBadgeResponse> getAllBadgesByUserId(Long userId) {
         List<UserBadge> userBadges = userBadgeRepository.findAllByUserId(userId);
 
@@ -98,6 +100,7 @@ public class UserService {
     /**
      * 유저의 장르 점수 조회
      */
+    @Transactional(readOnly = true)
     public List<GenreScoreResponse> getGenreScoresByUserId(Long userId) {
         List<GenreScore> genreScores = genreScoreRepository.findAllByUserId(userId);
 
@@ -130,6 +133,7 @@ public class UserService {
     /**
      * 유저의 리뷰 조회
      */
+    @Transactional(readOnly = true)
     public List<ReviewResponse> getReviewsByUserId(Long userId) {
         List<Review> reviews = reviewRepository.findAllByUserIdWithMovie(userId);
 
