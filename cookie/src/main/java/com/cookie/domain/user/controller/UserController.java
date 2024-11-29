@@ -11,14 +11,18 @@ import com.cookie.domain.user.dto.request.MyProfileRequest;
 import com.cookie.domain.user.dto.response.BadgeAccResponse;
 import com.cookie.domain.user.dto.response.MyPageResponse;
 import com.cookie.domain.user.dto.response.MyProfileDataResponse;
+import com.cookie.domain.user.dto.response.auth.CustomOAuth2User;
 import com.cookie.domain.user.service.UserService;
 import com.cookie.global.util.ApiUtil;
 import com.cookie.global.util.ApiUtil.ApiSuccess;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
@@ -29,54 +33,61 @@ public class UserController {
     private final ReviewService reviewService;
 
 
-    @GetMapping("/{userId}")
-    public ApiSuccess<?> getMyPage(@PathVariable(name="userId") Long userId) {
-        // 서비스 호출을 통해 MyPage 데이터를 가져옴
+    @GetMapping()
+    public ApiSuccess<?> getMyPage(@AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
+        Long userId = customOAuth2User.getId();
+        log.info("userId: {}", userId);
         MyPageResponse myPageDto = userService.getMyPage(userId);
         return ApiUtil.success(myPageDto);
 
     }
 
-    @GetMapping("/{userId}/likedMovieList")
+    @GetMapping("/likedMovieList")
     public ApiSuccess<?> getLikedMoviesByUserId(
-            @PathVariable(name = "userId") Long userId,
+            @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
             @RequestParam(name="page", defaultValue = "0") int page, // 요청 페이지 번호 (기본값: 0)
             @RequestParam(name="size", defaultValue = "10") int size // 페이지 크기 (기본값 10)
     ) {
+        Long userId = customOAuth2User.getId();
         MoviePagenationResponse response = movieService.getLikedMoviesByUserId(userId, page, size);
         return ApiUtil.success(response);
     }
 
-    @GetMapping("/{userId}/likedReviewList")
+    @GetMapping("/likedReviewList")
     public ApiSuccess<?> getLikedReviewsByUserId(
-            @PathVariable(name = "userId") Long userId,
+            @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
             @RequestParam(name="page", defaultValue = "0") int page, // 요청 페이지 번호 (기본값: 0)
             @RequestParam(name="size", defaultValue = "10") int size // 페이지 크기 (기본값: 10)
     ) {
+        Long userId = customOAuth2User.getId();
         ReviewPagenationResponse response = reviewService.getLikedReviewsByUserId(userId, page, size);
         return ApiUtil.success(response);
     }
 
-    @GetMapping("/{userId}/profileData")
-    public ApiSuccess<?> getUserProfile(@PathVariable(name="userId") Long userId) {
+    @GetMapping("/profileData")
+    public ApiSuccess<?> getUserProfile(@AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
+        Long userId = customOAuth2User.getId();
         MyProfileDataResponse profileData = userService.getMyProfile(userId);
         return ApiUtil.success(profileData);
     }
 
-    @PostMapping("/{userId}")
-    public ApiSuccess<?> updateMyProfile(@PathVariable(name="userId") Long userId, @RequestBody MyProfileRequest request) {
+    @PostMapping
+    public ApiSuccess<?> updateMyProfile(@AuthenticationPrincipal CustomOAuth2User customOAuth2User, @RequestBody MyProfileRequest request) {
+        Long userId = customOAuth2User.getId();
         userService.updateMyProfile(userId, request);
         return ApiUtil.success("SUCCESS");
     }
 
-    @GetMapping("/{userId}/badgePoint")
-    public ApiSuccess<?> getBadgePointsByUserId(@PathVariable(name="userId") Long userId) {
+    @GetMapping("/badgePoint")
+    public ApiSuccess<?> getBadgePointsByUserId(@AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
+        Long userId = customOAuth2User.getId();
         BadgeAccResponse badgeAccResponse = userService.getBadgeAccumulationPoint(userId);
         return ApiUtil.success(badgeAccResponse);
     }
 
-    @GetMapping("/{userId}/myReviews")
-    public ApiSuccess<?> getMyReviewsByUserId(@PathVariable(name="userId") Long userId) {
+    @GetMapping("/myReviews")
+    public ApiSuccess<?> getMyReviewsByUserId(@AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
+        Long userId = customOAuth2User.getId();
         List<ReviewResponse> reviews = userService.getReviewsByUserId(userId);
         return ApiUtil.success(reviews);
     }
