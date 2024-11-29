@@ -1,8 +1,10 @@
 package com.cookie.domain.user.controller;
 
+import com.cookie.domain.movie.dto.response.MoviePagenationResponse;
 import com.cookie.domain.movie.dto.response.MovieResponse;
 import com.cookie.domain.movie.dto.response.MovieSimpleResponse;
 import com.cookie.domain.movie.service.MovieService;
+import com.cookie.domain.review.dto.response.ReviewPagenationResponse;
 import com.cookie.domain.review.dto.response.ReviewResponse;
 import com.cookie.domain.review.service.ReviewService;
 import com.cookie.domain.user.dto.request.MyProfileRequest;
@@ -36,16 +38,24 @@ public class UserController {
     }
 
     @GetMapping("/{userId}/likedMovieList")
-    public ApiSuccess<?> getLikedMoviesByUserId(@PathVariable(name="userId") Long userId) {
-        List<MovieSimpleResponse> likedMovies = movieService.getLikedMoviesByUserId(userId);
-        return ApiUtil.success(likedMovies);
+    public ApiSuccess<?> getLikedMoviesByUserId(
+            @PathVariable(name = "userId") Long userId,
+            @RequestParam(name="page", defaultValue = "0") int page, // 요청 페이지 번호 (기본값: 0)
+            @RequestParam(name="size", defaultValue = "10") int size // 페이지 크기 (기본값 10)
+    ) {
+        MoviePagenationResponse response = movieService.getLikedMoviesByUserId(userId, page, size);
+        return ApiUtil.success(response);
     }
 
-//    @GetMapping("/{userId}/likedReviewList")
-//    public ApiSuccess<?> getLikedReviewsByUserId(@PathVariable(name="userId") Long userId) {
-//        List<ReviewResponse> likedReviews = reviewService.getLikedReviewsByUserId(userId);
-//        return ApiUtil.success(likedReviews);
-//    }
+    @GetMapping("/{userId}/likedReviewList")
+    public ApiSuccess<?> getLikedReviewsByUserId(
+            @PathVariable(name = "userId") Long userId,
+            @RequestParam(name="page", defaultValue = "0") int page, // 요청 페이지 번호 (기본값: 0)
+            @RequestParam(name="size", defaultValue = "10") int size // 페이지 크기 (기본값: 10)
+    ) {
+        ReviewPagenationResponse response = reviewService.getLikedReviewsByUserId(userId, page, size);
+        return ApiUtil.success(response);
+    }
 
     @GetMapping("/{userId}/profileData")
     public ApiSuccess<?> getUserProfile(@PathVariable(name="userId") Long userId) {

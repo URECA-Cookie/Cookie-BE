@@ -16,7 +16,7 @@ public class BadgeAccumulationPoint {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     private long romancePoint;
@@ -29,12 +29,22 @@ public class BadgeAccumulationPoint {
     private long sfPoint;
     private long musicPoint;
     private long thrillerPoint;
-    private long queerPoint;
     private long warPoint;
     private long documentaryPoint;
+    private long dramaPoint;
+    private long familyPoint;
+    private long historyPoint;
+    private long misteryPoint;
+    private long tvMoviePoint;
+    private long westernPoint;
+    private long adventurePoint;
 
     @Builder
-    public BadgeAccumulationPoint(User user, long romancePoint, long horrorPoint, long comedyPoint, long actionPoint, long fantasyPoint, long animationPoint, long crimePoint, long sfPoint, long musicPoint, long thrillerPoint, long queerPoint, long warPoint, long documentaryPoint) {
+    public BadgeAccumulationPoint(User user, long romancePoint, long horrorPoint, long comedyPoint, long actionPoint,
+                                  long fantasyPoint, long animationPoint, long crimePoint, long sfPoint,
+                                  long musicPoint, long thrillerPoint, long warPoint, long documentaryPoint,
+                                  long dramaPoint, long familyPoint, long historyPoint, long misteryPoint,
+                                  long tvMoviePoint, long westernPoint, long adventurePoint) {
         this.user = user;
         this.romancePoint = romancePoint;
         this.horrorPoint = horrorPoint;
@@ -46,8 +56,14 @@ public class BadgeAccumulationPoint {
         this.sfPoint = sfPoint;
         this.musicPoint = musicPoint;
         this.thrillerPoint = thrillerPoint;
-        this.queerPoint = queerPoint;
         this.warPoint = warPoint;
         this.documentaryPoint = documentaryPoint;
+        this.dramaPoint = dramaPoint;
+        this.familyPoint = familyPoint;
+        this.historyPoint = historyPoint;
+        this.misteryPoint = misteryPoint;
+        this.tvMoviePoint = tvMoviePoint;
+        this.westernPoint = westernPoint;
+        this.adventurePoint = adventurePoint;
     }
 }

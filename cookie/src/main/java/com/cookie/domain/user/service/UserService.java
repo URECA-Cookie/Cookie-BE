@@ -13,6 +13,7 @@ import com.cookie.domain.user.entity.BadgeAccumulationPoint;
 import com.cookie.domain.user.entity.GenreScore;
 import com.cookie.domain.user.entity.User;
 import com.cookie.domain.user.entity.UserBadge;
+import com.cookie.domain.user.entity.enums.ActionType;
 import com.cookie.domain.user.entity.enums.SocialProvider;
 import com.cookie.domain.user.repository.BadgeAccumulationPointRepository;
 import com.cookie.domain.user.repository.GenreScoreRepository;
@@ -40,6 +41,7 @@ public class UserService {
     private final GenreScoreService genreScoreService;
     private final MovieRepository movieRepository;
     private final MovieLikeRepository movieLikeRepository;
+    private final DailyGenreScoreService dailyGenreScoreService;
 
 
     public MyPageResponse getMyPage(Long userId) {
@@ -105,9 +107,17 @@ public class UserService {
                         .thriller(genreScore.getThriller())
                         .war(genreScore.getWar())
                         .documentary(genreScore.getDocumentary())
+                        .drama(genreScore.getDrama())
+                        .family(genreScore.getFamily())
+                        .history(genreScore.getHistory())
+                        .mistery(genreScore.getMistery())
+                        .tvMovie(genreScore.getTvMovie())
+                        .western(genreScore.getWestern())
+                        .adventure(genreScore.getAdventure())
                         .build())
                 .collect(Collectors.toList());
     }
+
 
     /**
      * 유저의 리뷰 조회
@@ -187,11 +197,18 @@ public class UserService {
                 .sfPoint(badgeAccumulationPoint.getSfPoint())
                 .musicPoint(badgeAccumulationPoint.getMusicPoint())
                 .thrillerPoint(badgeAccumulationPoint.getThrillerPoint())
-                .queerPoint(badgeAccumulationPoint.getQueerPoint())
                 .warPoint(badgeAccumulationPoint.getWarPoint())
                 .documentaryPoint(badgeAccumulationPoint.getDocumentaryPoint())
+                .dramaPoint(badgeAccumulationPoint.getDramaPoint())
+                .familyPoint(badgeAccumulationPoint.getFamilyPoint())
+                .historyPoint(badgeAccumulationPoint.getHistoryPoint())
+                .misteryPoint(badgeAccumulationPoint.getMisteryPoint())
+                .tvMoviePoint(badgeAccumulationPoint.getTvMoviePoint())
+                .westernPoint(badgeAccumulationPoint.getWesternPoint())
+                .adventurePoint(badgeAccumulationPoint.getAdventurePoint())
                 .build();
     }
+
 
     @Transactional
     public void registerUser(User user) {
@@ -210,6 +227,8 @@ public class UserService {
     public boolean isDuplicateNickname(String nickname) {
         return userRepository.existsByNickname(nickname);
     }
+
+    @Transactional
     public boolean toggleMovieLike(Long movieId, Long userId) {
         // 사용자가 존재하는지 확인
         User user = userRepository.findById(userId)
@@ -219,12 +238,22 @@ public class UserService {
         Movie movie = movieRepository.findById(movieId)
                 .orElseThrow(() -> new EntityNotFoundException("Movie not found with id: " + movieId));
 
+        // 영화의 카테고리 중 메인 카테고리가 "장르"인 항목만 필터링
+        List<String> genres = movie.getMovieCategories().stream()
+                .filter(mc -> "장르".equals(mc.getCategory().getMainCategory())) // "장르" 필터
+                .map(mc -> mc.getCategory().getSubCategory()) // SubCategory 추출
+                .collect(Collectors.toList());
+
         // 좋아요 기록이 있는지 확인
         Optional<MovieLike> existingLike = movieLikeRepository.findByMovieAndUser(movie, user);
 
         if (existingLike.isPresent()) {
             // 이미 좋아요를 눌렀다면 삭제
             movieLikeRepository.delete(existingLike.get());
+
+            // DailyGenreScore에서 -6점 추가
+            genres.forEach(genre -> dailyGenreScoreService.saveScore(user, genre, -6, ActionType.MOVIE_LIKE));
+
             return false; // 좋아요 취소
         } else {
             // 좋아요를 누르지 않았다면 새로 추가
@@ -233,7 +262,14 @@ public class UserService {
                     .movie(movie)
                     .build();
             movieLikeRepository.save(movieLike);
+
+            // DailyGenreScore에 6점 추가
+            genres.forEach(genre -> dailyGenreScoreService.saveScore(user, genre, 6, ActionType.MOVIE_LIKE));
+
             return true; // 좋아요 등록
         }
     }
+
+
+
 }
