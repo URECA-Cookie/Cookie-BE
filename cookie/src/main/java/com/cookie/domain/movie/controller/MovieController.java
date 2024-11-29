@@ -56,4 +56,10 @@ public class MovieController {
         return ResponseEntity.ok(movies);
     }
 
+    @GetMapping("/test")
+    public String test() {
+
+        return "SUCCESS";
+    }
+
 }
