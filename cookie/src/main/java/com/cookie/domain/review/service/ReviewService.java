@@ -69,6 +69,12 @@ public class ReviewService {
             throw new IllegalArgumentException("해당 영화에 이미 리뷰를 등록했습니다.");
         }
 
+        // 영화 평점이 0.0일 경우 평점 반영
+        if (movie.getScore() == 0.0) {
+            movie.updateScore((double) createReviewRequest.getMovieScore());
+//            movieRepository.save(movie);
+        }
+
         Review review = createReviewRequest.toEntity(user, movie);
         Review savedReview = reviewRepository.save(review);
         log.info("Created review: userId = {}, movieId = {}", userId, movieId);

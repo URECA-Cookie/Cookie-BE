@@ -69,4 +69,9 @@ public class Movie {
         this.reviews = reviews;
         this.movieCategories = movieCategories;
     }
+
+    public void updateScore(Double score) {
+        this.score = score;
+    }
+
 }
