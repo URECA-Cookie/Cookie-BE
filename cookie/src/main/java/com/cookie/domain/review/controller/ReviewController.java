@@ -8,11 +8,13 @@ import com.cookie.domain.review.dto.response.ReviewListResponse;
 import com.cookie.domain.review.dto.response.ReviewResponse;
 import com.cookie.domain.review.dto.request.UpdateReviewRequest;
 import com.cookie.domain.review.service.ReviewService;
+import com.cookie.domain.user.dto.response.auth.CustomOAuth2User;
 import com.cookie.global.util.ApiUtil;
 import com.cookie.global.util.ApiUtil.ApiSuccess;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -68,9 +70,9 @@ public class ReviewController {
         return emitter;
     }
 
-    @PostMapping("/{userId}")
-    public ApiSuccess<?> createReview(@PathVariable(name = "userId") Long userId, @RequestBody CreateReviewRequest createReviewRequest) {
-        // TODO: userId JWT 토큰으로 변경
+    @PostMapping
+    public ApiSuccess<?> createReview(@AuthenticationPrincipal CustomOAuth2User customOAuth2User, @RequestBody CreateReviewRequest createReviewRequest) {
+        Long userId = customOAuth2User.getId();
         reviewService.createReview(userId, createReviewRequest, reviewEmitters, pushNotificationEmitters);
         return ApiUtil.success("SUCCESS");
     }
@@ -82,15 +84,15 @@ public class ReviewController {
     }
 
     @GetMapping
-    public ApiSuccess<?> getReviewList(Pageable pageable) {
-        Long userId = 1L;
+    public ApiSuccess<?> getReviewList(@AuthenticationPrincipal CustomOAuth2User customOAuth2User, Pageable pageable) {
+        Long userId = customOAuth2User.getId();
         ReviewListResponse reviewList = reviewService.getReviewList(userId, pageable);
         return ApiUtil.success(reviewList);
     }
 
     @GetMapping("/spoiler")
-    public ApiSuccess<?> getSpoilerReviewList(Pageable pageable) {
-        Long userId = 1L;
+    public ApiSuccess<?> getSpoilerReviewList(@AuthenticationPrincipal CustomOAuth2User customOAuth2User,Pageable pageable) {
+        Long userId = customOAuth2User.getId();
         ReviewListResponse reviewList = reviewService.getSpoilerReviewList(userId, pageable);
         return ApiUtil.success(reviewList);
     }
@@ -102,36 +104,34 @@ public class ReviewController {
     }
 
     @GetMapping("/{reviewId}")
-    public ApiSuccess<?> getReviewDetail(@PathVariable(name = "reviewId") Long reviewId) {
-        Long userId = 2L;
+    public ApiSuccess<?> getReviewDetail(@AuthenticationPrincipal CustomOAuth2User customOAuth2User, @PathVariable(name = "reviewId") Long reviewId) {
+        Long userId = customOAuth2User.getId();
         ReviewDetailResponse reviewDetailResponse = reviewService.getReviewDetail(reviewId, userId);
         return ApiUtil.success(reviewDetailResponse);
     }
 
-    @PostMapping("/{reviewId}/like/{userId}")
-    public ApiSuccess<?> addReviewLike(@PathVariable(name = "reviewId") Long reviewId, @PathVariable(name = "userId") Long userId) {
-        // TODO: userId JWT 토큰으로 변경
+    @PostMapping("/{reviewId}/like")
+    public ApiSuccess<?> addReviewLike(@PathVariable(name = "reviewId") Long reviewId, @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
+        Long userId = customOAuth2User.getId();
         reviewService.addReviewLike(reviewId, userId);
         return ApiUtil.success("SUCCESS");
     }
 
-    @PostMapping("/{reviewId}/comments/{userId}")
-    public ApiSuccess<?> createComment(@PathVariable(name = "reviewId") Long reviewId, @PathVariable(name = "userId") Long userId, @RequestBody ReviewCommentRequest reviewCommentRequest) {
-        // TODO: userId JWT 토큰으로 변경
+    @PostMapping("/{reviewId}/comments")
+    public ApiSuccess<?> createComment(@PathVariable(name = "reviewId") Long reviewId, @AuthenticationPrincipal CustomOAuth2User customOAuth2User, @RequestBody ReviewCommentRequest reviewCommentRequest) {
+        Long userId = customOAuth2User.getId();
         reviewService.createComment(reviewId, userId, reviewCommentRequest);
         return ApiUtil.success("SUCCESS");
     }
 
     @PutMapping("/comments/{commentId}")
     public ApiSuccess<?> updateComment(@PathVariable(name = "commentId") Long commentId, @RequestBody ReviewCommentRequest reviewCommentRequest) {
-        // TODO: userId JWT 토큰으로 변경
         reviewService.updateComment(commentId, reviewCommentRequest);
         return ApiUtil.success("SUCCESS");
     }
 
     @DeleteMapping("/comments/{commentId}")
     public ApiSuccess<?> deleteComment(@PathVariable(name = "commentId") Long commentId) {
-        // TODO: userId JWT 토큰으로 변경
         reviewService.deleteComment(commentId);
         return ApiUtil.success("SUCCESS");
     }
