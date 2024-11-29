@@ -2,8 +2,8 @@ package com.cookie.domain.review.repository;
 
 import com.cookie.domain.review.entity.Review;
 import com.cookie.domain.movie.entity.Movie;
-import org.springframework.data.domain.Page;
 import com.cookie.domain.user.entity.User;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -42,4 +42,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     List<Review> findReviewsByMovieId(@Param("movieId") Long movieId);
 
     Long countByMovieId(Long movieId);
+
+
 }
+

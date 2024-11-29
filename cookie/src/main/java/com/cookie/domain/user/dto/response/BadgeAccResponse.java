@@ -1,11 +1,8 @@
 package com.cookie.domain.user.dto.response;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Data
+@Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -20,7 +17,13 @@ public class BadgeAccResponse {
     private long sfPoint;
     private long musicPoint;
     private long thrillerPoint;
-    private long queerPoint;
     private long warPoint;
     private long documentaryPoint;
+    private long dramaPoint;
+    private long familyPoint;
+    private long historyPoint;
+    private long misteryPoint;
+    private long tvMoviePoint;
+    private long westernPoint;
+    private long adventurePoint;
 }

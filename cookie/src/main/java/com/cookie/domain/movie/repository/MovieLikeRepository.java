@@ -3,6 +3,8 @@ package com.cookie.domain.movie.repository;
 import com.cookie.domain.movie.entity.Movie;
 import com.cookie.domain.movie.entity.MovieLike;
 import com.cookie.domain.user.entity.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -28,4 +30,7 @@ public interface MovieLikeRepository extends JpaRepository<MovieLike, Long> {
     WHERE ml.movie.id = :movieId
     """)
     List<MovieLike> findAllByMovieId(@Param("movieId") Long movieId);
+
+    @Query("SELECT ml FROM MovieLike ml JOIN FETCH ml.movie m WHERE ml.user.id = :userId")
+    Page<MovieLike> findAllByUserIdWithMovies(@Param("userId") Long userId, Pageable pageable);
 }

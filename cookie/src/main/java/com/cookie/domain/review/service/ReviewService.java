@@ -12,6 +12,7 @@ import com.cookie.domain.review.dto.response.ReviewCommentResponse;
 import com.cookie.domain.review.dto.response.ReviewDetailResponse;
 import com.cookie.domain.review.dto.response.ReviewListResponse;
 import com.cookie.domain.review.dto.response.ReviewResponse;
+import com.cookie.domain.review.dto.response.*;
 import com.cookie.domain.review.dto.request.UpdateReviewRequest;
 import com.cookie.domain.review.entity.Review;
 import com.cookie.domain.review.entity.ReviewComment;
@@ -21,12 +22,16 @@ import com.cookie.domain.review.repository.ReviewLikeRepository;
 import com.cookie.domain.review.repository.ReviewRepository;
 import com.cookie.domain.user.dto.response.CommentUserResponse;
 import com.cookie.domain.user.dto.response.ReviewUserResponse;
+import com.cookie.domain.user.entity.DailyGenreScore;
 import com.cookie.domain.user.entity.User;
+import com.cookie.domain.user.entity.enums.ActionType;
+import com.cookie.domain.user.repository.DailyGenreScoreRepository;
 import com.cookie.domain.user.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -36,6 +41,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -46,6 +52,7 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final ReviewCommentRepository reviewCommentRepository;
     private final ReviewLikeRepository reviewLikeRepository;
+    private final DailyGenreScoreRepository dailyGenreScoreRepository;
 
     @Transactional
     public void createReview(Long userId, CreateReviewRequest createReviewRequest, CopyOnWriteArrayList<SseEmitter> reviewEmitters, CopyOnWriteArrayList<SseEmitter> pushNotificationEmitters) {
@@ -301,42 +308,51 @@ public class ReviewService {
         reviewCommentRepository.delete(comment);
         log.info("Deleted comment: commentId = {}", commentId);
     }
-  
-//    @Transactional(readOnly = true)
-//    public List<ReviewResponse> getLikedReviewsByUserId(Long userId) {
-//        List<ReviewLike> likedReviews = reviewLikeRepository.findAllByUserIdWithReviews(userId);
-//
-//        return likedReviews.stream()
-//                .map(reviewLike -> {
-//                    Review review = reviewLike.getReview();
-//                    return ReviewResponse.fromReview(review);
-//                })
-//                .toList();
-//    }
+
+    @Transactional(readOnly = true)
+    public ReviewPagenationResponse getLikedReviewsByUserId(Long userId, int page, int size) {
+        // 페이징 요청 생성
+        Pageable pageable = PageRequest.of(page, size);
+
+        // ReviewLike 엔티티를 페이징 처리하여 조회
+        Page<ReviewLike> likedReviewsPage = reviewLikeRepository.findAllByUserIdWithReviews(userId, pageable);
+
+        // ReviewLike -> ReviewResponse 변환
+        List<ReviewResponse> reviews = likedReviewsPage.getContent().stream()
+                .map(reviewLike -> {
+                    Review review = reviewLike.getReview();
+                    return ReviewResponse.fromReview(review, true);
+                })
+                .toList();
+
+        // ReviewPagenationResponse 생성
+        return ReviewPagenationResponse.builder()
+                .currentPage(page)
+                .reviews(reviews)
+                .totalPages(likedReviewsPage.getTotalPages())
+                .build();
+    }
+
 
     @Transactional
     public boolean toggleReviewLike(Long reviewId, Long userId) {
-        // Fetch user and review entities
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
 
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new EntityNotFoundException("Review not found with id: " + reviewId));
 
-        // Find existing like by review and user
         Optional<ReviewLike> existingLike = reviewLikeRepository.findByReviewAndUser(review, user);
 
         if (existingLike.isPresent()) {
-            // If like exists, remove it
             reviewLikeRepository.delete(existingLike.get());
             return false; // Indicates the like was removed
         } else {
-            // If no like exists, add a new like
             reviewLikeRepository.save(ReviewLike.builder()
                     .user(user)
                     .review(review)
                     .build());
-            return true; // Indicates the like was added
+            return true;
         }
     }
 

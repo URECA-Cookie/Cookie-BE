@@ -1,4 +1,7 @@
 package com.cookie.domain.user.repository;
 
-public interface DailyGenreScoreRepository {
+import com.cookie.domain.user.entity.DailyGenreScore;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface DailyGenreScoreRepository extends JpaRepository<DailyGenreScore, Long> {
 }
