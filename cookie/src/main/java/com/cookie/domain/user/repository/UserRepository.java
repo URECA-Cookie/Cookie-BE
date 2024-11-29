@@ -13,7 +13,11 @@ import java.util.List;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
-    @Query("SELECT DISTINCT u FROM User u JOIN FETCH u.userCategories uc JOIN FETCH uc.category c WHERE c.mainCategory = '장르' AND c.subCategory IN :genres AND u.id <> :userId")
+    @Query("SELECT DISTINCT u FROM User u " +
+            "JOIN FETCH u.category c " +
+            "WHERE c.mainCategory = '장르' " +
+            "AND c.subCategory IN :genres " +
+            "AND u.id <> :userId")
     List<User> findUsersByFavoriteGenresInAndExcludeUserId(@Param("genres") List<String> genres, @Param("userId") Long userId);
 
     User findBySocialProviderAndSocialId(SocialProvider socialProvider, String socialId);
