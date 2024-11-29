@@ -7,7 +7,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Data
+@Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class UserBadge extends BaseTimeEntity {
 
@@ -29,5 +29,9 @@ public class UserBadge extends BaseTimeEntity {
         this.isMain = isMain;
         this.user = user;
         this.badge = badge;
+    }
+
+    public void updateMainBadge(boolean isMain) {
+        this.isMain = isMain;
     }
 }
