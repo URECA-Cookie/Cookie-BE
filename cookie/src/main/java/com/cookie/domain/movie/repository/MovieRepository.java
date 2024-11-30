@@ -1,5 +1,6 @@
 package com.cookie.domain.movie.repository;
 
+import com.cookie.domain.movie.dto.response.MovieSimpleResponse;
 import com.cookie.domain.movie.entity.Movie;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -45,8 +46,36 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
 
     Page<Movie> findByTitleContainingIgnoreCase(String keyword, Pageable pageable);
 
+    @Query("""
+    SELECT new com.cookie.domain.movie.dto.response.MovieSimpleResponse(
+        m.id, 
+        m.title, 
+        m.poster, 
+        m.releasedAt, 
+        c2.name, 
+        CAST((SELECT COUNT(ml) FROM MovieLike ml WHERE ml.movie.id = m.id) AS long), 
+        CAST((SELECT COUNT(r) FROM Review r WHERE r.movie.id = m.id) AS long)
+    )
+    FROM Movie m
+    JOIN m.movieCategories mc
+    JOIN mc.category c
+    JOIN m.country c2
+    WHERE c.subCategory = :genre
+    ORDER BY m.movieLikes DESC
+""")
+    List<MovieSimpleResponse> findTop3MoviesByCategory(@Param("genre") String genre);
+
+
+
+
+
+
     @Query("SELECT c.subCategory FROM MovieCategory mc " +
             "JOIN mc.category c " +
             "WHERE mc.movie.id = :movieId AND c.mainCategory = '장르'")
     List<String> findGenresByMovieId(@Param("movieId") Long movieId);
+
+    @Query("SELECT COUNT(ml) FROM MovieLike ml WHERE ml.movie.id = :movieId")
+    Long countLikesByMovieId(@Param("movieId") Long movieId);
 }
+

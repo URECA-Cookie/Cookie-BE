@@ -10,17 +10,24 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class GenreScoreResponse {
-    private Long romance;      // 로맨스 점수
-    private Long horror;       // 공포 점수
-    private Long comedy;       // 코미디 점수
-    private Long action;       // 액션 점수
-    private Long fantasy;      // 판타지 점수
-    private Long animation;    // 애니메이션 점수
-    private Long crime;        // 범죄 점수
-    private Long sf;           // SF 점수
-    private Long music;        // 음악 점수
-    private Long thriller;     // 스릴러 점수
-    private Long queer;        // 퀴어 점수
-    private Long war;          // 전쟁 점수
-    private Long documentary;  // 다큐멘터리 점수
+    private long romance;
+    private long horror;
+    private long comedy;
+    private long action;
+    private long fantasy;
+    private long animation;
+    private long crime;
+    private long sf;
+    private long music;
+    private long thriller;
+    private long war;
+    private long documentary;
+    private long drama;
+    private long family;
+    private long history;
+    private long mistery;
+    private long tvMovie;
+    private long western;
+    private long adventure;
+
 }

@@ -11,10 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -56,10 +53,10 @@ public class MovieController {
         return ResponseEntity.ok(movies);
     }
 
-    @GetMapping("/test")
-    public String test() {
-
-        return "SUCCESS";
+    @GetMapping("/{userId}/recommendations")
+    public ApiSuccess<List<MovieSimpleResponse>> getRecommendations(@PathVariable(name="userId") Long userId) {
+        List<MovieSimpleResponse> recommendedMovies = movieService.getRecommendedMovies(userId);
+        return ApiUtil.success(recommendedMovies);
     }
 
 }
