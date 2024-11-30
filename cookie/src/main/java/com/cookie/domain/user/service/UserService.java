@@ -167,6 +167,7 @@ public class UserService {
                 .profileImage(user.getProfileImage())
                 .badges(badgeResponses)
                 .nickname(user.getNickname())
+                .genreId(user.getCategory().getId())
                 .build();
     }
 
