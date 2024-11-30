@@ -20,8 +20,8 @@ public class SchedulerConfig {
         this.genreScoreUpdateJob = genreScoreUpdateJob;
     }
 
-    @Scheduled(cron = "0 0 2 * * ?") // 매일 새벽 2시
-    //@Scheduled(cron = "0 */2 * * * ?") // 매 2분마다 실행
+    //@Scheduled(cron = "0 0 2 * * ?") // 매일 새벽 2시
+    @Scheduled(cron = "0 */2 * * * ?") // 매 2분마다 실행
     public void runBatchJob() {
         try {
             JobParameters jobParameters = new JobParametersBuilder()
