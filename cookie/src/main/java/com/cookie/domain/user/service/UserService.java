@@ -1,33 +1,40 @@
 package com.cookie.domain.user.service;
 
+import com.cookie.admin.repository.CategoryRepository;
 import com.cookie.domain.badge.dto.MyBadgeResponse;
+import com.cookie.domain.badge.repository.BadgeRepository;
+import com.cookie.domain.category.entity.Category;
 import com.cookie.domain.movie.entity.Movie;
 import com.cookie.domain.movie.entity.MovieLike;
 import com.cookie.domain.movie.repository.MovieLikeRepository;
 import com.cookie.domain.movie.repository.MovieRepository;
 import com.cookie.domain.review.dto.response.ReviewResponse;
-import com.cookie.domain.user.dto.request.MyProfileRequest;
 import com.cookie.domain.user.dto.response.*;
 import com.cookie.domain.review.entity.Review;
 import com.cookie.domain.user.entity.BadgeAccumulationPoint;
 import com.cookie.domain.user.entity.GenreScore;
 import com.cookie.domain.user.entity.User;
 import com.cookie.domain.user.entity.UserBadge;
+import com.cookie.domain.user.entity.enums.ActionType;
 import com.cookie.domain.user.entity.enums.SocialProvider;
 import com.cookie.domain.user.repository.BadgeAccumulationPointRepository;
 import com.cookie.domain.user.repository.GenreScoreRepository;
 import com.cookie.domain.review.repository.ReviewRepository;
 import com.cookie.domain.user.repository.UserBadgeRepository;
 import com.cookie.domain.user.repository.UserRepository;
+import com.cookie.global.service.AWSS3Service;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -40,8 +47,12 @@ public class UserService {
     private final GenreScoreService genreScoreService;
     private final MovieRepository movieRepository;
     private final MovieLikeRepository movieLikeRepository;
+    private final DailyGenreScoreService dailyGenreScoreService;
+    private final AWSS3Service awss3Service;
+    private final BadgeRepository badgeRepository;
+    private final CategoryRepository categoryRepository;
 
-
+    @Transactional(readOnly = true)
     public MyPageResponse getMyPage(Long userId) {
         // 1. 유저의 닉네임 및 프로필 이미지 조회
         User user = userRepository.findById(userId)
@@ -73,6 +84,7 @@ public class UserService {
     /**
      * 유저가 보유한 뱃지 조회
      */
+    @Transactional(readOnly = true)
     public List<MyBadgeResponse> getAllBadgesByUserId(Long userId) {
         List<UserBadge> userBadges = userBadgeRepository.findAllByUserId(userId);
 
@@ -88,6 +100,7 @@ public class UserService {
     /**
      * 유저의 장르 점수 조회
      */
+    @Transactional(readOnly = true)
     public List<GenreScoreResponse> getGenreScoresByUserId(Long userId) {
         List<GenreScore> genreScores = genreScoreRepository.findAllByUserId(userId);
 
@@ -105,13 +118,22 @@ public class UserService {
                         .thriller(genreScore.getThriller())
                         .war(genreScore.getWar())
                         .documentary(genreScore.getDocumentary())
+                        .drama(genreScore.getDrama())
+                        .family(genreScore.getFamily())
+                        .history(genreScore.getHistory())
+                        .mistery(genreScore.getMistery())
+                        .tvMovie(genreScore.getTvMovie())
+                        .western(genreScore.getWestern())
+                        .adventure(genreScore.getAdventure())
                         .build())
                 .collect(Collectors.toList());
     }
 
+
     /**
      * 유저의 리뷰 조회
      */
+    @Transactional(readOnly = true)
     public List<ReviewResponse> getReviewsByUserId(Long userId) {
         List<Review> reviews = reviewRepository.findAllByUserIdWithMovie(userId);
 
@@ -145,30 +167,63 @@ public class UserService {
                 .build();
     }
 
-    public void updateMyProfile(Long userId, MyProfileRequest request) {
-        // 1. 유저 조회
+    @Transactional
+    public void updateMyProfile(Long userId, MultipartFile profileImage, String nickname, String mainBadgeIdStr, String genreIdStr) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + userId));
+                .orElseThrow(() -> new IllegalArgumentException("not found user: " + userId));
 
-        // 2. 프로필 이미지와 닉네임 업데이트
-        user.setProfileImage(request.getProfileImage());
-        user.setNickname(request.getNickname());
-
-        // 3. 유저의 모든 뱃지 조회
-        List<UserBadge> userBadges = userBadgeRepository.findAllByUserId(userId);
-
-        // 4. mainBadge 처리
-        userBadges.forEach(userBadge -> {
-            if (userBadge.getBadge().getName().equals(request.getMainBadge())) {
-                userBadge.setMain(true); // mainBadge로 설정
-            } else if (userBadge.isMain()) {
-                userBadge.setMain(false); // 기존 mainBadge 해제
+        Long mainBadgeId = null;
+        if (mainBadgeIdStr != null && !mainBadgeIdStr.isEmpty()) { // 메인 뱃지가 없을 경우 (유저가 획득한 뱃지가 존재하지 않을 경우)
+            try {
+                mainBadgeId = Long.parseLong(mainBadgeIdStr);
+                badgeRepository.findById(mainBadgeId)
+                        .orElseThrow(() -> new IllegalArgumentException("not found badge: " + mainBadgeIdStr));
+            } catch (NumberFormatException e) {
+                throw new IllegalArgumentException("Invalid badge ID: " + mainBadgeIdStr);
             }
-        });
+        }
 
-        // 5. 유저 정보와 뱃지 업데이트
+        if (!user.getNickname().equals(nickname) && userRepository.existsByNickname(nickname)) {
+            throw new IllegalArgumentException(nickname + "은(는) 이미 존재하는 닉네임입니다.");
+        }
+
+        if (nickname == null || nickname.trim().isEmpty()) {
+            throw new IllegalArgumentException("닉네임을 입력해 주세요.");
+        }
+
+        String profileImageUrl = user.getProfileImage();
+        if (profileImage != null && !profileImage.isEmpty()) { // profile null 이 아닐 경우
+            profileImageUrl = awss3Service.uploadImage(profileImage);
+        }
+
+        List<UserBadge> userBadges = userBadgeRepository.findAllByUserId(userId);
+        log.info("user badge list: {}", userBadges == null ? 0 : userBadges.size());
+
+        if (userBadges != null && !userBadges.isEmpty()) {
+            Long finalMainBadgeId = mainBadgeId;
+            userBadges.forEach(userBadge -> {
+                if (userBadge.getBadge().getId().equals(finalMainBadgeId)) {
+                    userBadge.updateMainBadge(true); // mainBadge로 설정
+                } else if (userBadge.isMain()) {
+                    userBadge.updateMainBadge(false); // 기존 mainBadge 해제
+                }
+            });
+        }
+        log.info("Updated user main badge: {}", user.getMainBadge() != null ? user.getMainBadge().getName() : "No main badge");
+
+        // 장르 선택
+        Long genreId = Long.parseLong(genreIdStr);
+        Category genre = categoryRepository.findById(genreId)
+                .orElseThrow(() -> new IllegalArgumentException("not found genre: " + genreId));
+
+        user.updateProfile(profileImageUrl, nickname.trim(), genre);
         userRepository.save(user);
-        userBadgeRepository.saveAll(userBadges);
+
+        if (userBadges != null && !userBadges.isEmpty()) {
+            userBadgeRepository.saveAll(userBadges);
+        }
+
+        log.info("Updated user info");
     }
 
     public BadgeAccResponse getBadgeAccumulationPoint(Long userId) {
@@ -187,11 +242,18 @@ public class UserService {
                 .sfPoint(badgeAccumulationPoint.getSfPoint())
                 .musicPoint(badgeAccumulationPoint.getMusicPoint())
                 .thrillerPoint(badgeAccumulationPoint.getThrillerPoint())
-                .queerPoint(badgeAccumulationPoint.getQueerPoint())
                 .warPoint(badgeAccumulationPoint.getWarPoint())
                 .documentaryPoint(badgeAccumulationPoint.getDocumentaryPoint())
+                .dramaPoint(badgeAccumulationPoint.getDramaPoint())
+                .familyPoint(badgeAccumulationPoint.getFamilyPoint())
+                .historyPoint(badgeAccumulationPoint.getHistoryPoint())
+                .misteryPoint(badgeAccumulationPoint.getMisteryPoint())
+                .tvMoviePoint(badgeAccumulationPoint.getTvMoviePoint())
+                .westernPoint(badgeAccumulationPoint.getWesternPoint())
+                .adventurePoint(badgeAccumulationPoint.getAdventurePoint())
                 .build();
     }
+
 
     @Transactional
     public void registerUser(User user) {
@@ -210,6 +272,8 @@ public class UserService {
     public boolean isDuplicateNickname(String nickname) {
         return userRepository.existsByNickname(nickname);
     }
+
+    @Transactional
     public boolean toggleMovieLike(Long movieId, Long userId) {
         // 사용자가 존재하는지 확인
         User user = userRepository.findById(userId)
@@ -219,12 +283,22 @@ public class UserService {
         Movie movie = movieRepository.findById(movieId)
                 .orElseThrow(() -> new EntityNotFoundException("Movie not found with id: " + movieId));
 
+        // 영화의 카테고리 중 메인 카테고리가 "장르"인 항목만 필터링
+        List<String> genres = movie.getMovieCategories().stream()
+                .filter(mc -> "장르".equals(mc.getCategory().getMainCategory())) // "장르" 필터
+                .map(mc -> mc.getCategory().getSubCategory()) // SubCategory 추출
+                .collect(Collectors.toList());
+
         // 좋아요 기록이 있는지 확인
         Optional<MovieLike> existingLike = movieLikeRepository.findByMovieAndUser(movie, user);
 
         if (existingLike.isPresent()) {
             // 이미 좋아요를 눌렀다면 삭제
             movieLikeRepository.delete(existingLike.get());
+
+            // DailyGenreScore에서 -6점 추가
+            genres.forEach(genre -> dailyGenreScoreService.saveScore(user, genre, -6, ActionType.MOVIE_LIKE));
+
             return false; // 좋아요 취소
         } else {
             // 좋아요를 누르지 않았다면 새로 추가
@@ -233,7 +307,14 @@ public class UserService {
                     .movie(movie)
                     .build();
             movieLikeRepository.save(movieLike);
+
+            // DailyGenreScore에 6점 추가
+            genres.forEach(genre -> dailyGenreScoreService.saveScore(user, genre, 6, ActionType.MOVIE_LIKE));
+
             return true; // 좋아요 등록
         }
     }
+
+
+
 }

@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Data
+@Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User extends BaseTimeEntity {
 
@@ -38,9 +38,6 @@ public class User extends BaseTimeEntity {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserBadge> userBadges = new ArrayList<>();
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<UserCategory> userCategories = new ArrayList<>();
-
     // mainBadge 반환 메서드
     public Badge getMainBadge() {
         return userBadges.stream()
@@ -65,11 +62,13 @@ public class User extends BaseTimeEntity {
     }
 
 
-    public void updateProfile(String profileImage, String nickname) {
-        this.profileImage = profileImage;
+    public void updateProfile(String profileImage, String nickname, Category genreId) {
+        if (profileImage != null) {
+            this.profileImage = profileImage;
+        }
         this.nickname = nickname;
+        this.category = genreId;
     }
-
 
 }
 

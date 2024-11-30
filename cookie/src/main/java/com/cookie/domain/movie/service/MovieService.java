@@ -1,6 +1,7 @@
 package com.cookie.domain.movie.service;
 
 
+import com.cookie.domain.movie.dto.response.MoviePagenationResponse;
 import com.cookie.domain.movie.dto.response.MovieResponse;
 import com.cookie.domain.movie.dto.response.MovieSimpleResponse;
 import com.cookie.domain.movie.dto.response.ReviewOfMovieResponse;
@@ -160,20 +161,33 @@ public class MovieService {
     private Long likes;
     private Long reviews;
     @Transactional(readOnly = true)
-    public List<MovieSimpleResponse> getLikedMoviesByUserId(Long userId) {
-        List<MovieLike> likedMovies = movieLikeRepository.findAllByUserIdWithMovies(userId);
+    public MoviePagenationResponse getLikedMoviesByUserId(Long userId, int page, int size) {
+        // Pageable 객체 생성
+        Pageable pageable = PageRequest.of(page, size);
 
-        return likedMovies.stream()
+        // MovieLikeRepository를 통해 좋아요 누른 영화 조회
+        Page<MovieLike> likedMoviesPage = movieLikeRepository.findAllByUserIdWithMovies(userId, pageable);
+
+        // MovieLike -> MovieSimpleResponse 변환
+        List<MovieSimpleResponse> movies = likedMoviesPage.getContent().stream()
                 .map(movieLike -> MovieSimpleResponse.builder()
                         .title(movieLike.getMovie().getTitle())
                         .poster(movieLike.getMovie().getPoster())
                         .releasedAt(movieLike.getMovie().getReleasedAt())
                         .country(movieLike.getMovie().getCountry().getName())
                         .likes(movieLike.getMovie().getMovieLikes())
-                        .reviews((long) (movieLike.getMovie().getReviews() != null ? movieLike.getMovie().getReviews().size() : 0)) // 리뷰 수
+                        .reviews((long) (movieLike.getMovie().getReviews() != null ? movieLike.getMovie().getReviews().size() : 0))
                         .build())
                 .collect(Collectors.toList());
+
+        // MoviePagenationResponse 반환
+        return MoviePagenationResponse.builder()
+                .currentPage(page)
+                .movies(movies)
+                .totalPages(likedMoviesPage.getTotalPages())
+                .build();
     }
+
 
     @Transactional(readOnly = true)
     public MovieResponse getMovieDetails(Long movieId, Long userId) {

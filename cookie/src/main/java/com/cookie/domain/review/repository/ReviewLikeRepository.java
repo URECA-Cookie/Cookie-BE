@@ -1,6 +1,8 @@
 package com.cookie.domain.review.repository;
 
 import com.cookie.domain.review.entity.ReviewLike;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import com.cookie.domain.review.entity.Review;
@@ -30,4 +32,7 @@ public interface ReviewLikeRepository extends JpaRepository<ReviewLike, Long> {
         WHERE rl.review.id = :reviewId
     """)
     List<ReviewLike> findAllByReviewId(@Param("reviewId") Long reviewId);
+
+    @Query("SELECT rl FROM ReviewLike rl JOIN FETCH rl.review r WHERE rl.user.id = :userId")
+    Page<ReviewLike> findAllByUserIdWithReviews(@Param("userId") Long userId, Pageable pageable);
 }
