@@ -16,4 +16,5 @@ public class MyProfileDataResponse {
     private String profileImage;
     private List<MyBadgeResponse> badges;
     private String nickname;
+    private Long genreId;
 }
