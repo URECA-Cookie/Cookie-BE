@@ -172,9 +172,8 @@ public class AuthController {
     }
 
     @GetMapping("/check-nickname")
-    public ResponseEntity<?> validateNickname(@AuthenticationPrincipal CustomOAuth2User customOAuth2User, @RequestParam("nickname") String nickname) {
-        Long userId = customOAuth2User.getId();
-        if (userService.isDuplicateNickname(nickname, userId)) {
+    public ResponseEntity<?> validateNickname(@RequestParam("nickname") String nickname) {
+        if (userService.isDuplicateNicknameRegister(nickname)) {
             return ResponseEntity.ok().body(ApiUtil.success("DUPLICATED_NICKNAME"));
         }
 
@@ -247,4 +246,5 @@ public class AuthController {
         return ResponseEntity.ok().body("AuthenticationPrincipal ID: " + customUserDetails.getId());
     }
 }
+
 
