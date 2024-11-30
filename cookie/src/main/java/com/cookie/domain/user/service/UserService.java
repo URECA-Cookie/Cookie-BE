@@ -9,6 +9,8 @@ import com.cookie.domain.movie.entity.MovieLike;
 import com.cookie.domain.movie.repository.MovieLikeRepository;
 import com.cookie.domain.movie.repository.MovieRepository;
 import com.cookie.domain.review.dto.response.ReviewResponse;
+import com.cookie.domain.review.entity.ReviewLike;
+import com.cookie.domain.review.repository.ReviewLikeRepository;
 import com.cookie.domain.user.dto.response.*;
 import com.cookie.domain.review.entity.Review;
 import com.cookie.domain.user.entity.BadgeAccumulationPoint;
@@ -51,6 +53,7 @@ public class UserService {
     private final AWSS3Service awss3Service;
     private final BadgeRepository badgeRepository;
     private final CategoryRepository categoryRepository;
+    private final ReviewLikeRepository reviewLikeRepository;
 
     @Transactional(readOnly = true)
     public MyPageResponse getMyPage(Long userId) {
@@ -302,6 +305,7 @@ public class UserService {
         if (existingLike.isPresent()) {
             // 이미 좋아요를 눌렀다면 삭제
             movieLikeRepository.delete(existingLike.get());
+            movie.decreaseLikeCount();
 
             // DailyGenreScore에서 -6점 추가
             genres.forEach(genre -> dailyGenreScoreService.saveScore(user, genre, -6, ActionType.MOVIE_LIKE));
@@ -314,6 +318,7 @@ public class UserService {
                     .movie(movie)
                     .build();
             movieLikeRepository.save(movieLike);
+            movie.increaseLikeCount();
 
             // DailyGenreScore에 6점 추가
             genres.forEach(genre -> dailyGenreScoreService.saveScore(user, genre, 6, ActionType.MOVIE_LIKE));
@@ -322,7 +327,35 @@ public class UserService {
         }
     }
 
+    @Transactional
+    public void toggleReviewLike(Long reviewId, Long userId) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new IllegalArgumentException("not found reviewId: " + reviewId));
+        log.info("Retrieved review: reviewId = {}", reviewId);
 
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("not found userId: " + userId));
+        log.info("Retrieved user: userId = {}", userId);
+
+        if (review.getUser().getId().equals(userId)) {
+            throw new IllegalArgumentException("자신의 리뷰에는 좋아요를 누를 수 없습니다.");
+        }
+
+        ReviewLike existingLike = reviewLikeRepository.findByUserAndReview(user, review);
+        if (existingLike != null) {
+            reviewLikeRepository.delete(existingLike);
+            review.decreaseLikeCount();
+            log.info("Removed like from reviewId: {}", reviewId);
+        } else {
+            ReviewLike like = ReviewLike.builder()
+                    .user(user)
+                    .review(review)
+                    .build();
+            reviewLikeRepository.save(like);
+            review.increaseLikeCount();
+            log.info("Added like to reviewId: {}", reviewId);
+        }
+    }
 
 }
 

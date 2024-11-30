@@ -108,13 +108,6 @@ public class ReviewController {
         return ApiUtil.success(reviewDetailResponse);
     }
 
-    @PostMapping("/{reviewId}/like/{userId}")
-    public ApiSuccess<?> addReviewLike(@PathVariable(name = "reviewId") Long reviewId, @PathVariable(name = "userId") Long userId) {
-        // TODO: userId JWT 토큰으로 변경
-        reviewService.addReviewLike(reviewId, userId);
-        return ApiUtil.success("SUCCESS");
-    }
-
     @PostMapping("/{reviewId}/comments/{userId}")
     public ApiSuccess<?> createComment(@PathVariable(name = "reviewId") Long reviewId, @PathVariable(name = "userId") Long userId, @RequestBody ReviewCommentRequest reviewCommentRequest) {
         // TODO: userId JWT 토큰으로 변경

@@ -21,9 +21,7 @@ public interface ReviewLikeRepository extends JpaRepository<ReviewLike, Long> {
     @Query("SELECT COUNT(rl) > 0 FROM ReviewLike rl WHERE rl.review.id = :reviewId AND rl.user.id = :userId")
     boolean existsByReviewIdAndUserId(@Param("reviewId") Long reviewId, @Param("userId") Long userId);
 
-    ReviewLike findByUserAndReview(@Param("user")User user, @Param("review") Review review);
-
-    Optional<ReviewLike> findByReviewAndUser(Review review, User user);
+    ReviewLike findByUserAndReview(User user, Review review);
 
     @Query("""
         SELECT rl
