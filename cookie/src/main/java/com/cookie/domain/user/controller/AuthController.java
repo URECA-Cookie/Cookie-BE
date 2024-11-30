@@ -61,7 +61,7 @@ public class AuthController {
         }
 
         // 닉네임 중복 체크
-        if (userService.isDuplicateNickname(nickname)) {
+        if (userService.isDuplicateNicknameRegister(nickname)) {
             return ResponseEntity.badRequest().body(ApiUtil.error(400, "DUPLICATED_NICKNAME"));
         }
 
@@ -172,8 +172,9 @@ public class AuthController {
     }
 
     @GetMapping("/check-nickname")
-    public ResponseEntity<?> validateNickname(@RequestParam("nickname") String nickname) {
-        if (userService.isDuplicateNickname(nickname)) {
+    public ResponseEntity<?> validateNickname(@AuthenticationPrincipal CustomOAuth2User customOAuth2User, @RequestParam("nickname") String nickname) {
+        Long userId = customOAuth2User.getId();
+        if (userService.isDuplicateNickname(nickname, userId)) {
             return ResponseEntity.ok().body(ApiUtil.success("DUPLICATED_NICKNAME"));
         }
 
@@ -182,7 +183,7 @@ public class AuthController {
 
     @PostMapping("/register-admin")
     public ResponseEntity<?> registerAdmin(@RequestBody AdminRegisterRequest request) {
-        if (userService.isDuplicateNickname(request.getId())) {
+        if (userService.isDuplicateNicknameRegister(request.getId())) {
             return ResponseEntity.badRequest().body(ApiUtil.error(400, "DUPLICATED_ID"));
         }
 
@@ -246,3 +247,4 @@ public class AuthController {
         return ResponseEntity.ok().body("AuthenticationPrincipal ID: " + customUserDetails.getId());
     }
 }
+

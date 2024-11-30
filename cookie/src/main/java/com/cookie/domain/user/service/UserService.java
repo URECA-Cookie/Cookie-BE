@@ -269,7 +269,14 @@ public class UserService {
         return userRepository.existsBySocialProviderAndSocialId(socialProvider, socialId);
     }
 
-    public boolean isDuplicateNickname(String nickname) {
+    public boolean isDuplicateNickname(String nickname, Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("not found userId: " + userId));
+
+        return !user.getNickname().equals(nickname) && userRepository.existsByNickname(nickname); // 존재하면
+    }
+
+    public boolean isDuplicateNicknameRegister(String nickname) {
         return userRepository.existsByNickname(nickname);
     }
 
@@ -318,3 +325,4 @@ public class UserService {
 
 
 }
+
