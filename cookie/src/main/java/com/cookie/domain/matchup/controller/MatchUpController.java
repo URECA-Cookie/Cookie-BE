@@ -10,11 +10,13 @@ import com.cookie.global.util.ApiUtil;
 import com.cookie.global.util.ApiUtil.ApiSuccess;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/matchups")
 @RequiredArgsConstructor
@@ -43,6 +45,7 @@ public class MatchUpController {
 
     @GetMapping("{matchUpId}")
     public ApiSuccess<?> getOnGoingMatchUp(@AuthenticationPrincipal CustomOAuth2User customOAuth2User, @PathVariable(name = "matchUpId") Long matchUpId) {
+        log.info("매치업 상세보기 시작");
         Long userId = customOAuth2User.getId();
         MatchUpResponse matchUp = matchUpService.getOnGoingMatchUp(matchUpId, userId);
         return ApiUtil.success(matchUp);
