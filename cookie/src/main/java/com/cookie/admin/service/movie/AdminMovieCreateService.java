@@ -161,6 +161,7 @@ public class AdminMovieCreateService {
                 .releasedAt(movie.getReleaseDate())
                 .runtime(movie.getRuntime())
                 .certification(movie.getCertification())
+                .movieLikes(0L)
                 .build();
     }
 
