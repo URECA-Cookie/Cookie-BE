@@ -172,4 +172,35 @@ class ReviewServiceTest {
         assertThat(exception.getMessage()).contains("not found reviewId");
     }
 
+    @Test
+    @DisplayName("영화 리뷰 삭제 성공 테스트")
+    void deleteReview_Success() {
+        Long reviewId = 1L;
+
+        Review review = Review.builder()
+                .content("review")
+                .build();
+
+        given(reviewRepository.findById(reviewId)).willReturn(Optional.of(review));
+
+        reviewService.deleteReview(reviewId);
+
+        verify(reviewRepository).delete(review);
+    }
+
+
+    @Test
+    @DisplayName("영화 리뷰 삭제 실패 테스트 - NotFoundReview")
+    void deleteReview_Fail_NotFound() {
+        Long reviewId = 999L;
+
+        given(reviewRepository.findById(reviewId)).willReturn(Optional.empty());
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            reviewService.deleteReview(reviewId);
+        });
+
+        assertThat(exception.getMessage()).contains("not found reviewId");
+    }
+
 }
