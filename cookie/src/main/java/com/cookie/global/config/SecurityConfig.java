@@ -93,9 +93,7 @@ public class SecurityConfig {
                                 "/**",
                                 "/api/auth/**",
                                 "/login/oauth2/code/**",
-                                "/oauth2/authorization/**",
-                                "/api/**", // TODO: will delete
-                                "/ws/**" // TODO: will delete
+                                "/oauth2/authorization/**"
                         ).permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
