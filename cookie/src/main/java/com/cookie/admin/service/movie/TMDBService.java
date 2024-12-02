@@ -235,7 +235,7 @@ public class TMDBService {
 
         return dates.getBackdrops().stream()
                 .map(data-> imageUrl + data.getFilePath())
-                .limit(5)
+                .limit(10)
                 .collect(Collectors.toList());
     }
 
