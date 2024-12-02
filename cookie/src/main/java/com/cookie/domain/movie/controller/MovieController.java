@@ -39,14 +39,14 @@ public class MovieController {
   
     @GetMapping("{movieId}/reviews")
     public ApiSuccess<?> getMovieReviewList(@AuthenticationPrincipal CustomOAuth2User customOAuth2User, @PathVariable(name = "movieId") Long movieId, Pageable pageable) {
-        Long userId = customOAuth2User.getId();
+        Long userId = (customOAuth2User != null) ? customOAuth2User.getId() : null;
         ReviewOfMovieResponse movieReviews = movieService.getMovieReviewList(movieId, userId, pageable);
         return ApiUtil.success(movieReviews);
     }
 
     @GetMapping("{movieId}/reviews/spoiler")
     public ApiSuccess<?> getMovieSpoilerReviewList(@AuthenticationPrincipal CustomOAuth2User customOAuth2User, @PathVariable(name = "movieId") Long movieId, Pageable pageable) {
-        Long userId = customOAuth2User.getId();
+        Long userId = (customOAuth2User != null) ? customOAuth2User.getId() : null;
         ReviewOfMovieResponse movieReviews = movieService.getMovieSpoilerReviewList(movieId, userId, pageable);
         return ApiUtil.success(movieReviews);
 

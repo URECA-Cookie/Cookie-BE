@@ -85,14 +85,16 @@ public class ReviewController {
 
     @GetMapping
     public ApiSuccess<?> getReviewList(@AuthenticationPrincipal CustomOAuth2User customOAuth2User, Pageable pageable) {
-        Long userId = customOAuth2User.getId();
+        Long userId = (customOAuth2User != null) ? customOAuth2User.getId() : null;
+        log.info("getReviewList() userId: {}", userId);
         ReviewListResponse reviewList = reviewService.getReviewList(userId, pageable);
         return ApiUtil.success(reviewList);
     }
 
     @GetMapping("/spoiler")
     public ApiSuccess<?> getSpoilerReviewList(@AuthenticationPrincipal CustomOAuth2User customOAuth2User,Pageable pageable) {
-        Long userId = customOAuth2User.getId();
+        Long userId = (customOAuth2User != null) ? customOAuth2User.getId() : null;
+        log.info("getSpoilerReviewList() userId: {}", userId);
         ReviewListResponse reviewList = reviewService.getSpoilerReviewList(userId, pageable);
         return ApiUtil.success(reviewList);
     }
@@ -105,7 +107,7 @@ public class ReviewController {
 
     @GetMapping("/{reviewId}")
     public ApiSuccess<?> getReviewDetail(@AuthenticationPrincipal CustomOAuth2User customOAuth2User, @PathVariable(name = "reviewId") Long reviewId) {
-        Long userId = customOAuth2User.getId();
+        Long userId = (customOAuth2User != null) ? customOAuth2User.getId() : null;
         ReviewDetailResponse reviewDetailResponse = reviewService.getReviewDetail(reviewId, userId);
         return ApiUtil.success(reviewDetailResponse);
     }

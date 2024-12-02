@@ -94,7 +94,11 @@ public class SecurityConfig {
                                 "/api/auth/**",
                                 "/login/oauth2/code/**",
                                 "/oauth2/authorization/**",
-                                "/api/**", // TODO: will delete
+                                "/api/reviews",
+                                "/api/reviews/spoiler",
+                                "/api/reviews/{reviewId}",
+                                "/api/movies/{movieId}/reviews",
+                                "/api/movies/{movieId}/reviews/spoiler",
                                 "/ws/**" // TODO: will delete
                         ).permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
