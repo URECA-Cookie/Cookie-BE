@@ -257,6 +257,7 @@ public class UserService {
     public void registerUser(User user) {
         userRepository.save(user);
         genreScoreService.createAndSaveGenreScore(user);
+        initBadgeAccumulationPoint(user);
     }
 
     public void registerAdmin(User user) {
@@ -350,6 +351,34 @@ public class UserService {
             review.increaseLikeCount();
             log.info("Added like to reviewId: {}", reviewId);
         }
+    }
+
+    @Transactional
+    public void initBadgeAccumulationPoint(User user) {
+        BadgeAccumulationPoint badgeAccumulationPoint = BadgeAccumulationPoint.builder()
+                .user(user)
+                .romancePoint(0)
+                .horrorPoint(0)
+                .comedyPoint(0)
+                .actionPoint(0)
+                .fantasyPoint(0)
+                .animationPoint(0)
+                .crimePoint(0)
+                .sfPoint(0)
+                .musicPoint(0)
+                .thrillerPoint(0)
+                .warPoint(0)
+                .documentaryPoint(0)
+                .dramaPoint(0)
+                .familyPoint(0)
+                .historyPoint(0)
+                .misteryPoint(0)
+                .westernPoint(0)
+                .adventurePoint(0)
+                .tvMoviePoint(0)
+                .build();
+
+        badgeAccumulationPointRepository.save(badgeAccumulationPoint);
     }
 
 }

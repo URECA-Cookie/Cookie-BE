@@ -154,12 +154,6 @@ public class MovieService {
     }
 
 
-    private String title;
-    private String poster;
-    private String releasedAt;
-    private String country;
-    private Long likes;
-    private Long reviews;
     @Transactional(readOnly = true)
     public MoviePagenationResponse getLikedMoviesByUserId(Long userId, int page, int size) {
         // Pageable 객체 생성
