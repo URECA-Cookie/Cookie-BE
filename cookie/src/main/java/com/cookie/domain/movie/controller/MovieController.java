@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -56,6 +57,12 @@ public class MovieController {
     public ResponseEntity<List<MovieSimpleResponse>> getMoviesByCategoryId(@PathVariable(name="categoryId") Long categoryId) {
         List<MovieSimpleResponse> movies = movieService.getMoviesByCategoryId(categoryId);
         return ResponseEntity.ok(movies);
+    }
+
+    @GetMapping("/{userId}/recommendations")
+    public ApiSuccess<List<MovieSimpleResponse>> getRecommendations(@PathVariable(name="userId") Long userId) {
+        List<MovieSimpleResponse> recommendedMovies = movieService.getRecommendedMovies(userId);
+        return ApiUtil.success(recommendedMovies);
     }
 
 }

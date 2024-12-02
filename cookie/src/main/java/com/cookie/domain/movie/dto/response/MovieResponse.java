@@ -20,6 +20,7 @@ public class MovieResponse {
     private String releasedAt;         // 개봉일 (LocalDateTime -> String 변환)
     private Integer runtime;           // 상영시간 (Integer)
     private Double score;              // 평점
+    private Long likes;
     private String certification;      // 연령등급 (Enum -> String 변환)
     private List<String> images;       // 영화 이미지 리스트
     private String  videos; // 영화 비디오 리스트

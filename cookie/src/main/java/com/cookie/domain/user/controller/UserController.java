@@ -96,15 +96,17 @@ public class UserController {
         return ApiUtil.success(reviews);
     }
 
-    @PostMapping("/{movieId}/movieLike")
-    public ApiSuccess<?> toggleMovieLike(@PathVariable(name="movieId") Long movieId, @RequestParam(name="userId") Long userId) {
+    @PostMapping("/movie-like/{movieId}")
+    public ApiSuccess<?> toggleMovieLike(@PathVariable(name="movieId") Long movieId, @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
+        Long userId = customOAuth2User.getId();
         userService.toggleMovieLike(movieId, userId);
         return ApiUtil.success("SUCCESS");
     }
 
-    @PostMapping("/{reviewId}/reviewLike")
-    public ApiUtil.ApiSuccess<?> toggleReviewLike(@PathVariable(name="reviewId") Long reviewId, @RequestParam(name="userId") Long userId) {
-        reviewService.toggleReviewLike(reviewId, userId);
+    @PostMapping("/review-like/{reviewId}")
+    public ApiSuccess<?> toggleReviewLike(@PathVariable(name="reviewId") Long reviewId, @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
+        Long userId = customOAuth2User.getId();
+        userService.toggleReviewLike(reviewId, userId);
         return ApiUtil.success("SUCCESS");
 
     }

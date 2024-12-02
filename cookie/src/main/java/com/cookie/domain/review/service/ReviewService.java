@@ -27,6 +27,7 @@ import com.cookie.domain.user.entity.User;
 import com.cookie.domain.user.entity.enums.ActionType;
 import com.cookie.domain.user.repository.DailyGenreScoreRepository;
 import com.cookie.domain.user.repository.UserRepository;
+import com.cookie.domain.user.service.DailyGenreScoreService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -53,6 +54,7 @@ public class ReviewService {
     private final ReviewCommentRepository reviewCommentRepository;
     private final ReviewLikeRepository reviewLikeRepository;
     private final DailyGenreScoreRepository dailyGenreScoreRepository;
+    private final DailyGenreScoreService dailyGenreScoreService;
 
     @Transactional
     public void createReview(Long userId, CreateReviewRequest createReviewRequest, CopyOnWriteArrayList<SseEmitter> reviewEmitters, CopyOnWriteArrayList<SseEmitter> pushNotificationEmitters) {
@@ -69,9 +71,17 @@ public class ReviewService {
             throw new IllegalArgumentException("해당 영화에 이미 리뷰를 등록했습니다.");
         }
 
+        List<String> genres = movie.getMovieCategories().stream()
+                .filter(mc -> "장르".equals(mc.getCategory().getMainCategory())) // "장르" 필터
+                .map(mc -> mc.getCategory().getSubCategory()) // SubCategory 추출
+                .collect(Collectors.toList());
+
+        genres.forEach(genre -> dailyGenreScoreService.saveScore(user, genre, 7, ActionType.MOVIE_LIKE));
+
         Review review = createReviewRequest.toEntity(user, movie);
         Review savedReview = reviewRepository.save(review);
         log.info("Created review: userId = {}, movieId = {}", userId, movieId);
+
 
         sendReviewCreatedEvent(savedReview, reviewEmitters); // 리뷰 피드에 실시간으로 리뷰 추가
         sendPushNotification(userId, movie, savedReview, pushNotificationEmitters); // 장르를 좋아하는 유저들에게 푸시 알림
@@ -236,36 +246,6 @@ public class ReviewService {
     }
 
     @Transactional
-    public void addReviewLike(Long reviewId, Long userId) {
-        Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new IllegalArgumentException("not found reviewId: " + reviewId));
-        log.info("Retrieved review: reviewId = {}", reviewId);
-
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("not found userId: " + userId));
-        log.info("Retrieved user: userId = {}", userId);
-
-        if (review.getUser().getId().equals(userId)) {
-            throw new IllegalArgumentException("자신의 리뷰에는 좋아요를 누를 수 없습니다.");
-        }
-
-        ReviewLike existingLike = reviewLikeRepository.findByUserAndReview(user, review);
-        if (existingLike != null) {
-            reviewLikeRepository.delete(existingLike);
-            review.decreaseLikeCount();
-            log.info("Removed like from reviewId: {}", reviewId);
-        } else {
-            ReviewLike like = ReviewLike.builder()
-                    .user(user)
-                    .review(review)
-                    .build();
-            reviewLikeRepository.save(like);
-            review.increaseLikeCount();
-            log.info("Added like to reviewId: {}", reviewId);
-        }
-    }
-
-    @Transactional
     public void createComment(Long reviewId, Long userId, ReviewCommentRequest reviewCommentRequest) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("not found userId: " + userId));
@@ -332,29 +312,6 @@ public class ReviewService {
                 .reviews(reviews)
                 .totalPages(likedReviewsPage.getTotalPages())
                 .build();
-    }
-
-
-    @Transactional
-    public boolean toggleReviewLike(Long reviewId, Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
-
-        Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new EntityNotFoundException("Review not found with id: " + reviewId));
-
-        Optional<ReviewLike> existingLike = reviewLikeRepository.findByReviewAndUser(review, user);
-
-        if (existingLike.isPresent()) {
-            reviewLikeRepository.delete(existingLike.get());
-            return false; // Indicates the like was removed
-        } else {
-            reviewLikeRepository.save(ReviewLike.builder()
-                    .user(user)
-                    .review(review)
-                    .build());
-            return true;
-        }
     }
 
 }
