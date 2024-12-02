@@ -3,7 +3,9 @@ package com.cookie.domain.review.service;
 import com.cookie.domain.movie.repository.MovieRepository;
 import com.cookie.domain.review.dto.request.CreateReviewRequest;
 import com.cookie.domain.review.dto.request.UpdateReviewRequest;
+import com.cookie.domain.review.dto.response.ReviewListResponse;
 import com.cookie.domain.review.entity.Review;
+import com.cookie.domain.review.entity.ReviewLike;
 import com.cookie.domain.review.repository.ReviewRepository;
 import com.cookie.domain.user.entity.User;
 import com.cookie.domain.movie.entity.Movie;
@@ -15,9 +17,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -202,5 +211,67 @@ class ReviewServiceTest {
 
         assertThat(exception.getMessage()).contains("not found reviewId");
     }
+
+    @Test
+    @DisplayName("영화 리뷰 피드 조회 성공 테스트")
+    void getReviewList_Success() {
+        Long userId = 1L;
+
+        Pageable pageable = PageRequest.of(0,10);
+
+        Review review = Review.builder()
+                .movie(movie)
+                .user(user)
+                .content("review")
+                .movieScore(3)
+                .build();
+
+        List<Review> reviews = new ArrayList<>();
+        reviews.add(review);
+
+        Page<Review> reviewPage = new PageImpl<>(reviews, pageable, 1);
+
+        given(reviewRepository.findAllWithMovieAndUser(pageable)).willReturn(reviewPage);
+
+        ReviewListResponse result = reviewService.getReviewList(userId, pageable);
+
+        assertThat(result.getReviews().size()).isEqualTo(1);
+        assertThat(result.getTotalReviews()).isEqualTo(1);
+        assertThat(result.getTotalReviewPages()).isEqualTo(1);
+        assertThat(result.getReviews().get(0).isLikedByUser()).isFalse();
+
+    }
+
+    @Test
+    @DisplayName("영화 스포일러 리뷰 피드 조회 성공 테스트")
+    void getSpoilerReviewList_Success() {
+        Long userId = 1L;
+
+        Pageable pageable = PageRequest.of(0,10);
+
+        Review review = Review.builder()
+                .movie(movie)
+                .user(user)
+                .content("review")
+                .movieScore(3)
+                .isSpoiler(true)
+                .build();
+
+        List<Review> reviews = new ArrayList<>();
+        reviews.add(review);
+
+        Page<Review> reviewPage = new PageImpl<>(reviews, pageable, 1);
+
+        given(reviewRepository.findAllWithMovieAndUserWithSpoilers(pageable)).willReturn(reviewPage);
+
+        ReviewListResponse result = reviewService.getSpoilerReviewList(userId, pageable);
+
+        assertThat(result.getReviews().size()).isEqualTo(1);
+        assertThat(result.getTotalReviews()).isEqualTo(1);
+        assertThat(result.getTotalReviewPages()).isEqualTo(1);
+        assertThat(result.getReviews().get(0).isLikedByUser()).isFalse();
+
+    }
+
 
 }
