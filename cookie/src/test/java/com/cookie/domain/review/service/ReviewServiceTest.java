@@ -2,6 +2,7 @@ package com.cookie.domain.review.service;
 
 import com.cookie.domain.movie.repository.MovieRepository;
 import com.cookie.domain.review.dto.request.CreateReviewRequest;
+import com.cookie.domain.review.dto.request.UpdateReviewRequest;
 import com.cookie.domain.review.entity.Review;
 import com.cookie.domain.review.repository.ReviewRepository;
 import com.cookie.domain.user.entity.User;
@@ -130,6 +131,29 @@ class ReviewServiceTest {
 
         assertThat(exception.getMessage()).contains("해당 영화에 이미 리뷰를 등록했습니다.");
     }
+
+    @Test
+    @DisplayName("영화 리뷰 수정 성공 테스트")
+    void updateReview_Success() {
+        Long reviewId = 1L;
+        UpdateReviewRequest updateReviewRequest = new UpdateReviewRequest("updated 리뷰", 5, true);
+
+        Review review = Review.builder()
+                .content("리뷰")
+                .movieScore(3)
+                .isSpoiler(false)
+                .build();
+
+        given(reviewRepository.findById(reviewId)).willReturn(Optional.of(review));
+
+        reviewService.updateReview(reviewId, updateReviewRequest);
+
+        assertThat(review.getContent()).isEqualTo(updateReviewRequest.getContent());
+        assertThat(review.getMovieScore()).isEqualTo(updateReviewRequest.getMovieScore());
+        assertThat(review.isSpoiler()).isEqualTo(updateReviewRequest.getIsSpoiler());
+
+    }
+
 
 
 
