@@ -112,13 +112,6 @@ public class ReviewController {
         return ApiUtil.success(reviewDetailResponse);
     }
 
-    @PostMapping("/{reviewId}/like")
-    public ApiSuccess<?> addReviewLike(@PathVariable(name = "reviewId") Long reviewId, @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
-        Long userId = customOAuth2User.getId();
-        reviewService.addReviewLike(reviewId, userId);
-        return ApiUtil.success("SUCCESS");
-    }
-
     @PostMapping("/{reviewId}/comments")
     public ApiSuccess<?> createComment(@PathVariable(name = "reviewId") Long reviewId, @AuthenticationPrincipal CustomOAuth2User customOAuth2User, @RequestBody ReviewCommentRequest reviewCommentRequest) {
         Long userId = customOAuth2User.getId();
