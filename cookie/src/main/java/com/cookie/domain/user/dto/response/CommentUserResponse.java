@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CommentUserResponse {
+    private Long userId;
     private String nickname;
     private String profileImage;
 }

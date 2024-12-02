@@ -208,6 +208,7 @@ public class ReviewService {
         List<ReviewCommentResponse> comments = reviewComments.stream()
                 .map(comment -> new ReviewCommentResponse(
                         new CommentUserResponse(
+                                comment.getUser().getId(),
                                 comment.getUser().getNickname(),
                                 comment.getUser().getProfileImage()),
                         comment.getCreatedAt(),
