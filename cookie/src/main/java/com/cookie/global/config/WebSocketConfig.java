@@ -23,7 +23,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/ws").setAllowedOrigins("www.cookiekie.com").withSockJS();
+        registry.addEndpoint("/ws").setAllowedOrigins("https://cookiekie.com").withSockJS();
     }
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
