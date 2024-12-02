@@ -154,8 +154,22 @@ class ReviewServiceTest {
 
     }
 
+    @Test
+    @DisplayName("영화 리뷰 수정 실패 테스트 - NotFoundReview")
+    void updateReview_Fail_NotFound() {
+        Long reviewId = 1L;
 
+        UpdateReviewRequest updateReviewRequest = new UpdateReviewRequest(
+                "Updated 리뷰", 5, true
+        );
 
+        given(reviewRepository.findById(reviewId)).willReturn(Optional.empty());
 
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            reviewService.updateReview(reviewId, updateReviewRequest);
+        });
+
+        assertThat(exception.getMessage()).contains("not found reviewId");
+    }
 
 }
