@@ -98,7 +98,8 @@ public class SecurityConfig {
                                 "/api/reviews/spoiler",
                                 "/api/reviews/{reviewId}",
                                 "/api/movies/{movieId}/reviews",
-                                "/api/movies/{movieId}/reviews/spoiler"
+                                "/api/movies/{movieId}/reviews/spoiler",
+                                "/api/admin/movie/base"
 
                         ).permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
