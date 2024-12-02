@@ -105,4 +105,33 @@ class ReviewServiceTest {
         assertThat(exception.getMessage()).contains("not found movieId");
     }
 
+
+    @Test
+    @DisplayName("영화 리뷰 등록 실패 테스트 - 이미 리뷰를 등록한 영화")
+    void createReview_Fail_AlreadyExists() {
+        Long userId = 1L;
+        Long movieId = 1L;
+
+        CreateReviewRequest createReviewRequest = new CreateReviewRequest(
+                movieId, "재밌었어요!", 4, false
+        );
+
+        given(userRepository.findById(userId)).willReturn(Optional.of(user));
+        given(movieRepository.findById(movieId)).willReturn(Optional.of(movie));
+
+        given(reviewRepository.findByUserAndMovie(user, movie)).willReturn(Optional.of(mock(Review.class)));
+
+        CopyOnWriteArrayList<SseEmitter> reviewEmitters = new CopyOnWriteArrayList<>();
+        CopyOnWriteArrayList<SseEmitter> pushNotificationEmitters = new CopyOnWriteArrayList<>();
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            reviewService.createReview(userId, createReviewRequest, reviewEmitters, pushNotificationEmitters);
+        });
+
+        assertThat(exception.getMessage()).contains("해당 영화에 이미 리뷰를 등록했습니다.");
+    }
+
+
+
+
 }
