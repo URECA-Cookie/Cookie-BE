@@ -56,4 +56,5 @@ public class AWSS3Service {
         return amazonS3.getUrl(bucketName, s3Filename).toString();
     }
 
+    // TO DO - aws delete image 필요
 }
