@@ -27,6 +27,7 @@ import com.cookie.domain.user.entity.User;
 import com.cookie.domain.user.entity.enums.ActionType;
 import com.cookie.domain.user.repository.DailyGenreScoreRepository;
 import com.cookie.domain.user.repository.UserRepository;
+import com.cookie.domain.user.service.DailyGenreScoreService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -53,6 +54,7 @@ public class ReviewService {
     private final ReviewCommentRepository reviewCommentRepository;
     private final ReviewLikeRepository reviewLikeRepository;
     private final DailyGenreScoreRepository dailyGenreScoreRepository;
+    private final DailyGenreScoreService dailyGenreScoreService;
 
     @Transactional
     public void createReview(Long userId, CreateReviewRequest createReviewRequest, CopyOnWriteArrayList<SseEmitter> reviewEmitters, CopyOnWriteArrayList<SseEmitter> pushNotificationEmitters) {
@@ -69,9 +71,17 @@ public class ReviewService {
             throw new IllegalArgumentException("해당 영화에 이미 리뷰를 등록했습니다.");
         }
 
+        List<String> genres = movie.getMovieCategories().stream()
+                .filter(mc -> "장르".equals(mc.getCategory().getMainCategory())) // "장르" 필터
+                .map(mc -> mc.getCategory().getSubCategory()) // SubCategory 추출
+                .collect(Collectors.toList());
+
+        genres.forEach(genre -> dailyGenreScoreService.saveScore(user, genre, 7, ActionType.MOVIE_LIKE));
+
         Review review = createReviewRequest.toEntity(user, movie);
         Review savedReview = reviewRepository.save(review);
         log.info("Created review: userId = {}, movieId = {}", userId, movieId);
+
 
         sendReviewCreatedEvent(savedReview, reviewEmitters); // 리뷰 피드에 실시간으로 리뷰 추가
         sendPushNotification(userId, movie, savedReview, pushNotificationEmitters); // 장르를 좋아하는 유저들에게 푸시 알림
