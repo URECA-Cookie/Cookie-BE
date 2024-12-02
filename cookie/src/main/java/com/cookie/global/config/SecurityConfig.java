@@ -98,8 +98,8 @@ public class SecurityConfig {
                                 "/api/reviews/spoiler",
                                 "/api/reviews/{reviewId}",
                                 "/api/movies/{movieId}/reviews",
-                                "/api/movies/{movieId}/reviews/spoiler",
-                                "/ws/**" // TODO: will delete
+                                "/api/movies/{movieId}/reviews/spoiler"
+
                         ).permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
