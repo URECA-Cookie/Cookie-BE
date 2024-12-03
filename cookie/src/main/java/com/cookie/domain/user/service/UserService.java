@@ -383,5 +383,13 @@ public class UserService {
         badgeAccumulationPointRepository.save(badgeAccumulationPoint);
     }
 
+    public UserResponse getUserInfo(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("not found userId: " + userId));
+        log.info("Retrieved user: userId = {}", userId);
+
+        return new UserResponse(user.getId(), user.getNickname(), user.getProfileImage(), user.getCategory().getId());
+    }
+
 }
 
