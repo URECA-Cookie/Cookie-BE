@@ -2,10 +2,7 @@ package com.cookie.domain.movie.controller;
 
 
 import com.cookie.domain.category.request.CategoryRequest;
-import com.cookie.domain.movie.dto.response.MainPageResponse;
-import com.cookie.domain.movie.dto.response.MovieResponse;
-import com.cookie.domain.movie.dto.response.MovieSimpleResponse;
-import com.cookie.domain.movie.dto.response.ReviewOfMovieResponse;
+import com.cookie.domain.movie.dto.response.*;
 import com.cookie.domain.movie.service.MovieService;
 import com.cookie.domain.user.dto.response.auth.CustomOAuth2User;
 import com.cookie.global.util.ApiUtil;
@@ -52,9 +49,12 @@ public class MovieController {
 
     }
 
-    @GetMapping("/{categoryId}/categoryMovies")
-    public ResponseEntity<List<MovieSimpleResponse>> getMoviesByCategoryId(@RequestBody CategoryRequest categoryRequest) {
-        List<MovieSimpleResponse> movies = movieService.getMoviesByCategory(categoryRequest);
+    @GetMapping("/categoryMovies")
+    public ResponseEntity<MoviePagenationResponse> getMoviesByCategoryId(@RequestBody CategoryRequest categoryRequest
+    , @RequestParam(name="page", defaultValue = "0") int page, // 요청 페이지 번호 (기본값: 0)
+     @RequestParam(name="size", defaultValue = "10") int size) // 페이지 크기 (기본값: 10))
+    {
+        MoviePagenationResponse movies = movieService.getMoviesByCategory(categoryRequest, page, size);
         return ResponseEntity.ok(movies);
     }
 

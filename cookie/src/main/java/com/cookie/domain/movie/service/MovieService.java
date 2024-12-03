@@ -221,17 +221,20 @@ public class MovieService {
 
 
     @Cacheable("categoryMoviesCache")
-    public List<MovieSimpleResponse> getMoviesByCategory(CategoryRequest categoryRequest) {
+    public MoviePagenationResponse getMoviesByCategory(CategoryRequest categoryRequest, int page, int size) {
         // 1. mainCategory와 subCategory로 Category ID 조회
-        Category category = categoryRepository.findByMainCategoryAndSubCategory(categoryRequest.getMainCategory(), categoryRequest.getSubCategory())
+        Category category = categoryRepository.findByMainCategoryAndSubCategory(
+                        categoryRequest.getMainCategory(), categoryRequest.getSubCategory())
                 .orElseThrow(() -> new IllegalArgumentException("해당 카테고리가 존재하지 않습니다."));
 
-        // 2. 카테고리 ID로 영화 리스트 조회
-        List<Movie> movies = movieCategoryRepository.findMoviesByCategoryId(category.getId());
+        // 2. 카테고리 ID로 영화 리스트 조회 (페이지네이션 적용)
+        Pageable pageable = PageRequest.of(page, size); // 페이지는 0부터 시작하므로 page-1
+        Page<Movie> moviePage = movieCategoryRepository.findMoviesByCategoryIdWithPagination(category.getId(), pageable);
 
         // 3. 조회된 영화 데이터를 MovieSimpleResponse DTO로 변환
-        return movies.stream()
+        List<MovieSimpleResponse> movies = moviePage.getContent().stream()
                 .map(movie -> MovieSimpleResponse.builder()
+                        .id(movie.getId())
                         .title(movie.getTitle()) // 영화 제목
                         .poster(movie.getPoster()) // 포스터 URL
                         .releasedAt(movie.getReleasedAt()) // 출시일
@@ -240,7 +243,15 @@ public class MovieService {
                         .reviews((long) (movie.getReviews() != null ? movie.getReviews().size() : 0)) // 리뷰 수
                         .build())
                 .collect(Collectors.toList());
+
+        // 4. 페이지네이션 정보를 포함한 응답 생성
+        return MoviePagenationResponse.builder()
+                .currentPage(page)
+                .movies(movies)
+                .totalPages(moviePage.getTotalPages())
+                .build();
     }
+
 
 
     public List<MovieSimpleResponse> getRecommendedMovies(Long userId) {
