@@ -5,7 +5,7 @@ import com.cookie.admin.dto.response.AdminMovieDetailResponse;
 import com.cookie.admin.dto.response.MovieCasts;
 import com.cookie.admin.dto.response.MovieCategories;
 import com.cookie.admin.exception.MovieNotFoundException;
-import com.cookie.admin.repository.CategoryRepository;
+import com.cookie.domain.category.repository.CategoryRepository;
 import com.cookie.domain.category.entity.Category;
 import com.cookie.domain.director.entity.Director;
 import com.cookie.domain.director.repository.DirectorRepository;

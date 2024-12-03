@@ -1,9 +1,8 @@
 package com.cookie.domain.movie.controller;
 
 
-import com.cookie.domain.movie.dto.response.MovieResponse;
-import com.cookie.domain.movie.dto.response.MovieSimpleResponse;
-import com.cookie.domain.movie.dto.response.ReviewOfMovieResponse;
+import com.cookie.domain.category.request.CategoryRequest;
+import com.cookie.domain.movie.dto.response.*;
 import com.cookie.domain.movie.service.MovieService;
 import com.cookie.domain.user.dto.response.auth.CustomOAuth2User;
 import com.cookie.global.util.ApiUtil;
@@ -14,10 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -53,9 +49,12 @@ public class MovieController {
 
     }
 
-    @GetMapping("/{categoryId}/categoryMovies")
-    public ResponseEntity<List<MovieSimpleResponse>> getMoviesByCategoryId(@PathVariable(name="categoryId") Long categoryId) {
-        List<MovieSimpleResponse> movies = movieService.getMoviesByCategoryId(categoryId);
+    @GetMapping("/categoryMovies")
+    public ResponseEntity<MoviePagenationResponse> getMoviesByCategoryId(@RequestBody CategoryRequest categoryRequest
+    , @RequestParam(name="page", defaultValue = "0") int page, // 요청 페이지 번호 (기본값: 0)
+     @RequestParam(name="size", defaultValue = "10") int size) // 페이지 크기 (기본값: 10))
+    {
+        MoviePagenationResponse movies = movieService.getMoviesByCategory(categoryRequest, page, size);
         return ResponseEntity.ok(movies);
     }
 
@@ -64,5 +63,11 @@ public class MovieController {
         List<MovieSimpleResponse> recommendedMovies = movieService.getRecommendedMovies(userId);
         return ApiUtil.success(recommendedMovies);
     }
+
+//    @GetMapping("/mainPage")
+//    public ApiSuccess<MainPageResponse> getMainPageInfo(){
+//        MainPageResponse mainPageResponse = movieService.getMainPageInfo();
+//        return ApiUtil.success(mainPageResponse);
+//    }
 
 }

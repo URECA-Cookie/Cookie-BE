@@ -1,6 +1,6 @@
 package com.cookie.domain.user.service;
 
-import com.cookie.admin.repository.CategoryRepository;
+import com.cookie.domain.category.repository.CategoryRepository;
 import com.cookie.domain.badge.dto.MyBadgeResponse;
 import com.cookie.domain.badge.repository.BadgeRepository;
 import com.cookie.domain.category.entity.Category;
@@ -282,7 +282,7 @@ public class UserService {
     }
 
     @Transactional
-    public boolean toggleMovieLike(Long movieId, Long userId) {
+    public void toggleMovieLike(Long movieId, Long userId) {
         // 사용자가 존재하는지 확인
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
@@ -308,7 +308,7 @@ public class UserService {
             // DailyGenreScore에서 -6점 추가
             genres.forEach(genre -> dailyGenreScoreService.saveScore(user, genre, -6, ActionType.MOVIE_LIKE));
 
-            return false; // 좋아요 취소
+
         } else {
             // 좋아요를 누르지 않았다면 새로 추가
             MovieLike movieLike = MovieLike.builder()
@@ -321,7 +321,6 @@ public class UserService {
             // DailyGenreScore에 6점 추가
             genres.forEach(genre -> dailyGenreScoreService.saveScore(user, genre, 6, ActionType.MOVIE_LIKE));
 
-            return true; // 좋아요 등록
         }
     }
 
