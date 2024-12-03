@@ -3,6 +3,8 @@ package com.cookie.domain.user.controller;
 import com.cookie.domain.category.service.CategoryService;
 import com.cookie.domain.user.dto.request.auth.AdminLoginRequest;
 import com.cookie.domain.user.dto.request.auth.AdminRegisterRequest;
+import com.cookie.domain.user.dto.response.UserInfoResponse;
+import com.cookie.domain.user.dto.response.UserResponse;
 import com.cookie.domain.user.dto.response.auth.CustomOAuth2User;
 import com.cookie.domain.user.dto.response.auth.CustomUserDetails;
 import com.cookie.domain.user.dto.response.auth.TokenResponse;
@@ -80,7 +82,7 @@ public class AuthController {
                 .role(Role.USER)
                 .build();
 
-        userService.registerUser(newUser);
+        UserResponse userResponse = userService.registerUser(newUser);
 
         // JWT 토큰 생성
         String accessToken = jwtUtil.createAccessToken(newUser.getId(), newUser.getNickname(), newUser.getRole().name());
@@ -112,8 +114,10 @@ public class AuthController {
 
         log.info("{}", response);
 
+        UserInfoResponse userInfoResponse = new UserInfoResponse(userResponse, response);
+
         return ResponseEntity.ok()
-                .body(ApiUtil.success(response));
+                .body(ApiUtil.success(userInfoResponse));
     }
 
     @GetMapping("/retrieve-token")
