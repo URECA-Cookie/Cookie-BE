@@ -254,10 +254,12 @@ public class UserService {
 
 
     @Transactional
-    public void registerUser(User user) {
+    public UserResponse registerUser(User user) {
         userRepository.save(user);
         genreScoreService.createAndSaveGenreScore(user);
         initBadgeAccumulationPoint(user);
+
+        return new UserResponse(user.getId(), user.getNickname(), user.getProfileImage(), user.getCategory().getId());
     }
 
     public void registerAdmin(User user) {
@@ -379,6 +381,14 @@ public class UserService {
                 .build();
 
         badgeAccumulationPointRepository.save(badgeAccumulationPoint);
+    }
+
+    public UserResponse getUserInfo(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("not found userId: " + userId));
+        log.info("Retrieved user: userId = {}", userId);
+
+        return new UserResponse(user.getId(), user.getNickname(), user.getProfileImage(), user.getCategory().getId());
     }
 
 }

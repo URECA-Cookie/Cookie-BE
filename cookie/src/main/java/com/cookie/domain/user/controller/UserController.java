@@ -10,6 +10,7 @@ import com.cookie.domain.review.service.ReviewService;
 import com.cookie.domain.user.dto.response.BadgeAccResponse;
 import com.cookie.domain.user.dto.response.MyPageResponse;
 import com.cookie.domain.user.dto.response.MyProfileDataResponse;
+import com.cookie.domain.user.dto.response.UserResponse;
 import com.cookie.domain.user.dto.response.auth.CustomOAuth2User;
 import com.cookie.domain.user.service.UserService;
 import com.cookie.global.util.ApiUtil;
@@ -108,6 +109,14 @@ public class UserController {
         Long userId = customOAuth2User.getId();
         userService.toggleReviewLike(reviewId, userId);
         return ApiUtil.success("SUCCESS");
+
+    }
+
+    @GetMapping("info")
+    public ApiSuccess<?> getUserInfo(@AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
+        Long userId = customOAuth2User.getId();
+        UserResponse userResponse = userService.getUserInfo(userId);
+        return ApiUtil.success(userResponse);
 
     }
 }
