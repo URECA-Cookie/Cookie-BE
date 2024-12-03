@@ -5,7 +5,7 @@ import com.cookie.admin.dto.response.AdminMovieTMDBDetailResponse;
 import com.cookie.admin.dto.response.tmdb.TMDBCasts;
 import com.cookie.admin.dto.response.tmdb.TMDBMovieSearchResponse;
 import com.cookie.admin.exception.MovieAlreadyExistsException;
-import com.cookie.admin.repository.CategoryRepository;
+import com.cookie.domain.category.repository.CategoryRepository;
 import com.cookie.admin.repository.CountryRepository;
 import com.cookie.domain.actor.entity.Actor;
 import com.cookie.domain.actor.repository.ActorRepository;

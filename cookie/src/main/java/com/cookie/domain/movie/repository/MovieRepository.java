@@ -63,7 +63,7 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
     WHERE c.subCategory = :genre
     ORDER BY m.movieLikes DESC
 """)
-    List<MovieSimpleResponse> findTop3MoviesByCategory(@Param("genre") String genre);
+    List<MovieSimpleResponse> findTopMoviesByCategory(@Param("genre") String genre);
 
 
 

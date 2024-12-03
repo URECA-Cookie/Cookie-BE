@@ -1,6 +1,7 @@
 package com.cookie.domain.matchup.repository;
 
 import com.cookie.domain.matchup.entity.ChatMessage;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 

@@ -1,6 +1,6 @@
 package com.cookie.domain.category.service;
 
-import com.cookie.admin.repository.CategoryRepository;
+import com.cookie.domain.category.repository.CategoryRepository;
 import com.cookie.domain.category.entity.Category;
 
 import lombok.RequiredArgsConstructor;

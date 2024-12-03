@@ -1,10 +1,12 @@
 package com.cookie.domain.movie.service;
 
 
-import com.cookie.domain.movie.dto.response.MoviePagenationResponse;
-import com.cookie.domain.movie.dto.response.MovieResponse;
-import com.cookie.domain.movie.dto.response.MovieSimpleResponse;
-import com.cookie.domain.movie.dto.response.ReviewOfMovieResponse;
+import com.cookie.domain.category.repository.CategoryRepository;
+import com.cookie.domain.category.entity.Category;
+import com.cookie.domain.category.request.CategoryRequest;
+import com.cookie.domain.matchup.dto.response.MainMatchUpsResponse;
+import com.cookie.domain.matchup.service.MatchUpService;
+import com.cookie.domain.movie.dto.response.*;
 import com.cookie.domain.movie.entity.Movie;
 import com.cookie.domain.movie.entity.MovieImage;
 import com.cookie.domain.movie.entity.MovieLike;
@@ -21,6 +23,7 @@ import com.cookie.domain.user.entity.User;
 import com.cookie.domain.user.repository.GenreScoreRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -41,6 +44,8 @@ public class MovieService {
     private final MovieLikeRepository movieLikeRepository;
     private final ReviewLikeRepository reviewLikeRepository;
     private final GenreScoreRepository genreScoreRepository;
+    private final CategoryRepository categoryRepository;
+    private final MatchUpService matchUpService;
 
 
     @Transactional(readOnly = true)
@@ -215,18 +220,23 @@ public class MovieService {
     }
 
 
-    public List<MovieSimpleResponse> getMoviesByCategoryId(Long categoryId) {
-        // 카테고리 ID로 영화 리스트 조회
-        List<Movie> movies = movieCategoryRepository.findMoviesByCategoryId(categoryId);
+    @Cacheable("categoryMoviesCache")
+    public List<MovieSimpleResponse> getMoviesByCategory(CategoryRequest categoryRequest) {
+        // 1. mainCategory와 subCategory로 Category ID 조회
+        Category category = categoryRepository.findByMainCategoryAndSubCategory(categoryRequest.getMainCategory(), categoryRequest.getSubCategory())
+                .orElseThrow(() -> new IllegalArgumentException("해당 카테고리가 존재하지 않습니다."));
 
-        // 조회된 영화 데이터를 MovieSimpleResponse DTO로 변환
+        // 2. 카테고리 ID로 영화 리스트 조회
+        List<Movie> movies = movieCategoryRepository.findMoviesByCategoryId(category.getId());
+
+        // 3. 조회된 영화 데이터를 MovieSimpleResponse DTO로 변환
         return movies.stream()
                 .map(movie -> MovieSimpleResponse.builder()
                         .title(movie.getTitle()) // 영화 제목
                         .poster(movie.getPoster()) // 포스터 URL
-                        .releasedAt(movie.getReleasedAt())
-                        .country(movie.getCountry().getName())
-                        .likes(movieRepository.countLikesByMovieId(movie.getId())) // Movie 엔티티에 likes 관련 정보 없음
+                        .releasedAt(movie.getReleasedAt()) // 출시일
+                        .country(movie.getCountry().getName()) // 국가
+                        .likes(movieRepository.countLikesByMovieId(movie.getId())) // 좋아요 수
                         .reviews((long) (movie.getReviews() != null ? movie.getReviews().size() : 0)) // 리뷰 수
                         .build())
                 .collect(Collectors.toList());
@@ -240,36 +250,61 @@ public class MovieService {
             throw new IllegalArgumentException("No genre scores found for user ID: " + userId);
         }
 
-        // 2. 상위 3개 장르 추출
+        // 2. 장르 점수 맵핑
         Map<String, Long> genreMap = mapGenreScores(genreScoreResponse);
-        List<String> topGenres = genreMap.entrySet().stream()
-                .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
+        List<Map.Entry<String, Long>> sortedGenres = genreMap.entrySet().stream()
                 .filter(entry -> entry.getValue() > 0) // 0점 이상인 장르만
-                .limit(3) // 상위 3개 장르만
-                .map(Map.Entry::getKey)
+                .sorted(Map.Entry.<String, Long>comparingByValue().reversed()
+                        .thenComparing(Map.Entry.comparingByKey())) // 동일 점수일 때 알파벳 순 정렬
                 .toList();
+
+        // 예외 처리: 장르 점수가 없는 경우
+        if (sortedGenres.isEmpty()) {
+            throw new IllegalArgumentException("No genres with scores greater than 0 for user ID: " + userId);
+        }
 
         // 3. 중복 방지를 위한 Set
         Set<Long> seenMovieIds = new HashSet<>();
         List<MovieSimpleResponse> recommendedMovies = new ArrayList<>();
 
-        // 4. 각 장르별로 영화 가져오기
-        for (String genre : topGenres) {
-            List<MovieSimpleResponse> movies = movieRepository.findTop3MoviesByCategory(genre);
-
-            for (MovieSimpleResponse movie : movies) {
-                if (!seenMovieIds.contains(movie.getId())) {
-                    recommendedMovies.add(movie);
-                    seenMovieIds.add(movie.getId());
-                }
-                // 최대 9개로 제한
-                if (recommendedMovies.size() == 9) {
-                    return recommendedMovies;
-                }
+        // 4. 장르 개수에 따라 로직 처리
+        if (sortedGenres.size() == 1) {
+            // 하나의 장르만 있는 경우 해당 장르에서 9개 추천
+            String genre = sortedGenres.get(0).getKey();
+            recommendedMovies.addAll(fetchMoviesForGenre(genre, 9, seenMovieIds));
+        } else if (sortedGenres.size() == 2) {
+            // 두 개의 장르가 있는 경우 높은 점수에서 5개, 두 번째에서 4개 추천
+            String firstGenre = sortedGenres.get(0).getKey();
+            String secondGenre = sortedGenres.get(1).getKey();
+            recommendedMovies.addAll(fetchMoviesForGenre(firstGenre, 5, seenMovieIds));
+            recommendedMovies.addAll(fetchMoviesForGenre(secondGenre, 4, seenMovieIds));
+        } else {
+            // 세 개 이상의 장르가 있는 경우 상위 3개 장르에서 각각 3개 추천
+            for (int i = 0; i < 3; i++) {
+                String genre = sortedGenres.get(i).getKey();
+                recommendedMovies.addAll(fetchMoviesForGenre(genre, 3, seenMovieIds));
             }
         }
 
-        return recommendedMovies;
+        // 결과가 9개를 넘을 경우 잘라서 반환
+        return recommendedMovies.size() > 9 ? recommendedMovies.subList(0, 9) : recommendedMovies;
+    }
+
+    private List<MovieSimpleResponse> fetchMoviesForGenre(String genre, int limit, Set<Long> seenMovieIds) {
+        List<MovieSimpleResponse> movies = movieRepository.findTopMoviesByCategory(genre);
+        List<MovieSimpleResponse> filteredMovies = new ArrayList<>();
+
+        for (MovieSimpleResponse movie : movies) {
+            if (!seenMovieIds.contains(movie.getId())) {
+                filteredMovies.add(movie);
+                seenMovieIds.add(movie.getId());
+            }
+            if (filteredMovies.size() == limit) {
+                break;
+            }
+        }
+
+        return filteredMovies;
     }
 
 
@@ -297,6 +332,18 @@ public class MovieService {
         return genreMap;
     }
 
+    @Cacheable("mainPageCache") // Caffeine Cache 적용
+   public MainPageResponse getMainPageInfo(CategoryRequest categoryRequest, Long userId){
+        MainPageResponse mainPageResponse = new MainPageResponse();
+
+        // 1. 배너
+       // 2. 매치업
+       MainMatchUpsResponse mainMatchUpsResponse = matchUpService.getMainMatchUps();
+       // 3. 박스오피스
+       //BoxofficeMovieList boxofficeMovieList =
+        return null;
+
+   }
 
 
 }
