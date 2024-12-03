@@ -165,6 +165,7 @@ public class MovieService {
         // MovieLike -> MovieSimpleResponse 변환
         List<MovieSimpleResponse> movies = likedMoviesPage.getContent().stream()
                 .map(movieLike -> MovieSimpleResponse.builder()
+                        .id(movieLike.getMovie().getId())
                         .title(movieLike.getMovie().getTitle())
                         .poster(movieLike.getMovie().getPoster())
                         .releasedAt(movieLike.getMovie().getReleasedAt())
