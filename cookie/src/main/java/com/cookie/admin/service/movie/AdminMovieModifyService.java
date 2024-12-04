@@ -3,14 +3,13 @@ package com.cookie.admin.service.movie;
 import com.cookie.admin.dto.response.AdminMovieCategoryResponse;
 import com.cookie.admin.dto.response.MovieCategories;
 import com.cookie.admin.exception.MovieNotFoundException;
+import com.cookie.admin.repository.RecommendRepository;
 import com.cookie.domain.category.repository.CategoryRepository;
 import com.cookie.domain.category.entity.Category;
 import com.cookie.domain.movie.entity.Movie;
 import com.cookie.domain.movie.entity.MovieCategory;
-import com.cookie.domain.movie.repository.MovieActorRepository;
-import com.cookie.domain.movie.repository.MovieCategoryRepository;
-import com.cookie.domain.movie.repository.MovieImageRepository;
-import com.cookie.domain.movie.repository.MovieRepository;
+import com.cookie.domain.movie.repository.*;
+import com.cookie.domain.review.repository.ReviewRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -31,6 +30,10 @@ public class AdminMovieModifyService {
     private final MovieActorRepository movieActorRepository;
     private final MovieCategoryRepository movieCategoryRepository;
     private final MovieImageRepository movieImageRepository;
+    private final ReviewRepository reviewRepository;
+    private final RecommendRepository recommendRepository;
+    private final MovieMonthRankingRepository movieMonthRankingRepository;
+    private final MovieLikeRepository movieLikeRepository;
 
     @Transactional
     public AdminMovieCategoryResponse updateMovieCategory(Long movieId, List<MovieCategories> categories) {
@@ -105,9 +108,14 @@ public class AdminMovieModifyService {
             movieActorRepository.deleteByMovieId(movie.getId());
             movieCategoryRepository.deleteByMovieId(movie.getId());
             movieImageRepository.deleteByMovieId(movie.getId());
+            reviewRepository.deleteByMovieId(movie.getId());
+            movieLikeRepository.deleteByMovieId(movie.getId());
+            recommendRepository.deleteByMovieId(movie.getId());
+            movieMonthRankingRepository.deleteByMovieId(movie.getId());
 
             movieRepository.deleteByMovieId(movie.getId());
             // 추가 삭제 로직 기능 구현 필요
+            // 히스토리?
             deleteMovieIds.add(movie.getId());
         }
 

@@ -18,10 +18,10 @@ public class BadgeAction {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
-    private int actionPoint;
+    private Integer actionPoint;
 
     @Builder
-    public BadgeAction(String name, int actionPoint) {
+    public BadgeAction(String name, Integer actionPoint) {
         this.name = name;
         this.actionPoint = actionPoint;
     }
