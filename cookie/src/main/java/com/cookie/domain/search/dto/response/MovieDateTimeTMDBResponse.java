@@ -2,14 +2,12 @@ package com.cookie.domain.search.dto.response;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 
 import java.util.List;
 
 @Getter
 @NoArgsConstructor
-@ToString
-public class MovieMonthTMDBResponse {
+public class MovieDateTimeTMDBResponse {
 
-    private List<MovieMonthTMDB> results;
+    private List<MovieDateTimeTMDB> results;
 }

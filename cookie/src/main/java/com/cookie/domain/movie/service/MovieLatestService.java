@@ -7,8 +7,8 @@ import com.cookie.domain.movie.entity.Movie;
 import com.cookie.domain.movie.entity.MovieMonthOrder;
 import com.cookie.domain.movie.repository.MovieRepository;
 import com.cookie.domain.movie.repository.MovieWeekOrderRepository;
-import com.cookie.domain.search.dto.response.MovieMonthTMDB;
-import com.cookie.domain.search.dto.response.MovieMonthTMDBResponse;
+import com.cookie.domain.search.dto.response.MovieDateTimeTMDB;
+import com.cookie.domain.search.dto.response.MovieDateTimeTMDBResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatusCode;
@@ -45,33 +45,109 @@ public class MovieLatestService {
     @Transactional
     public void createDailyMovies() {
 
-        LocalDate now = LocalDate.now();
-        String today = now.format(DATE_TIME_FORMATTER);
+        List<MovieDateTimeTMDB> dailyCreateMovies = fetchMoviesDailyFromTMDB();
 
+        if (dailyCreateMovies.isEmpty()) {
+            return;
+        }
+
+        dailyCreateMovies.sort(Comparator.comparing(MovieDateTimeTMDB::getPopularity).reversed());
+
+        List<Long> createMovieIds = dailyCreateMovies.stream().map(MovieDateTimeTMDB::getId).toList();
+
+        if (createMovieIds.size() > 3) {
+            createMovieIds = new ArrayList<>(createMovieIds.subList(0, 3));
+        }
+
+        createMovies(createMovieIds);
     }
 
     @Transactional
     public void createMoviesWeek() {
 
-        List<MovieMonthTMDB> movieMonthTMDBS = fetchMoviesWeekFromTMDB();
+        List<MovieDateTimeTMDB> movieDateTimeTMDBS = fetchMoviesWeekFromTMDB();
 
-        List<Long> createMovieIds = fetchMissingMovieIds(movieMonthTMDBS);
+        List<Long> createMovieIds = fetchMissingMovieIds(movieDateTimeTMDBS);
         List<Movie> createdMovies = createMovies(createMovieIds);
 
-        List<Movie> existingMovies = fetchExistMovieIds(movieMonthTMDBS);
+        List<Movie> existingMovies = fetchExistMovieIds(movieDateTimeTMDBS);
 
         List<Movie> addMovieWeekDates = Stream.concat(createdMovies.stream(), existingMovies.stream())
                 .distinct()
                 .collect(Collectors.toList());
 
-        saveWeekMovies(addMovieWeekDates, movieMonthTMDBS);
+        saveWeekMovies(addMovieWeekDates, movieDateTimeTMDBS);
     }
 
-    private void saveWeekMovies(List<Movie> addMovieWeekDates, List<MovieMonthTMDB> movieMonthTMDBS) {
-        Map<Long, Double> moviePopularityMap = movieMonthTMDBS.stream()
+    private List<MovieDateTimeTMDB> fetchMoviesDailyFromTMDB() {
+
+        LocalDate today = LocalDate.now();
+        String date = today.format(DATE_TIME_FORMATTER);
+
+        int maxPage = 3;
+
+        List<CompletableFuture<List<MovieDateTimeTMDB>>> futures = new ArrayList<>();
+
+        for (int page = 1; page <= maxPage; page++) {
+            String url = createMovieDailyUrl(date, page);
+            futures.add(CompletableFuture.supplyAsync(() -> getMovieDailyDates(url)));
+        }
+
+        return futures.stream()
+                .map(CompletableFuture::join)
+                .flatMap(List::stream)
+                .filter(movie -> movie.getOriginalLanguage().equals("ko"))
+                .limit(10)
+                .collect(Collectors.toList());
+    }
+
+    private List<MovieDateTimeTMDB> getMovieDailyDates(String url) {
+        MovieDateTimeTMDBResponse dates = webClient.get()
+                .uri(url)
+                .header("accept", "application/json")
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, clientResponse ->
+                        Mono.error(new RuntimeException("잘못된 TMDB API 요청입니다. 요청 URL 또는 매개변수를 확인하세요."))
+                )
+                .onStatus(HttpStatusCode::is5xxServerError, clientResponse ->
+                        Mono.error(new RuntimeException("TMDB 요청 중 서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요."))
+                )
+                .bodyToMono(MovieDateTimeTMDBResponse.class)
+                .retryWhen(Retry.backoff(2, Duration.ofSeconds(1)))
+                .block();
+
+        if (dates == null) {
+            return Collections.emptyList();
+        }
+
+        return dates.getResults().stream()
+                .map(data -> MovieDateTimeTMDB.builder()
+                        .title(data.getTitle())
+                        .id(data.getId())
+                        .originalLanguage(data.getOriginalLanguage())
+                        .popularity(data.getPopularity())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    private List<Movie> createMovies(List<Long> createMovieIds) {
+
+        List<Movie> movies = new ArrayList<>();
+
+        for (Long createMovieId : createMovieIds) {
+            AdminMovieTMDBDetailResponse movieData = tmdbService.getMovieInfoById(createMovieId);
+            Movie movie = adminMovieCreateService.createMovie(movieData);
+            movies.add(movie);
+        }
+
+        return movies;
+    }
+
+    private void saveWeekMovies(List<Movie> addMovieWeekDates, List<MovieDateTimeTMDB> movieDateTimeTMDBS) {
+        Map<Long, Double> moviePopularityMap = movieDateTimeTMDBS.stream()
                 .collect(Collectors.toMap(
-                        MovieMonthTMDB::getId,
-                        MovieMonthTMDB::getPopularity,
+                        MovieDateTimeTMDB::getId,
+                        MovieDateTimeTMDB::getPopularity,
                         (existing, replacement) -> existing
                 ));
 
@@ -97,38 +173,24 @@ public class MovieLatestService {
         movieWeekOrderRepository.saveAll(movieMonthOrders);
     }
 
-
-    private List<Movie> createMovies(List<Long> createMovieIds) {
-
-        List<Movie> movies = new ArrayList<>();
-
-        for (Long createMovieId : createMovieIds) {
-            AdminMovieTMDBDetailResponse movieData = tmdbService.getMovieInfoById(createMovieId);
-            Movie movie = adminMovieCreateService.createMovie(movieData);
-            movies.add(movie);
-        }
-
-        return movies;
-    }
-
-    private List<Movie> fetchExistMovieIds(List<MovieMonthTMDB> movieMonthTMDBS) {
+    private List<Movie> fetchExistMovieIds(List<MovieDateTimeTMDB> movieDateTimeTMDBS) {
         return movieRepository.findAllByTMDBMovieIds(
-                movieMonthTMDBS.stream().map(MovieMonthTMDB::getId).collect(Collectors.toSet()));
+                movieDateTimeTMDBS.stream().map(MovieDateTimeTMDB::getId).collect(Collectors.toSet()));
     }
 
-    private List<Long> fetchMissingMovieIds(List<MovieMonthTMDB> movieMonthTMDBS) {
+    private List<Long> fetchMissingMovieIds(List<MovieDateTimeTMDB> movieDateTimeTMDBS) {
 
         Set<Long> existingMovieIds = movieRepository.findAllByTMDBMovieIds(
-                        movieMonthTMDBS.stream().map(MovieMonthTMDB::getId).collect(Collectors.toSet()))
+                        movieDateTimeTMDBS.stream().map(MovieDateTimeTMDB::getId).collect(Collectors.toSet()))
                 .stream().map(Movie::getTMDBMovieId).collect(Collectors.toSet());
 
-        return movieMonthTMDBS.stream()
-                .map(MovieMonthTMDB::getId)
+        return movieDateTimeTMDBS.stream()
+                .map(MovieDateTimeTMDB::getId)
                 .filter(id -> !existingMovieIds.contains(id))
                 .collect(Collectors.toList());
     }
 
-    private List<MovieMonthTMDB> fetchMoviesWeekFromTMDB() {
+    private List<MovieDateTimeTMDB> fetchMoviesWeekFromTMDB() {
 
         LocalDate today = LocalDate.now();
         LocalDate oneWeeksAgo = today.minusWeeks(1);
@@ -142,7 +204,7 @@ public class MovieLatestService {
 
         int maxPage = 5;
 
-        List<CompletableFuture<List<MovieMonthTMDB>>> futures = new ArrayList<>();
+        List<CompletableFuture<List<MovieDateTimeTMDB>>> futures = new ArrayList<>();
 
         for (int page = 1; page <= maxPage; page++) {
             String url = createMovieWeekUrl(startDate, endDate, page);
@@ -157,8 +219,9 @@ public class MovieLatestService {
                 .collect(Collectors.toList());
     }
 
-    private List<MovieMonthTMDB> getMovieWeekDates(String url) {
-        MovieMonthTMDBResponse dates = webClient.get()
+
+    private List<MovieDateTimeTMDB> getMovieWeekDates(String url) {
+        MovieDateTimeTMDBResponse dates = webClient.get()
                 .uri(url)
                 .header("accept", "application/json")
                 .retrieve()
@@ -168,7 +231,7 @@ public class MovieLatestService {
                 .onStatus(HttpStatusCode::is5xxServerError, clientResponse ->
                         Mono.error(new RuntimeException("TMDB 요청 중 서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요."))
                 )
-                .bodyToMono(MovieMonthTMDBResponse.class)
+                .bodyToMono(MovieDateTimeTMDBResponse.class)
                 .retryWhen(Retry.backoff(2, Duration.ofSeconds(1)))
                 .block();
 
@@ -177,12 +240,21 @@ public class MovieLatestService {
         }
 
         return dates.getResults().stream()
-                .map(data -> MovieMonthTMDB.builder()
+                .map(data -> MovieDateTimeTMDB.builder()
                         .title(data.getTitle())
                         .id(data.getId())
+                        .originalLanguage(data.getOriginalLanguage())
                         .popularity(data.getPopularity())
                         .build())
                 .collect(Collectors.toList());
+    }
+
+
+    private String createMovieDailyUrl(String today, int page) {
+        String baseUrl = "https://api.themoviedb.org/3/discover/movie?api_key=";
+        String dateQuery1  = "&primary_release_date.gte=";
+        String dateQuery2 = "&primary_release_date.lte=";
+        return baseUrl + apiKey + dateQuery1 + today + dateQuery2 + today + "&language=ko-KR&page=" + page;
     }
 
     private String createMovieWeekUrl(String startDate, String endDate, int page) {
