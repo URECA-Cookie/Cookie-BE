@@ -4,9 +4,9 @@ import com.cookie.admin.dto.response.AdminMovieTMDBDetailResponse;
 import com.cookie.admin.service.movie.AdminMovieCreateService;
 import com.cookie.admin.service.movie.TMDBService;
 import com.cookie.domain.movie.entity.Movie;
-import com.cookie.domain.movie.entity.MovieMonthOrder;
+import com.cookie.domain.movie.entity.MovieMonthRanking;
 import com.cookie.domain.movie.repository.MovieRepository;
-import com.cookie.domain.movie.repository.MovieWeekOrderRepository;
+import com.cookie.domain.movie.repository.MovieMonthRankingRepository;
 import com.cookie.domain.search.dto.response.MovieDateTimeTMDB;
 import com.cookie.domain.search.dto.response.MovieDateTimeTMDBResponse;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +35,7 @@ public class MovieLatestService {
     private String apiKey;
     private final WebClient webClient;
 
-    private final MovieWeekOrderRepository movieWeekOrderRepository;
+    private final MovieMonthRankingRepository movieMonthRankingRepository;
     private final MovieRepository movieRepository;
     private final AdminMovieCreateService adminMovieCreateService;
     private final TMDBService tmdbService;
@@ -63,7 +63,7 @@ public class MovieLatestService {
     }
 
     @Transactional
-    public void createMoviesWeek() {
+    public void createMoviesMonthRanking() {
 
         List<MovieDateTimeTMDB> movieDateTimeTMDBS = fetchMoviesWeekFromTMDB();
 
@@ -156,21 +156,21 @@ public class MovieLatestService {
                 Comparator.reverseOrder()
         ));
 
-        List<MovieMonthOrder> movieMonthOrders = new ArrayList<>();
+        List<MovieMonthRanking> movieMonthRankings = new ArrayList<>();
 
         int rank = 1;
 
         for (Movie movie : addMovieWeekDates) {
-            MovieMonthOrder movieMonthOrder = MovieMonthOrder.builder()
+            MovieMonthRanking movieMonthRanking = MovieMonthRanking.builder()
                     .ranking(rank++)
                     .movie(movie)
                     .build();
 
-            movieMonthOrders.add(movieMonthOrder);
+            movieMonthRankings.add(movieMonthRanking);
         }
 
-        movieWeekOrderRepository.deleteAll();
-        movieWeekOrderRepository.saveAll(movieMonthOrders);
+        movieMonthRankingRepository.deleteAll();
+        movieMonthRankingRepository.saveAll(movieMonthRankings);
     }
 
     private List<Movie> fetchExistMovieIds(List<MovieDateTimeTMDB> movieDateTimeTMDBS) {

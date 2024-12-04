@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class MovieMonthOrder extends BaseTimeEntity {
+public class MovieMonthRanking extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,7 +23,7 @@ public class MovieMonthOrder extends BaseTimeEntity {
     private Movie movie;
 
     @Builder
-    public MovieMonthOrder(int ranking, Movie movie) {
+    public MovieMonthRanking(int ranking, Movie movie) {
         this.ranking = ranking;
         this.movie = movie;
     }

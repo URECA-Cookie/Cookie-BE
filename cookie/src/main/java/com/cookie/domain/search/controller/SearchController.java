@@ -40,9 +40,9 @@ public class SearchController {
         }
     }
 
-    @GetMapping("/api/search/weekOrder")
-    public ApiSuccess<?> getMoviesWeekOrder() {
-        List<SearchMovieMonthRankingResponse> data = searchMovieMonthRankingService.getMoviesWeekOrder();
+    @GetMapping("/api/search/default")
+    public ApiSuccess<?> getMoviesMonthRanking() {
+        List<SearchMovieMonthRankingResponse> data = searchMovieMonthRankingService.getMoviesMonthRanking();
         return ApiUtil.success(data);
     }
 }

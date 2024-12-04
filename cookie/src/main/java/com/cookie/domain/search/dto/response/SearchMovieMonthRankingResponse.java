@@ -7,6 +7,7 @@ import lombok.Getter;
 @Builder
 public class SearchMovieMonthRankingResponse {
 
+    private Long movieId;
     private String movieTitle;
     private String releaseYear;
     private int ranking;

@@ -1,8 +1,8 @@
 package com.cookie.domain.search.service;
 
 import com.cookie.domain.movie.entity.MovieCategory;
-import com.cookie.domain.movie.entity.MovieMonthOrder;
-import com.cookie.domain.movie.repository.MovieWeekOrderRepository;
+import com.cookie.domain.movie.entity.MovieMonthRanking;
+import com.cookie.domain.movie.repository.MovieMonthRankingRepository;
 import com.cookie.domain.search.dto.response.SearchMovieMonthRankingResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,24 +15,25 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SearchMovieMonthRankingService {
 
-    private final MovieWeekOrderRepository movieWeekOrderRepository;
+    private final MovieMonthRankingRepository movieMonthRankingRepository;
 
     @Transactional(readOnly = true)
-    public List<SearchMovieMonthRankingResponse> getMoviesWeekOrder() {
+    public List<SearchMovieMonthRankingResponse> getMoviesMonthRanking() {
 
-        List<MovieMonthOrder> movieMonthOrders = movieWeekOrderRepository.findAll();
+        List<MovieMonthRanking> movieMonthRankings = movieMonthRankingRepository.findAll();
 
-        if (movieMonthOrders.isEmpty()) {
+        if (movieMonthRankings.isEmpty()) {
             return Collections.emptyList();
         }
 
-        return movieMonthOrders.stream().map(movie -> {
+        return movieMonthRankings.stream().map(movie -> {
 
             String releaseYear = movie.getMovie().getReleasedAt().substring(0, 4);
             List<MovieCategory> movieCategories = movie.getMovie().getMovieCategories();
             String genreAgent = movieCategories.isEmpty() ? "N/A" : movieCategories.get(0).getCategory().getSubCategory();
 
             return SearchMovieMonthRankingResponse.builder()
+                    .movieId(movie.getMovie().getId())
                     .movieTitle(movie.getMovie().getTitle())
                     .runtime(movie.getMovie().getRuntime())
                     .ranking(movie.getRanking())

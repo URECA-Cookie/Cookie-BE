@@ -29,7 +29,7 @@ public class MovieSchedulerService {
     @Scheduled(cron = "0 0 3 * * SUN")
     public void updateWeeklyMovies() {
         try {
-            movieLatestService.createMoviesWeek();
+            movieLatestService.createMoviesMonthRanking();
             log.info("주간 인기 영화 저장 및 배치 완료!");
         } catch (Exception e) {
             log.error("주간 인기 영화 최신화 중 오류 발생: {}", e.getMessage());
