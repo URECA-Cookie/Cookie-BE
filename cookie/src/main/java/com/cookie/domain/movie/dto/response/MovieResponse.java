@@ -1,5 +1,6 @@
 package com.cookie.domain.movie.dto.response;
 
+import com.cookie.domain.director.dto.response.DirectorResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -25,4 +26,6 @@ public class MovieResponse {
     private List<String> images;       // 영화 이미지 리스트
     private String  videos; // 영화 비디오 리스트
     private String country;    // 제작 국가 리스트
+    private DirectorResponse director;
+
 }
