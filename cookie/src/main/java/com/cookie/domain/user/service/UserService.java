@@ -390,5 +390,12 @@ public class UserService {
         return new UserResponse(user.getId(), user.getNickname(), user.getProfileImage(), user.getCategory().getId());
     }
 
+    @Transactional
+    public void deleteUserAccount(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("not found userId: " + userId));
+        userRepository.deleteById(userId);
+    }
+
 }
 

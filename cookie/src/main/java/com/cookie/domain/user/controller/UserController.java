@@ -119,4 +119,11 @@ public class UserController {
         return ApiUtil.success(userResponse);
 
     }
+
+    @DeleteMapping
+    public ApiSuccess<?> deleteUserAccount(@AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
+        Long userId = customOAuth2User.getId();
+        userService.deleteUserAccount(userId);
+        return ApiUtil.success("SUCCESS");
+    }
 }
