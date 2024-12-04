@@ -221,10 +221,10 @@ public class MovieService {
 
 
     @Cacheable("categoryMoviesCache")
-    public MoviePagenationResponse getMoviesByCategory(CategoryRequest categoryRequest, int page, int size) {
+    public MoviePagenationResponse getMoviesByCategory(String mainCategory, String subCategory, int page, int size) {
         // 1. mainCategory와 subCategory로 Category ID 조회
         Category category = categoryRepository.findByMainCategoryAndSubCategory(
-                        categoryRequest.getMainCategory(), categoryRequest.getSubCategory())
+                        mainCategory, subCategory)
                 .orElseThrow(() -> new IllegalArgumentException("해당 카테고리가 존재하지 않습니다."));
 
         // 2. 카테고리 ID로 영화 리스트 조회 (페이지네이션 적용)
