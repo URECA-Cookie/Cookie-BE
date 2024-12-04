@@ -4,6 +4,8 @@ package com.cookie.domain.movie.service;
 import com.cookie.domain.category.repository.CategoryRepository;
 import com.cookie.domain.category.entity.Category;
 import com.cookie.domain.category.request.CategoryRequest;
+import com.cookie.domain.director.dto.response.DirectorResponse;
+import com.cookie.domain.director.service.DirectorService;
 import com.cookie.domain.matchup.dto.response.MainMatchUpsResponse;
 import com.cookie.domain.matchup.service.MatchUpService;
 import com.cookie.domain.movie.dto.response.*;
@@ -46,6 +48,7 @@ public class MovieService {
     private final GenreScoreRepository genreScoreRepository;
     private final CategoryRepository categoryRepository;
     private final MatchUpService matchUpService;
+    private final DirectorService directorService;
 
 
     @Transactional(readOnly = true)
@@ -200,6 +203,12 @@ public class MovieService {
                 .orElseThrow(() -> new IllegalArgumentException("Movie Images not found"))
                 .getMovieImages();
 
+        //3. 감독 정보 가져오기
+//        DirectorResponse directorResponse = DirectorResponse.builder()
+//                .name(movie.getDirector().getName())
+//                .profileImage(movie.getDirector().getProfileImage())
+//                .
+
         // 5. MovieResponse 생성
         return MovieResponse.builder()
                 .id(movie.getId())
@@ -221,10 +230,10 @@ public class MovieService {
 
 
     @Cacheable("categoryMoviesCache")
-    public MoviePagenationResponse getMoviesByCategory(CategoryRequest categoryRequest, int page, int size) {
+    public MoviePagenationResponse getMoviesByCategory(String mainCategory, String subCategory, int page, int size) {
         // 1. mainCategory와 subCategory로 Category ID 조회
         Category category = categoryRepository.findByMainCategoryAndSubCategory(
-                        categoryRequest.getMainCategory(), categoryRequest.getSubCategory())
+                        mainCategory, subCategory)
                 .orElseThrow(() -> new IllegalArgumentException("해당 카테고리가 존재하지 않습니다."));
 
         // 2. 카테고리 ID로 영화 리스트 조회 (페이지네이션 적용)
