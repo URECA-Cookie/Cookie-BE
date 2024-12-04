@@ -113,7 +113,7 @@ public class TMDBService {
                 .releaseDate(detail.getReleaseDate())
                 .certification(certification)
                 .country(detail.getOriginCountry().get(0))
-                .plot(detail.getOverview())
+                .plot(detail.getOverview().isEmpty() ? "N/A" : detail.getOverview())
                 .youtube(video.orElse("N/A"))
                 .stillCuts(images)
                 .actors(actors)
