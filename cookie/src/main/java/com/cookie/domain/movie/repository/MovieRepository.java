@@ -12,6 +12,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface MovieRepository extends JpaRepository<Movie, Long> {
@@ -65,11 +66,6 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
 """)
     List<MovieSimpleResponse> findTopMoviesByCategory(@Param("genre") String genre);
 
-
-
-
-
-
     @Query("SELECT c.subCategory FROM MovieCategory mc " +
             "JOIN mc.category c " +
             "WHERE mc.movie.id = :movieId AND c.mainCategory = '장르'")
@@ -77,5 +73,13 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
 
     @Query("SELECT COUNT(ml) FROM MovieLike ml WHERE ml.movie.id = :movieId")
     Long countLikesByMovieId(@Param("movieId") Long movieId);
+
+    @Query("""
+        SELECT m
+        FROM Movie m
+        WHERE m.TMDBMovieId IN :tmdbIds
+    """)
+    List<Movie> findAllByTMDBMovieIds(@Param("tmdbIds") Set<Long> tmdbIds);
+
 }
 
