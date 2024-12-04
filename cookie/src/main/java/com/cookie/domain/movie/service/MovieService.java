@@ -1,6 +1,11 @@
 package com.cookie.domain.movie.service;
 
 
+import com.cookie.admin.dto.response.RecommendResponse;
+import com.cookie.admin.entity.AdminMovieRecommend;
+import com.cookie.admin.service.recommend.AdminRecommendService;
+import com.cookie.domain.actor.dto.response.ActorResponse;
+import com.cookie.domain.actor.repository.ActorRepository;
 import com.cookie.domain.category.repository.CategoryRepository;
 import com.cookie.domain.category.entity.Category;
 import com.cookie.domain.category.request.CategoryRequest;
@@ -16,11 +21,13 @@ import com.cookie.domain.movie.repository.MovieCategoryRepository;
 import com.cookie.domain.movie.repository.MovieLikeRepository;
 import com.cookie.domain.movie.repository.MovieRepository;
 import com.cookie.domain.review.dto.response.MovieReviewResponse;
+import com.cookie.domain.review.dto.response.ReviewResponse;
 import com.cookie.domain.review.entity.Review;
 import com.cookie.domain.review.repository.ReviewLikeRepository;
 import com.cookie.domain.review.repository.ReviewRepository;
 import com.cookie.domain.user.dto.response.GenreScoreResponse;
 import com.cookie.domain.user.dto.response.MovieReviewUserResponse;
+import com.cookie.domain.user.dto.response.ReviewUserResponse;
 import com.cookie.domain.user.entity.User;
 import com.cookie.domain.user.repository.GenreScoreRepository;
 import lombok.RequiredArgsConstructor;
@@ -49,6 +56,8 @@ public class MovieService {
     private final CategoryRepository categoryRepository;
     private final MatchUpService matchUpService;
     private final DirectorService directorService;
+    private final ActorRepository actorRepository;
+    private final AdminRecommendService adminRecommendService;
 
 
     @Transactional(readOnly = true)
@@ -203,13 +212,27 @@ public class MovieService {
                 .orElseThrow(() -> new IllegalArgumentException("Movie Images not found"))
                 .getMovieImages();
 
-        //3. 감독 정보 가져오기
-//        DirectorResponse directorResponse = DirectorResponse.builder()
-//                .name(movie.getDirector().getName())
-//                .profileImage(movie.getDirector().getProfileImage())
-//                .
+        // 3. 감독 정보 가져오기
+        DirectorResponse directorResponse = DirectorResponse.builder()
+                .name(movie.getDirector().getName())
+                .profileImage(movie.getDirector().getProfileImage())
+                .build();
 
-        // 5. MovieResponse 생성
+        List<ActorResponse> actors = actorRepository.findActorsByMovieId(movieId);
+
+        // 4. 리뷰 가져오기
+        List<ReviewResponse> reviews = reviewRepository.findReviewsByMovieId(movieId).stream()
+                .limit(4) // 최대 4개의 리뷰만 가져옴
+                .map(review -> {
+                    // 리뷰 정보를 ReviewResponse로 변환
+                    return ReviewResponse.fromReview(review, false); // likedByUser는 기본값 false
+                })
+                .collect(Collectors.toList());
+
+        // 5. 사용자가 해당 영화에 좋아요를 눌렀는지 안 눌렀는지 여부
+        boolean isLiked = movieLikeRepository.isMovieLikedByUser(movieId,userId);
+
+        // 6. MovieResponse 생성
         return MovieResponse.builder()
                 .id(movie.getId())
                 .title(movie.getTitle())
@@ -225,8 +248,13 @@ public class MovieService {
                         .collect(Collectors.toList()))
                 .videos(movie.getYoutubeUrl())
                 .country(movie.getCountry().getName())
+                .director(directorResponse)
+                .actors(actors)
+                .reviews(reviews) // 리뷰 리스트 추가
+                .isLiked(isLiked)
                 .build();
     }
+
 
 
     @Cacheable("categoryMoviesCache")
@@ -356,12 +384,35 @@ public class MovieService {
    public MainPageResponse getMainPageInfo(CategoryRequest categoryRequest, Long userId){
         MainPageResponse mainPageResponse = new MainPageResponse();
 
-        // 1. 배너
-       // 2. 매치업
+       // 1. 매치업
        MainMatchUpsResponse mainMatchUpsResponse = matchUpService.getMainMatchUps();
-       // 3. 박스오피스
-       //BoxofficeMovieList boxofficeMovieList =
-        return null;
+       // 2. 관리자 수동 추천
+       List<RecommendResponse> recommendMovies = adminRecommendService.getRecommendMovies();
+       List<MovieSimpleResponse> movieSimpleResponses = recommendMovies.stream()
+            .map(recommendResponse -> {
+                // movieId로 Movie 조회
+                Movie movie = movieRepository.findById(recommendResponse.getMovieId())
+                        .orElseThrow(() -> new IllegalArgumentException(
+                                "Movie not found with id: " + recommendResponse.getMovieId()));
+
+                // Movie 데이터를 기반으로 MovieSimpleResponse 생성
+                return MovieSimpleResponse.builder()
+                        .id(movie.getId()) // Movie ID
+                        .title(movie.getTitle()) // 제목
+                        .poster(movie.getPoster()) // 포스터
+                        .releasedAt(movie.getReleasedAt()) // 개봉일
+                        .country(movie.getCountry().getName()) // 제작 국가
+                        .likes(movieRepository.countLikesByMovieId(movie.getId())) // 좋아요 수
+                        .reviews((long) movie.getReviews().size()) // 리뷰 수
+                        .build();
+            })
+            .toList();
+
+
+        return MainPageResponse.builder()
+                .adminRecommendMovies(movieSimpleResponses)
+                .matchUp(mainMatchUpsResponse)
+                .build();
 
    }
 
