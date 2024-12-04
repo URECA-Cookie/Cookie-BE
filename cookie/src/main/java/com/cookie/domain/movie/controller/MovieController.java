@@ -52,7 +52,7 @@ public class MovieController {
     @GetMapping("/categoryMovies")
     public ResponseEntity<MoviePagenationResponse> getMoviesByCategoryId(
             @RequestParam(name="mainCategory") String mainCategory,
-            @RequestParam(name="subCategoru") String subCategory,
+            @RequestParam(name="subCategory") String subCategory,
             @RequestParam(name="page", defaultValue = "0") int page, // 요청 페이지 번호 (기본값: 0)
             @RequestParam(name="size", defaultValue = "10") int size) // 페이지 크기 (기본값: 10))
     {
