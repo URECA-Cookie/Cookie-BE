@@ -108,6 +108,7 @@ public class AdminMovieModifyService {
 
             movieRepository.deleteByMovieId(movie.getId());
             // 추가 삭제 로직 기능 구현 필요
+            // 리뷰, 영화 좋아요, 어드민 영화추천, 박스오피스, 히스토리?
             deleteMovieIds.add(movie.getId());
         }
 
