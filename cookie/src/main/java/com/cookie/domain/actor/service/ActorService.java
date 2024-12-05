@@ -42,6 +42,7 @@ public class ActorService {
                             .poster(movie.getPoster())
                             .releasedAt(movie.getReleasedAt())
                             .country(movie.getCountry().getName())
+                            .score(movie.getScore())
                             .likes(movieLikeRepository.countByMovieId(movie.getId()))
                             .reviews(reviewRepository.countByMovieId(movie.getId()))
                             .build();
