@@ -26,10 +26,11 @@ public class MovieController {
 
     private final MovieService movieService;
 
-    @GetMapping("/{movieId}/{userId}") //userId token으로 변경 필요
+    @GetMapping("/{movieId}/{userId}")
     public ResponseEntity<MovieResponse> getMovieDetail(
             @PathVariable(name="movieId") Long movieId,
             @PathVariable(name="userId") Long userId) {
+
         MovieResponse movieDetail = movieService.getMovieDetails(movieId, userId);
         return ResponseEntity.ok(movieDetail);
     }
@@ -60,16 +61,18 @@ public class MovieController {
         return ResponseEntity.ok(movies);
     }
 
+
     @GetMapping("/{userId}/recommendations")
-    public ApiSuccess<List<MovieSimpleResponse>> getRecommendations(@PathVariable(name="userId") Long userId) {
+    public ApiSuccess<List<MovieSimpleResponse>> getRecommendations(@AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
+        Long userId = (customOAuth2User != null) ? customOAuth2User.getId() : null;
         List<MovieSimpleResponse> recommendedMovies = movieService.getRecommendedMovies(userId);
         return ApiUtil.success(recommendedMovies);
     }
 
-//    @GetMapping("/mainPage")
-//    public ApiSuccess<MainPageResponse> getMainPageInfo(){
-//        MainPageResponse mainPageResponse = movieService.getMainPageInfo();
-//        return ApiUtil.success(mainPageResponse);
-//    }
+    @GetMapping("/mainPage")
+    public ApiSuccess<MainPageResponse> getMainPageInfo(){
+        MainPageResponse mainPageResponse = movieService.getMainPageInfo();
+        return ApiUtil.success(mainPageResponse);
+    }
 
 }
