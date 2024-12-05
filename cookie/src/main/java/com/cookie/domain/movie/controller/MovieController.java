@@ -29,8 +29,8 @@ public class MovieController {
     @GetMapping("/{movieId}/{userId}")
     public ResponseEntity<MovieResponse> getMovieDetail(
             @PathVariable(name="movieId") Long movieId,
-            @PathVariable(name="userId") Long userId) {
-
+            @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
+        Long userId = (customOAuth2User != null) ? customOAuth2User.getId() : null;
         MovieResponse movieDetail = movieService.getMovieDetails(movieId, userId);
         return ResponseEntity.ok(movieDetail);
     }
