@@ -93,8 +93,8 @@ public class AdminMovieController {
 
     @Operation(summary = "영화 카테고리 업데이트",
             parameters = {
-                    @Parameter(name = "MovieCategories",
-                            array = @ArraySchema(
+            @Parameter(name = "MovieCategories",
+                    array = @ArraySchema(
                                     schema = @Schema(implementation = MovieCategories.class, nullable = true)))
             }, responses = {
             @ApiResponse(responseCode = "200", content = @Content(mediaType = "application/json",

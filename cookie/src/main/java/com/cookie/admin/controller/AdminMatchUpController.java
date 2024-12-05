@@ -73,8 +73,8 @@ public class AdminMatchUpController {
 
     @Operation(summary = "영화 매치 업 업데이트",
             parameters = {
-                    @Parameter(name = "AdminMatchUpRequest", description = "영화 수정 시 2개 전부 요청 필요",
-                            schema = @Schema(implementation = AdminMatchUpRequest.class, nullable = true))
+            @Parameter(name = "AdminMatchUpRequest", description = "영화 수정 시 2개 전부 요청 필요",
+                    schema = @Schema(implementation = AdminMatchUpRequest.class, nullable = true))
             },
             responses = {
             @ApiResponse(responseCode = "200", content = @Content(mediaType = "application/json",
