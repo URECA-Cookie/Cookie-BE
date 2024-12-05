@@ -13,7 +13,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,22 +28,17 @@ public class SearchController {
     private final SearchMovieMonthRankingService searchMovieMonthRankingService;
 
     @GetMapping("/api/search")
-    public ResponseEntity<?> search(SearchRequest searchRequest) {
+    public ResponseEntity<?> search(SearchRequest searchRequest, Pageable pageable) {
 
-        Pageable pageable = PageRequest.of(searchRequest.getPage(), 10);
         String keyword = searchRequest.getKeyword();
 
-        switch (searchRequest.getType().toLowerCase()) {
-            case "movie":
-                return ResponseEntity.ok(searchService.searchMovies(keyword, pageable));
-            case "actor":
-                return ResponseEntity.ok(searchService.searchActors(keyword, pageable));
-            case "director":
-                return ResponseEntity.ok(searchService.searchDirectors(keyword, pageable));
-            default:
-                return ResponseEntity.badRequest()
-                        .body(ApiUtil.error(400, "INVALID_TYPE: Use 'movie', 'actor', or 'director'"));
-        }
+        return switch (searchRequest.getType().toLowerCase()) {
+            case "movie" -> ResponseEntity.ok(searchService.searchMovies(keyword, pageable));
+            case "actor" -> ResponseEntity.ok(searchService.searchActors(keyword, pageable));
+            case "director" -> ResponseEntity.ok(searchService.searchDirectors(keyword, pageable));
+            default -> ResponseEntity.badRequest()
+                    .body(ApiUtil.error(400, "INVALID_TYPE: Use 'movie', 'actor', or 'director'"));
+        };
     }
 
     @Operation(summary = "검색 디폴트 10개 영화 리스트", responses = {
