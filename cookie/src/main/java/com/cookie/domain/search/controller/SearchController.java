@@ -6,6 +6,12 @@ import com.cookie.domain.search.service.SearchMovieMonthRankingService;
 import com.cookie.domain.search.service.SearchService;
 import com.cookie.global.util.ApiUtil;
 import com.cookie.global.util.ApiUtil.ApiSuccess;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -15,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+@Tag(name = "검색", description = "검색 API")
 @RestController
 @RequiredArgsConstructor
 public class SearchController {
@@ -40,6 +47,11 @@ public class SearchController {
         }
     }
 
+    @Operation(summary = "검색 디폴트 10개 영화 리스트", responses = {
+            @ApiResponse(responseCode = "200", content = @Content(mediaType = "application/json",
+                    array = @ArraySchema(
+                            schema = @Schema(implementation = SearchMovieMonthRankingResponse.class))))
+    })
     @GetMapping("/api/search/default")
     public ApiSuccess<?> getMoviesMonthRanking() {
         List<SearchMovieMonthRankingResponse> data = searchMovieMonthRankingService.getMoviesMonthRanking();
