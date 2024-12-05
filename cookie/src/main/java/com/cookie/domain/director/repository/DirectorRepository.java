@@ -19,8 +19,6 @@ public interface DirectorRepository extends JpaRepository<Director, Long> {
            """)
     Optional<Director> findByTMDBCasterId(@Param("tmdbCasterId") Long tmdbCasterId);
 
-    Page<Director> findByNameContainingIgnoreCase(String keyword, Pageable pageable);
-
     @Query("""
             SELECT d
             FROM Director d
