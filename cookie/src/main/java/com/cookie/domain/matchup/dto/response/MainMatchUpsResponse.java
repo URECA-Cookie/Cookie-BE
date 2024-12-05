@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -22,6 +23,8 @@ public class MainMatchUpsResponse {
         private Long matchUpId;
         private String matchUpTitle;
         private MatchUpType type;
+        private LocalDateTime startAt;
+        private LocalDateTime endAt;
         private MainMatchUpMovieResponse movie1;
         private MainMatchUpMovieResponse movie2;
 
@@ -30,6 +33,8 @@ public class MainMatchUpsResponse {
                     matchUp.getId(),
                     matchUp.getTitle(),
                     matchUp.getType(),
+                    matchUp.getStartAt(),
+                    matchUp.getEndAt(),
                     new MainMatchUpMovieResponse(matchUp.getMovie1().getMovieTitle(), matchUp.getMovie1().getMoviePoster()),
                     new MainMatchUpMovieResponse(matchUp.getMovie2().getMovieTitle(), matchUp.getMovie2().getMoviePoster())
             );
