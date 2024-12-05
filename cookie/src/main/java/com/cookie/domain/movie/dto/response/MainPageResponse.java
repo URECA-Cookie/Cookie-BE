@@ -14,7 +14,6 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 public class MainPageResponse {
-    private List<String> banners;
     private MainMatchUpsResponse matchUp;
-    private BoxofficeMovieList boxOffice;
+    private List<MovieSimpleResponse> adminRecommendMovies;
 }
