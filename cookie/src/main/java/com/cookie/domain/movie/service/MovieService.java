@@ -224,8 +224,9 @@ public class MovieService {
         List<ReviewResponse> reviews = reviewRepository.findReviewsByMovieId(movieId).stream()
                 .limit(4) // 최대 4개의 리뷰만 가져옴
                 .map(review -> {
-                    // 리뷰 정보를 ReviewResponse로 변환
-                    return ReviewResponse.fromReview(review, reviewRepository.existsById(userId)); // likedByUser는 기본값 false
+                    // 리뷰 정보를 ReviewResponse로 변환<<<<<<< feature/#57-RefactorLikeAuth
+                    return ReviewResponse.fromReview(review, reviewRepository.existsById(userId)); 
+
                 })
                 .collect(Collectors.toList());
 
