@@ -54,6 +54,7 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
         m.poster, 
         m.releasedAt, 
         c2.name, 
+        m.score, 
         CAST((SELECT COUNT(ml) FROM MovieLike ml WHERE ml.movie.id = m.id) AS long), 
         CAST((SELECT COUNT(r) FROM Review r WHERE r.movie.id = m.id) AS long)
     )
@@ -64,7 +65,8 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
     WHERE c.subCategory = :genre
     ORDER BY m.movieLikes DESC
 """)
-    List<MovieSimpleResponse> findTopMoviesByCategory(@Param("genre") String genre);
+    List<MovieSimpleResponse> findTopMoviesByCategory(String genre);
+
 
     @Query("SELECT c.subCategory FROM MovieCategory mc " +
             "JOIN mc.category c " +
