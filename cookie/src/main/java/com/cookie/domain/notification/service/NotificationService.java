@@ -43,6 +43,24 @@ public class NotificationService {
 
     }
 
+    public void unsubscribeFromTopic(String token, Long categoryId, Long userId) {
+        userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("not found userId: " + userId));
+
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new IllegalArgumentException("not found categoryId: " + categoryId));
+
+        String topic = category.getSubCategoryEn();
+
+        try {
+            FirebaseMessaging.getInstance().unsubscribeFromTopic(List.of(token), topic);
+            log.info("Unsubscribed from topic: {}", topic);
+        } catch (FirebaseMessagingException e) {
+            log.error("Failed to unsubscribe from topic: {}", e.getMessage());
+        }
+    }
+
+
     public void sendPushNotificationToTopic(String topic, String title, String body) {
         Message message = Message.builder()
                 .setNotification(Notification.builder()
