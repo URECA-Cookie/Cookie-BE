@@ -224,8 +224,9 @@ public class MovieService {
         List<ReviewResponse> reviews = reviewRepository.findReviewsByMovieId(movieId).stream()
                 .limit(4) // 최대 4개의 리뷰만 가져옴
                 .map(review -> {
-                    // 리뷰 정보를 ReviewResponse로 변환
-                    return ReviewResponse.fromReview(review, false); // likedByUser는 기본값 false
+                    // 리뷰 정보를 ReviewResponse로 변환<<<<<<< feature/#57-RefactorLikeAuth
+                    return ReviewResponse.fromReview(review, reviewRepository.existsById(userId)); 
+
                 })
                 .collect(Collectors.toList());
 
@@ -246,7 +247,7 @@ public class MovieService {
                 .images(movieImages.stream()
                         .map(MovieImage::getUrl)
                         .collect(Collectors.toList()))
-                .videos(movie.getYoutubeUrl())
+                .video(movie.getYoutubeUrl())
                 .country(movie.getCountry().getName())
                 .director(directorResponse)
                 .actors(actors)
@@ -381,7 +382,7 @@ public class MovieService {
     }
 
     @Cacheable("mainPageCache") // Caffeine Cache 적용
-   public MainPageResponse getMainPageInfo(CategoryRequest categoryRequest, Long userId){
+   public MainPageResponse getMainPageInfo(){
         MainPageResponse mainPageResponse = new MainPageResponse();
 
        // 1. 매치업
