@@ -13,6 +13,7 @@ import java.util.concurrent.TimeUnit;
 public class CacheConfig {
 
     @Bean(name = "mainPageCache")
+    @Primary
     public CacheManager mainCacheManager() {
         CaffeineCacheManager cacheManager = new CaffeineCacheManager("mainPageCache");
         cacheManager.setCaffeine(Caffeine.newBuilder()
@@ -20,7 +21,7 @@ public class CacheConfig {
                 .expireAfterWrite(1, TimeUnit.MINUTES));
         return cacheManager;
     }
-    @Primary
+    //@Primary
     @Bean(name = "categoryMoviesCache")
     public CacheManager categoryMoviesCacheManager() {
         CaffeineCacheManager cacheManager = new CaffeineCacheManager("categoryMoviesCache");
