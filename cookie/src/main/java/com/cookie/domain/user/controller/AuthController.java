@@ -1,6 +1,8 @@
 package com.cookie.domain.user.controller;
 
 import com.cookie.domain.category.service.CategoryService;
+import com.cookie.domain.notification.service.FcmTokenService;
+import com.cookie.domain.notification.service.NotificationService;
 import com.cookie.domain.user.dto.request.auth.AdminLoginRequest;
 import com.cookie.domain.user.dto.request.auth.AdminRegisterRequest;
 import com.cookie.domain.user.dto.response.UserInfoResponse;
@@ -47,6 +49,8 @@ public class AuthController {
     private final PasswordEncoder passwordEncoder;
     private final CategoryService categoryService;
     private final AWSS3Service awss3Service;
+    private final FcmTokenService fcmTokenService;
+    private final NotificationService notificationService;
 
     @Operation(summary = "회원 가입", responses = {
             @ApiResponse(responseCode = "200", content = @Content(mediaType = "application/json",
@@ -61,9 +65,10 @@ public class AuthController {
             @RequestPart("profileImage") MultipartFile profileImage,
             @RequestPart("pushEnabled") String pushEnabled,
             @RequestPart("emailEnabled") String emailEnabled,
-            @RequestPart("genreId") String genreId) {
+            @RequestPart("genreId") String genreId,
+            @RequestPart("fcmToken") String fcmToken) {
 
-        log.info("{}, {}, {}, {}, {}, {}, {}, {}", socialProvider, socialId, email, nickname, profileImage, pushEnabled, emailEnabled, genreId);
+        log.info("{}, {}, {}, {}, {}, {}, {}, {}, {}", socialProvider, socialId, email, nickname, profileImage, pushEnabled, emailEnabled, genreId, fcmToken);
         boolean pushEnabledValue = Boolean.parseBoolean(pushEnabled);
         boolean emailEnabledValue = Boolean.parseBoolean(emailEnabled);
         Long genreIdValue = Long.parseLong(genreId);
@@ -126,6 +131,11 @@ public class AuthController {
         log.info("{}", response);
 
         UserInfoResponse userInfoResponse = new UserInfoResponse(userResponse, response);
+
+        if(pushEnabledValue) {
+            fcmTokenService.saveToken(newUser.getId(), fcmToken);
+            notificationService.subscribeToTopic(fcmToken, newUser.getCategory().getId(), newUser.getId());
+        }
 
         return ResponseEntity.ok()
                 .body(ApiUtil.success(userInfoResponse));
