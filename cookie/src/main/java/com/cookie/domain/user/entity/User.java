@@ -3,6 +3,7 @@ package com.cookie.domain.user.entity;
 import com.cookie.domain.badge.entity.Badge;
 import com.cookie.domain.category.entity.Category;
 import com.cookie.domain.movie.entity.MovieLike;
+import com.cookie.domain.notification.entity.FcmToken;
 import com.cookie.domain.review.entity.Review;
 import com.cookie.domain.review.entity.ReviewLike;
 import com.cookie.domain.user.entity.enums.Role;
@@ -59,6 +60,9 @@ public class User extends BaseTimeEntity {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ReviewLike> reviewLikes = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<FcmToken> fcmTokens = new ArrayList<>();
 
 
     // mainBadge 반환 메서드
