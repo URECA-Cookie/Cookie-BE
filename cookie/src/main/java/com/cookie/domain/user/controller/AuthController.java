@@ -17,6 +17,12 @@ import com.cookie.domain.user.service.UserService;
 import com.cookie.global.jwt.JWTUtil;
 import com.cookie.global.service.AWSS3Service;
 import com.cookie.global.util.ApiUtil;
+import io.swagger.v3.oas.annotations.Hidden;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -30,6 +36,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+@Tag(name = "인증", description = "인증 API")
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
@@ -45,6 +52,10 @@ public class AuthController {
     private final FcmTokenService fcmTokenService;
     private final NotificationService notificationService;
 
+    @Operation(summary = "회원 가입", responses = {
+            @ApiResponse(responseCode = "200", content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = UserInfoResponse.class)))
+    })
     @PostMapping("/register")
     public ResponseEntity<Object> registerUser(
             @RequestPart("socialProvider") String socialProvider,
@@ -130,6 +141,10 @@ public class AuthController {
                 .body(ApiUtil.success(userInfoResponse));
     }
 
+    @Operation(summary = "JWT 검색", responses = {
+            @ApiResponse(responseCode = "200", content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = TokenResponse.class)))
+    })
     @GetMapping("/retrieve-token")
     public ResponseEntity<?> retrieveToken(@CookieValue(name = "Authorization", required = false) String accessToken,
                                            @CookieValue(name = "RefreshToken", required = false) String refreshToken) {
@@ -158,6 +173,10 @@ public class AuthController {
                 .body(ApiUtil.success(response));
     }
 
+    @Operation(summary = "Refresh JWT 발급", responses = {
+            @ApiResponse(responseCode = "200", content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = TokenResponse.class)))
+    })
     @PostMapping("/refresh-token")
     public ResponseEntity<?> refreshToken(@RequestHeader("Authorization") String refreshTokenHeader) {
         if (refreshTokenHeader == null || !refreshTokenHeader.startsWith("Bearer ")) {
@@ -185,6 +204,10 @@ public class AuthController {
                 .body(ApiUtil.success(response));
     }
 
+    @Operation(summary = "닉네임 중복 체크", responses = {
+            @ApiResponse(responseCode = "200", content = @Content(mediaType = "application/json",
+                    schema = @Schema(type = "string", example = "SUCCESS")))
+    })
     @GetMapping("/check-nickname")
     public ResponseEntity<?> validateNickname(@RequestParam("nickname") String nickname) {
         if (userService.isDuplicateNicknameRegister(nickname)) {
@@ -194,6 +217,10 @@ public class AuthController {
         return ResponseEntity.ok(ApiUtil.success("SUCCESS"));
     }
 
+    @Operation(summary = "관리자 생성", responses = {
+            @ApiResponse(responseCode = "200", content = @Content(mediaType = "application/json",
+                    schema = @Schema(type = "string", example = "SUCCESS")))
+    })
     @PostMapping("/register-admin")
     public ResponseEntity<?> registerAdmin(@RequestBody AdminRegisterRequest request) {
         if (userService.isDuplicateNicknameRegister(request.getId())) {
@@ -213,6 +240,10 @@ public class AuthController {
         return ResponseEntity.ok(ApiUtil.success("SUCCESS"));
     }
 
+    @Operation(summary = "관리자 로그인", responses = {
+            @ApiResponse(responseCode = "200", content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = TokenResponse.class)))
+    })
     @PostMapping("/admin")
     public ResponseEntity<?> loginAdmin(@RequestBody AdminLoginRequest request) {
         try {
@@ -247,6 +278,7 @@ public class AuthController {
     }
 
     // USER 정보 확인용 (소셜로그인)
+    @Hidden
     @GetMapping(value = "/me/user", produces = "application/json")
     public ResponseEntity<Object> getCurrentUserId(@AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
         log.info("user info: {} {} {}", customOAuth2User.getId(), customOAuth2User.getNickname(), customOAuth2User.getRole());
@@ -254,6 +286,7 @@ public class AuthController {
     }
 
     // ADMIN 정보 확인용 (일반로그인)
+    @Hidden
     @GetMapping(value = "/me/admin", produces = "application/json")
     public ResponseEntity<Object> getCurrentAdminId(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
         log.info("admin info: {} {} {}", customUserDetails.getId(), customUserDetails.getUsername(), customUserDetails.getAuthorities().iterator().next().getAuthority());

@@ -99,8 +99,10 @@ public class SecurityConfig {
                                 "/api/reviews/{reviewId}",
                                 "/api/movies/{movieId}/reviews",
                                 "/api/movies/{movieId}/reviews/spoiler",
-                                "/api/admin/movie/base"
+                                "/api/admin/movie/base",
 
+                                "/swagger-ui.html",
+                                "/v3/api-docs"
                         ).permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()

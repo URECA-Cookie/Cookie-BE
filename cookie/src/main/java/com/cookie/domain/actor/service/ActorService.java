@@ -3,9 +3,12 @@ package com.cookie.domain.actor.service;
 import com.cookie.domain.actor.dto.response.ActorDetailResponse;
 import com.cookie.domain.actor.entity.Actor;
 import com.cookie.domain.actor.repository.ActorRepository;
+import com.cookie.domain.movie.dto.response.MovieSimpleResponse;
 import com.cookie.domain.movie.dto.response.PersonDetailMovieInfo;
 import com.cookie.domain.movie.entity.MovieActor;
 import com.cookie.domain.movie.repository.MovieActorRepository;
+import com.cookie.domain.movie.repository.MovieLikeRepository;
+import com.cookie.domain.review.repository.ReviewRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +21,8 @@ public class ActorService {
 
     private final ActorRepository actorRepository;
     private final MovieActorRepository movieActorRepository;
+    private final ReviewRepository reviewRepository;
+    private final MovieLikeRepository movieLikeRepository;
 
     public ActorDetailResponse getActorDetails(Long actorId) {
         // 1. 배우 정보 가져오기
@@ -28,13 +33,18 @@ public class ActorService {
         List<MovieActor> movieActors = movieActorRepository.findAllMoviesByActorId(actorId);
 
         // 3. ActorMovie 리스트 생성
-        List<PersonDetailMovieInfo> actorMovieList = movieActors.stream()
+        List<MovieSimpleResponse> actorMovieList = movieActors.stream()
                 .map(movieActor -> {
                     var movie = movieActor.getMovie();
-                    return PersonDetailMovieInfo.builder()
+                    return MovieSimpleResponse.builder()
+                            .id(movie.getId())
                             .title(movie.getTitle())
                             .poster(movie.getPoster())
-                            .released(movie.getReleasedAt()) // LocalDateTime -> LocalDate 변환
+                            .releasedAt(movie.getReleasedAt())
+                            .country(movie.getCountry().getName())
+                            .score(movie.getScore())
+                            .likes(movieLikeRepository.countByMovieId(movie.getId()))
+                            .reviews(reviewRepository.countByMovieId(movie.getId()))
                             .build();
                 })
                 .collect(Collectors.toList());

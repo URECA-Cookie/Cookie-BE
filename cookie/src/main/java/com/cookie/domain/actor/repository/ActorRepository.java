@@ -21,8 +21,6 @@ public interface ActorRepository extends JpaRepository<Actor, Long> {
            """)
     Optional<Actor> findByTMDBCasterId(@Param("tmdbCasterId") Long tmdbCasterId);
 
-    Page<Actor> findByNameContainingIgnoreCase(String keyword, Pageable pageable);
-
     @Query("""
             SELECT a
             FROM Actor a
