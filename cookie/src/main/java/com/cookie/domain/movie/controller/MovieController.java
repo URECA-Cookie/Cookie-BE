@@ -86,7 +86,6 @@ public class MovieController {
                     array = @ArraySchema(
                             schema = @Schema(implementation = MovieSimpleResponse.class))))
     })
-
     @GetMapping("/{userId}/recommendations")
     public ApiSuccess<List<MovieSimpleResponse>> getRecommendations(@AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
         Long userId = (customOAuth2User != null) ? customOAuth2User.getId() : null;
@@ -94,6 +93,11 @@ public class MovieController {
         return ApiUtil.success(recommendedMovies);
     }
 
+    @Operation(summary = "메인 페이지", responses = {
+            @ApiResponse(responseCode = "200", content = @Content(mediaType = "application/json",
+                    array = @ArraySchema(
+                            schema = @Schema(implementation = MainPageResponse.class))))
+    })
     @GetMapping("/mainPage")
     public ApiSuccess<MainPageResponse> getMainPageInfo(){
         MainPageResponse mainPageResponse = movieService.getMainPageInfo();
