@@ -12,15 +12,25 @@ import java.util.concurrent.TimeUnit;
 @Configuration
 public class CacheConfig {
 
-    @Bean(name = "mainPageCache")
-    public CacheManager mainCacheManager() {
-        CaffeineCacheManager cacheManager = new CaffeineCacheManager("mainPageCache");
+    @Bean(name = "mainAdminRecommendCacheManager")
+    @Primary
+    public CacheManager mainAdminCachManager() {
+        CaffeineCacheManager cacheManager = new CaffeineCacheManager("mainAdminRecommendCache");
         cacheManager.setCaffeine(Caffeine.newBuilder()
                 .maximumSize(500)
                 .expireAfterWrite(1, TimeUnit.MINUTES));
         return cacheManager;
     }
-    @Primary
+
+    @Bean(name = "mainMatchUpCacheManager")
+    public CacheManager mainMatchUpCacheManager() {
+        CaffeineCacheManager cacheManager = new CaffeineCacheManager("mainMatchUpCache");
+        cacheManager.setCaffeine(Caffeine.newBuilder()
+                .maximumSize(500)
+                .expireAfterWrite(1, TimeUnit.MINUTES));
+        return cacheManager;
+    }
+    //@Primary
     @Bean(name = "categoryMoviesCache")
     public CacheManager categoryMoviesCacheManager() {
         CaffeineCacheManager cacheManager = new CaffeineCacheManager("categoryMoviesCache");
@@ -29,5 +39,20 @@ public class CacheConfig {
                 .expireAfterWrite(1, TimeUnit.MINUTES));
         return cacheManager;
     }
+
+//    @Bean(name = "pointLivedCache")
+//    public Caffeine<Object, Object> pointCaffeineConfig() {
+//        return Caffeine.newBuilder()
+//                .maximumSize(1000)
+//                .recordStats()
+//                .expireAfterWrite(30, TimeUnit.DAYS);
+//    }
+//
+//    @Bean(name = "pointLivedCacheManager")
+//    public CacheManager pointCacheManager(@Qualifier("pointLivedCache") Caffeine<Object, Object> caffeine) {
+//        CaffeineCacheManager cacheManager = new CaffeineCacheManager("pointLivedCache");
+//        cacheManager.setCaffeine(caffeine);
+//        return cacheManager;
+//    }
 }
 

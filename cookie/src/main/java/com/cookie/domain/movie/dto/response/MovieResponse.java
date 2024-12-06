@@ -25,8 +25,8 @@ public class MovieResponse {
     private Long likes;
     private String certification;      // 연령등급 (Enum -> String 변환)
     private List<String> images;       // 영화 이미지 리스트
-    private String  videos; // 영화 비디오 리스트
-    private String country;    // 제작 국가 리스트
+    private String  video;             // 영화 비디오
+    private String country;            // 제작 국가
     private DirectorResponse director; //감독 정보
     private List<ActorResponse> actors;
     private List<ReviewResponse> reviews;
