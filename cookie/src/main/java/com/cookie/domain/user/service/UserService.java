@@ -250,25 +250,7 @@ public class UserService {
 
         // BadgeAccResponse로 변환하여 반환
         return BadgeAccResponse.builder()
-                .romancePoint(badgeAccumulationPoint.getRomancePoint())
-                .horrorPoint(badgeAccumulationPoint.getHorrorPoint())
-                .comedyPoint(badgeAccumulationPoint.getComedyPoint())
-                .actionPoint(badgeAccumulationPoint.getActionPoint())
-                .fantasyPoint(badgeAccumulationPoint.getFantasyPoint())
-                .animationPoint(badgeAccumulationPoint.getAnimationPoint())
-                .crimePoint(badgeAccumulationPoint.getCrimePoint())
-                .sfPoint(badgeAccumulationPoint.getSfPoint())
-                .musicPoint(badgeAccumulationPoint.getMusicPoint())
-                .thrillerPoint(badgeAccumulationPoint.getThrillerPoint())
-                .warPoint(badgeAccumulationPoint.getWarPoint())
-                .documentaryPoint(badgeAccumulationPoint.getDocumentaryPoint())
-                .dramaPoint(badgeAccumulationPoint.getDramaPoint())
-                .familyPoint(badgeAccumulationPoint.getFamilyPoint())
-                .historyPoint(badgeAccumulationPoint.getHistoryPoint())
-                .misteryPoint(badgeAccumulationPoint.getMisteryPoint())
-                .tvMoviePoint(badgeAccumulationPoint.getTvMoviePoint())
-                .westernPoint(badgeAccumulationPoint.getWesternPoint())
-                .adventurePoint(badgeAccumulationPoint.getAdventurePoint())
+                .accPoint(badgeAccumulationPoint.getAccPoint())
                 .build();
     }
 
@@ -383,25 +365,7 @@ public class UserService {
     public void initBadgeAccumulationPoint(User user) {
         BadgeAccumulationPoint badgeAccumulationPoint = BadgeAccumulationPoint.builder()
                 .user(user)
-                .romancePoint(0)
-                .horrorPoint(0)
-                .comedyPoint(0)
-                .actionPoint(0)
-                .fantasyPoint(0)
-                .animationPoint(0)
-                .crimePoint(0)
-                .sfPoint(0)
-                .musicPoint(0)
-                .thrillerPoint(0)
-                .warPoint(0)
-                .documentaryPoint(0)
-                .dramaPoint(0)
-                .familyPoint(0)
-                .historyPoint(0)
-                .misteryPoint(0)
-                .westernPoint(0)
-                .adventurePoint(0)
-                .tvMoviePoint(0)
+                .accPoint(0L)
                 .build();
 
         badgeAccumulationPointRepository.save(badgeAccumulationPoint);

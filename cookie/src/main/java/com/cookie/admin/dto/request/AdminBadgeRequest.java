@@ -8,6 +8,6 @@ import lombok.NoArgsConstructor;
 public class AdminBadgeRequest {
 
     private String badgeName;
-    private String genre;
-    private Integer needPoint;
+    private String grade;
+    private Long needPoint;
 }

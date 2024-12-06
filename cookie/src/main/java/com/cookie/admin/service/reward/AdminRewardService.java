@@ -31,7 +31,7 @@ public class AdminRewardService {
         return badges.stream()
                 .map(badge -> AdminBadges.builder()
                         .BadgeId(badge.getId())
-                        .genre(badge.getGenre())
+                        .grade(badge.getGrade())
                         .badgeImage(badge.getBadgeImage())
                         .badgeName(badge.getName())
                         .needPoint(badge.getNeedPoint()).build())
@@ -50,7 +50,7 @@ public class AdminRewardService {
 
         Badge badge = Badge.builder()
                 .name(request.getBadgeName())
-                .genre(request.getGenre())
+                .grade(request.getGrade())
                 .badgeImage(imageUrl)
                 .needPoint(request.getNeedPoint())
                 .build();
@@ -66,8 +66,6 @@ public class AdminRewardService {
 
 
         if (image != null) {
-            System.out.println("image = " + image.getName());
-            System.out.println("image getContentType = " + image.getContentType());
             String imageUrl = awss3Service.uploadImage(image);
             badge.updateBadgeImage(imageUrl);
         }
@@ -79,8 +77,8 @@ public class AdminRewardService {
             badge.updateBadgeName(update.getBadgeName());
         }
 
-        if ((update.getGenre() != null)) {
-            badge.updateGenre(update.getGenre());
+        if ((update.getGrade() != null)) {
+            badge.updateGrade(update.getGrade());
         }
 
         if (update.getNeedPoint() != null) {
