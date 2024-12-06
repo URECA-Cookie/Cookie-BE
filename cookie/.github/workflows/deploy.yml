@@ -45,7 +45,7 @@ jobs:
           # 프로젝트 경로 설정
           PROJECT_DIR="/home/ubuntu/Cookie-BE/cookie"
           BUILD_DIR="$PROJECT_DIR/build/libs"
-          DEPLOY_JAR="cookie-0.0.1-SNAPSHOT.jar"
+          DEPLOY_JAR="cookie-0.0.2-SNAPSHOT.jar"
           
           # 빌드된 JAR 파일을 EC2로 전송
           scp -i private_key.pem -o StrictHostKeyChecking=no build/libs/$DEPLOY_JAR ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:$BUILD_DIR/
