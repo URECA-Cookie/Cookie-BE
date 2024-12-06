@@ -28,8 +28,9 @@ jobs:
           echo "SPRING_DATASOURCE_URL=${{ secrets.SPRING_DATASOURCE_URL }}" >> $GITHUB_ENV
           echo "SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME }}" >> $GITHUB_ENV
           echo "SPRING_DATASOURCE_PASSWORD=${{ secrets.SPRING_DATASOURCE_PASSWORD }}" >> $GITHUB_ENV
-          echo "SPRING_JPA_HIBERNATE_DDL_AUTO=${{ secrets.SPRING_JPA_HIBERNATE_DDL_AUTO }}" >> $GITHUB_ENV
-          echo "SPRING_JPA_HIBERNATE_DIALECT=${{ secrets.SPRING_JPA_HIBERNATE_DIALECT }}" >> $GITHUB_ENV
+          echo "SPRING_JPA_HIBERNATE_DDL_AUTO=update" >> $GITHUB_ENV
+          echo "SPRING_JPA_HIBERNATE_DIALECT=org.hibernate.dialect.MySQL8Dialect" >> $GITHUB_ENV
+          echo "SPRING_DATASOURCE_DRIVER_CLASS_NAME=com.mysql.cj.jdbc.Driver" >> $GITHUB_ENV
 
     
       # Gradle Wrapper 실행 권한 부여
