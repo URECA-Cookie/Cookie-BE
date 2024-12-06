@@ -9,6 +9,7 @@ import com.cookie.domain.movie.service.MovieService;
 import com.cookie.domain.user.dto.response.auth.CustomOAuth2User;
 import com.cookie.global.util.ApiUtil;
 import com.cookie.global.util.ApiUtil.ApiSuccess;
+import com.google.protobuf.Api;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -40,12 +41,12 @@ public class MovieController {
     })
 
     @GetMapping("/{movieId}")
-    public ResponseEntity<MovieResponse> getMovieDetail(
+    public ApiSuccess<MovieResponse> getMovieDetail(
             @PathVariable(name="movieId") Long movieId,
             @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
         Long userId = (customOAuth2User != null) ? customOAuth2User.getId() : null;
         MovieResponse movieDetail = movieService.getMovieDetails(movieId, userId);
-        return ResponseEntity.ok(movieDetail);
+        return ApiUtil.success(movieDetail);
     }
 
     @Operation(summary = "영화에 작성 된 리뷰", responses = {
