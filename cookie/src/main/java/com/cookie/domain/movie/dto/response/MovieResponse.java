@@ -1,6 +1,7 @@
 package com.cookie.domain.movie.dto.response;
 
 import com.cookie.domain.actor.dto.response.ActorResponse;
+import com.cookie.domain.category.dto.CategoryResponse;
 import com.cookie.domain.director.dto.response.DirectorResponse;
 import com.cookie.domain.review.dto.response.ReviewResponse;
 import lombok.AllArgsConstructor;
@@ -30,6 +31,7 @@ public class MovieResponse {
     private DirectorResponse director; //감독 정보
     private List<ActorResponse> actors;
     private List<ReviewResponse> reviews;
+    private List<CategoryResponse> categories;
     private boolean isLiked;
 
 }
