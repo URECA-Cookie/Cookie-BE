@@ -49,7 +49,7 @@ jobs:
       # 프로젝트 빌드
       - name: Build with Gradle
         working-directory: cookie
-        run: ./gradlew build
+        run: ./gradlew build x-test
 
       # EC2 서버로 배포
       - name: Deploy to EC2
