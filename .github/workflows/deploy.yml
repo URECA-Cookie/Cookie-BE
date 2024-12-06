@@ -22,12 +22,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # 작업 디렉토리 변경
-      - name: Change working directory
-        run: cd cookie
-
       # Gradle Wrapper 실행 권한 부여
       - name: Grant execute permission for gradlew
+        working-directory: cookie
         run: chmod +x gradlew
  
       # JDK 17 설정
@@ -37,10 +34,9 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-
-
       # 프로젝트 빌드
       - name: Build with Gradle
+        working-directory: cookie
         run: ./gradlew build
 
       # EC2 서버로 배포
