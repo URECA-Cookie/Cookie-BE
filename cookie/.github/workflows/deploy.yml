@@ -2,8 +2,13 @@ name: Cookie Project BE Deploy
 
 on:
   push:
-    branches:
+   branches:
       - develop
+  pull_request:
+      branches:
+        - develop
+      types:
+        - closed
 
 # 워크플로우가 깃 레포에 대한 권한을 읽기만 가능하게 설정
 permissions:
@@ -38,6 +43,9 @@ jobs:
       # 5. EC2 서버로 배포
       - name: Deploy to EC2
         run: |
+          set -e  # 에러 발생 시 중단
+          echo "빌드 배포에 실패 했습니다."
+          
           # 비공개 키 파일 생성
           echo "${{ secrets.EC2_SSH_KEY }}" > private_key.pem
           chmod 600 private_key.pem
@@ -45,16 +53,21 @@ jobs:
           # 프로젝트 경로 설정
           PROJECT_DIR="/home/ubuntu/Cookie-BE/cookie"
           BUILD_DIR="$PROJECT_DIR/build/libs"
-          DEPLOY_JAR="cookie-0.0.2-SNAPSHOT.jar"
+          DEPLOY_JAR="cookie-0.0.1-SNAPSHOT.jar"
           
           # 빌드된 JAR 파일을 EC2로 전송
+          echo "EC2에 Jar 파일 전송 시작"
           scp -i private_key.pem -o StrictHostKeyChecking=no build/libs/$DEPLOY_JAR ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:$BUILD_DIR/
           
           # EC2에서 실행 중인 애플리케이션 중지 및 새로운 JAR 파일 실행
+          echo "EC2 내부에서 Jar 파일 실행"
           ssh -i private_key.pem -o StrictHostKeyChecking=no ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} << EOF
+          echo "실행 중인 현재 서버 종료..."
           pkill -f 'java -jar' || true
+          echo "서버 재시동 중...!!."
           nohup java -jar $BUILD_DIR/$DEPLOY_JAR > $BUILD_DIR/app.log 2>&1 &
           EOF
           
+          echo "✅ EC2 서버에 배포 완료!"
           # 비공개 키 파일 삭제
           rm -f private_key.pem
