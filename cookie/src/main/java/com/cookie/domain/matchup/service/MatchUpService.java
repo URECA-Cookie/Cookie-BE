@@ -16,6 +16,7 @@ import com.cookie.domain.user.repository.MatchUpParticipationRepository;
 import com.cookie.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -246,6 +247,7 @@ public class MatchUpService {
         }
     }
 
+    @Cacheable(value = "mainMatchUpCache", cacheManager = "mainMatchUpCacheManager") // Caffeine Cache 적용
     public MainMatchUpsResponse getMainMatchUps() {
         List<MatchUp> nowMatchUps = matchUpRepository.findByStatus(MatchUpStatus.NOW);
 
