@@ -30,7 +30,6 @@ public class DirectorService {
         // 2. 디렉팅한 영화 정보 가져오기
         List<Director> movieDirectors = directorRepository.findAllMoviesByDirectorId(directorId);
 
-        // 3. ActorMovie 리스트 생성
         // 3. DirectorMovie 리스트 생성
         List<MovieSimpleResponse> directorMovieList = movieDirectors.stream()
                 .flatMap(movieDirector -> movieDirector.getMovies().stream())
@@ -41,7 +40,7 @@ public class DirectorService {
                         .releasedAt(movie.getReleasedAt()) // LocalDateTime -> LocalDate 변환
                         .country(movie.getCountry().getName()) // 제작 국가 이름
                         .score(movie.getScore())
-                        .likes(movieLikeRepository.countByMovieId(movie.getId())) // 좋아요 수
+                        .likes(movie.getMovieLikes()) // 좋아요 수
                         .reviews(reviewRepository.countByMovieId(movie.getId())) // 리뷰 개수
                         .build()
                 )
