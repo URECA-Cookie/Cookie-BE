@@ -15,4 +15,11 @@ public interface BadgeRepository extends JpaRepository<Badge, Long> {
         WHERE b.name = :name
     """)
     Optional<Badge> findBadgeByName(@Param("name") String name);
+
+    @Query("""
+        SELECT b
+        FROM Badge b
+        WHERE b.grade = :grade
+    """)
+    Optional<Badge> findBadgeByGrade(@Param("grade") String grade);
 }

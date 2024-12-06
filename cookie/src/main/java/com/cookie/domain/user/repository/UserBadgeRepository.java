@@ -20,6 +20,15 @@ public interface UserBadgeRepository extends JpaRepository<UserBadge, Long> {
 
     Optional<UserBadge> findByUserIdAndIsMainTrue(Long userId);
 
+    @Query("""
+        SELECT ub
+        FROM UserBadge ub
+        JOIN FETCH ub.badge
+        WHERE ub.user.id = :userId
+        AND ub.badge.grade = :grade
+    """)
+    Optional<UserBadge> findByUserIdAAndBadgeGrade(@Param("userId") Long userId, @Param("grade") String grade);
+
     @Modifying
     @Query("""
         DELETE FROM UserBadge ub

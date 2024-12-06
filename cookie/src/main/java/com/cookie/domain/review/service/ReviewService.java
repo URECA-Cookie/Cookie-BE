@@ -2,13 +2,11 @@ package com.cookie.domain.review.service;
 
 
 import com.cookie.domain.movie.dto.response.ReviewMovieResponse;
-import com.cookie.domain.movie.dto.response.ReviewOfMovieResponse;
 import com.cookie.domain.movie.entity.Movie;
 import com.cookie.domain.movie.repository.MovieRepository;
 import com.cookie.domain.notification.service.NotificationService;
 import com.cookie.domain.review.dto.request.ReviewCommentRequest;
 import com.cookie.domain.review.dto.request.CreateReviewRequest;
-import com.cookie.domain.review.dto.response.PushNotification;
 import com.cookie.domain.review.dto.response.ReviewCommentResponse;
 import com.cookie.domain.review.dto.response.ReviewDetailResponse;
 import com.cookie.domain.review.dto.response.ReviewListResponse;
@@ -21,15 +19,14 @@ import com.cookie.domain.review.entity.ReviewLike;
 import com.cookie.domain.review.repository.ReviewCommentRepository;
 import com.cookie.domain.review.repository.ReviewLikeRepository;
 import com.cookie.domain.review.repository.ReviewRepository;
+import com.cookie.domain.reward.service.RewardPointService;
 import com.cookie.domain.user.dto.response.CommentUserResponse;
 import com.cookie.domain.user.dto.response.ReviewUserResponse;
-import com.cookie.domain.user.entity.DailyGenreScore;
 import com.cookie.domain.user.entity.User;
 import com.cookie.domain.user.entity.enums.ActionType;
 import com.cookie.domain.user.repository.DailyGenreScoreRepository;
 import com.cookie.domain.user.repository.UserRepository;
 import com.cookie.domain.user.service.DailyGenreScoreService;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -41,9 +38,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -57,6 +52,7 @@ public class ReviewService {
     private final DailyGenreScoreRepository dailyGenreScoreRepository;
     private final DailyGenreScoreService dailyGenreScoreService;
     private final NotificationService notificationService;
+    private final RewardPointService rewardPointService;
 
     @Transactional
     public void createReview(Long userId, CreateReviewRequest createReviewRequest, CopyOnWriteArrayList<SseEmitter> reviewEmitters, CopyOnWriteArrayList<SseEmitter> pushNotificationEmitters) {
@@ -111,6 +107,10 @@ public class ReviewService {
 
 
         sendReviewCreatedEvent(savedReview, reviewEmitters); // 리뷰 피드에 실시간으로 리뷰 추가
+
+        // 테스트 완료 (리뷰 생성 시 뱃지 포인트 업데이트 및 지급 처리)
+        rewardPointService.updateBadgePointFromReview(user, 1L);
+
 //        sendPushNotification(userId, movie, savedReview, pushNotificationEmitters); // 장르를 좋아하는 유저들에게 푸시 알림
     }
 

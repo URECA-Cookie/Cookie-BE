@@ -16,15 +16,15 @@ public class Badge {
     private Long id;
     private String name;
     private String badgeImage;
-    private String genre;
-    private Integer needPoint;
+    private String grade;
+    private Long needPoint;
 
     @Builder
-    public Badge(Long id, String name, String badgeImage, String genre, int needPoint) {
+    public Badge(Long id, String name, String badgeImage, String grade, Long needPoint) {
         this.id = id;
         this.name = name;
         this.badgeImage = badgeImage;
-        this.genre = genre;
+        this.grade = grade;
         this.needPoint = needPoint;
     }
 
@@ -36,10 +36,11 @@ public class Badge {
         this.badgeImage = BadgeImage;
     }
 
-    public void updateGenre(String newGenre) {
-        this.genre = newGenre;
+    public void updateGrade(String newGrade) {
+        this.grade = newGrade;
     }
-    public void updateNeedPoint(Integer newNeedPoint) {
+
+    public void updateNeedPoint(Long newNeedPoint) {
         this.needPoint = newNeedPoint;
     }
 }
