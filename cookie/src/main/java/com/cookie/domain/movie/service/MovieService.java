@@ -381,13 +381,9 @@ public class MovieService {
         return genreMap;
     }
 
-    @Cacheable("mainPageCache") // Caffeine Cache 적용
-   public MainPageResponse getMainPageInfo(){
-        MainPageResponse mainPageResponse = new MainPageResponse();
 
-       // 1. 매치업
-       MainMatchUpsResponse mainMatchUpsResponse = matchUpService.getMainMatchUps();
-       // 2. 관리자 수동 추천
+   @Cacheable(value = "mainAdminRecommendCache", cacheManager = "mainAdminRecommendCacheManager") // Caffeine Cache 적용
+   public List<MovieSimpleResponse> getMainAdminRecommend(){
        List<RecommendResponse> recommendMovies = adminRecommendService.getRecommendMovies();
        List<MovieSimpleResponse> movieSimpleResponses = recommendMovies.stream()
             .map(recommendResponse -> {
@@ -410,12 +406,11 @@ public class MovieService {
             .toList();
 
 
-        return MainPageResponse.builder()
-                .adminRecommendMovies(movieSimpleResponses)
-                .matchUp(mainMatchUpsResponse)
-                .build();
+        return movieSimpleResponses;
 
    }
+
+
 
 
 }

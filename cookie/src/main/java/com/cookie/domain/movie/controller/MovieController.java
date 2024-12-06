@@ -1,6 +1,9 @@
 package com.cookie.domain.movie.controller;
 
 
+
+import com.cookie.domain.matchup.dto.response.MainMatchUpsResponse;
+import com.cookie.domain.matchup.service.MatchUpService;
 import com.cookie.domain.movie.dto.response.*;
 import com.cookie.domain.movie.service.MovieService;
 import com.cookie.domain.user.dto.response.auth.CustomOAuth2User;
@@ -29,12 +32,14 @@ import java.util.List;
 public class MovieController {
 
     private final MovieService movieService;
+    private final MatchUpService matchUpService;
 
     @Operation(summary = "영화 상세 정보", responses = {
             @ApiResponse(responseCode = "200", content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = MovieResponse.class)))
     })
-    @GetMapping("/{movieId}/{userId}")
+
+    @GetMapping("/{movieId}")
     public ResponseEntity<MovieResponse> getMovieDetail(
             @PathVariable(name="movieId") Long movieId,
             @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
@@ -98,10 +103,20 @@ public class MovieController {
                     array = @ArraySchema(
                             schema = @Schema(implementation = MainPageResponse.class))))
     })
-    @GetMapping("/mainPage")
-    public ApiSuccess<MainPageResponse> getMainPageInfo(){
-        MainPageResponse mainPageResponse = movieService.getMainPageInfo();
-        return ApiUtil.success(mainPageResponse);
+
+
+
+    @GetMapping("/mainMatchUps")
+    public ApiSuccess<MainMatchUpsResponse> getMainPageMatchUps(){
+        MainMatchUpsResponse mainMatchUpsResponse = matchUpService.getMainMatchUps();
+        return ApiUtil.success(mainMatchUpsResponse);
     }
+
+    @GetMapping("/mainAdminRecommend")
+    public ApiSuccess<List<MovieSimpleResponse>> getMainAdminRecommend(){
+        List<MovieSimpleResponse> mainAdminRecommend = movieService.getMainAdminRecommend();
+        return ApiUtil.success(mainAdminRecommend);
+    }
+
 
 }
