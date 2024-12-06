@@ -6,6 +6,7 @@ import com.cookie.admin.entity.AdminMovieRecommend;
 import com.cookie.admin.service.recommend.AdminRecommendService;
 import com.cookie.domain.actor.dto.response.ActorResponse;
 import com.cookie.domain.actor.repository.ActorRepository;
+import com.cookie.domain.category.dto.CategoryResponse;
 import com.cookie.domain.category.repository.CategoryRepository;
 import com.cookie.domain.category.entity.Category;
 import com.cookie.domain.category.request.CategoryRequest;
@@ -231,10 +232,19 @@ public class MovieService {
                 })
                 .collect(Collectors.toList());
 
-        // 5. 사용자가 해당 영화에 좋아요를 눌렀는지 안 눌렀는지 여부
+        // 5. 카테고리 리스트
+        List<CategoryResponse> categories = movieCategoryRepository.findByMovieIdWithCategory(movieId).stream()
+                .map(movieCategory -> new CategoryResponse(
+                        movieCategory.getCategory().getId(),
+                        movieCategory.getCategory().getMainCategory(),
+                        movieCategory.getCategory().getSubCategory()
+                ))
+                .collect(Collectors.toList());
+
+        // 6. 사용자가 해당 영화에 좋아요를 눌렀는지 안 눌렀는지 여부
         boolean isLiked = movieLikeRepository.isMovieLikedByUser(movieId,userId);
 
-        // 6. MovieResponse 생성
+        // 7. MovieResponse 생성
         return MovieResponse.builder()
                 .id(movie.getId())
                 .title(movie.getTitle())
@@ -253,6 +263,7 @@ public class MovieService {
                 .director(directorResponse)
                 .actors(actors)
                 .reviews(reviews) // 리뷰 리스트 추가
+                .categories(categories)
                 .isLiked(isLiked)
                 .build();
     }
