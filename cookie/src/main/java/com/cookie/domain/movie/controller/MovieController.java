@@ -1,6 +1,7 @@
 package com.cookie.domain.movie.controller;
 
 
+
 import com.cookie.domain.matchup.dto.response.MainMatchUpsResponse;
 import com.cookie.domain.matchup.service.MatchUpService;
 import com.cookie.domain.movie.dto.response.*;
@@ -37,6 +38,7 @@ public class MovieController {
             @ApiResponse(responseCode = "200", content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = MovieResponse.class)))
     })
+
     @GetMapping("/{movieId}")
     public ResponseEntity<MovieResponse> getMovieDetail(
             @PathVariable(name="movieId") Long movieId,
@@ -101,6 +103,7 @@ public class MovieController {
                     array = @ArraySchema(
                             schema = @Schema(implementation = MainPageResponse.class))))
     })
+
 
 
     @GetMapping("/mainMatchUps")

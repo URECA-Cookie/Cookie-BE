@@ -381,7 +381,8 @@ public class MovieService {
         return genreMap;
     }
 
-    @Cacheable(value = "mainAdminRecommendCache", cacheManager = "mainAdminRecommendCacheManager") // Caffeine Cache 적용
+
+   @Cacheable(value = "mainAdminRecommendCache", cacheManager = "mainAdminRecommendCacheManager") // Caffeine Cache 적용
    public List<MovieSimpleResponse> getMainAdminRecommend(){
        List<RecommendResponse> recommendMovies = adminRecommendService.getRecommendMovies();
        List<MovieSimpleResponse> movieSimpleResponses = recommendMovies.stream()

@@ -40,6 +40,7 @@ public class DirectorService {
                         .poster(movie.getPoster()) // 포스터
                         .releasedAt(movie.getReleasedAt()) // LocalDateTime -> LocalDate 변환
                         .country(movie.getCountry().getName()) // 제작 국가 이름
+                        .score(movie.getScore())
                         .likes(movieLikeRepository.countByMovieId(movie.getId())) // 좋아요 수
                         .reviews(reviewRepository.countByMovieId(movie.getId())) // 리뷰 개수
                         .build()

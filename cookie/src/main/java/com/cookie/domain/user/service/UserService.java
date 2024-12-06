@@ -8,6 +8,8 @@ import com.cookie.domain.movie.entity.Movie;
 import com.cookie.domain.movie.entity.MovieLike;
 import com.cookie.domain.movie.repository.MovieLikeRepository;
 import com.cookie.domain.movie.repository.MovieRepository;
+import com.cookie.domain.notification.repository.FcmTokenRepository;
+import com.cookie.domain.notification.service.NotificationService;
 import com.cookie.domain.review.dto.response.ReviewResponse;
 import com.cookie.domain.review.entity.ReviewLike;
 import com.cookie.domain.review.repository.ReviewLikeRepository;
@@ -19,6 +21,7 @@ import com.cookie.domain.user.entity.enums.SocialProvider;
 import com.cookie.domain.user.repository.*;
 import com.cookie.domain.review.repository.ReviewRepository;
 import com.cookie.global.service.AWSS3Service;
+import com.cookie.domain.notification.entity.FcmToken;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -48,6 +51,8 @@ public class UserService {
     private final BadgeRepository badgeRepository;
     private final CategoryRepository categoryRepository;
     private final ReviewLikeRepository reviewLikeRepository;
+    private final NotificationService notificationService;
+    private final FcmTokenRepository fcmTokenRepository;
 
     @Transactional(readOnly = true)
     public MyPageResponse getMyPage(Long userId) {
@@ -209,6 +214,9 @@ public class UserService {
         }
         log.info("Updated user main badge: {}", user.getMainBadge() != null ? user.getMainBadge().getName() : "No main badge");
 
+        // 기존 장르
+        Long prevGenreId = user.getCategory().getId();
+
         // 장르 선택
         Long genreId = Long.parseLong(genreIdStr);
         Category genre = categoryRepository.findById(genreId)
@@ -220,6 +228,18 @@ public class UserService {
         if (userBadges != null && !userBadges.isEmpty()) {
             userBadgeRepository.saveAll(userBadges);
         }
+
+        // 선호 장르 변경시, 기존 토픽 구독 취소 및 업데이트
+//        if (!prevGenreId.equals(genre.getId())) {
+//            if (fcmToken != null && !fcmToken.isEmpty()) {
+//                notificationService.unsubscribeFromTopic(fcmToken, prevGenreId, userId);
+//                log.info("Unsubscribed from previous genre: {}", prevGenreId);
+//            }
+//            notificationService.subscribeToTopic(fcmToken, genreId, userId);
+//            log.info("Subscribed to new genre: {}", genreId);
+//        } else {
+//            log.warn("FCM token is null or empty. Skipping subscription update.");
+//        }
 
         log.info("Updated user info");
     }
@@ -254,10 +274,17 @@ public class UserService {
 
 
     @Transactional
-    public void registerUser(User user) {
+    public UserResponse registerUser(User user) {
         userRepository.save(user);
         genreScoreService.createAndSaveGenreScore(user);
         initBadgeAccumulationPoint(user);
+
+//        List<String> fcmTokens = user.getFcmTokens()
+//                .stream()
+//                .map(FcmToken::getToken)
+//                .toList();
+
+        return new UserResponse(user.getId(), user.getNickname(), user.getProfileImage(), user.getCategory().getId());
     }
 
     public void registerAdmin(User user) {
@@ -293,7 +320,7 @@ public class UserService {
         List<String> genres = movie.getMovieCategories().stream()
                 .filter(mc -> "장르".equals(mc.getCategory().getMainCategory())) // "장르" 필터
                 .map(mc -> mc.getCategory().getSubCategory()) // SubCategory 추출
-                .collect(Collectors.toList());
+                .toList();
 
         // 좋아요 기록이 있는지 확인
         Optional<MovieLike> existingLike = movieLikeRepository.findByMovieAndUser(movie, user);
@@ -378,6 +405,26 @@ public class UserService {
                 .build();
 
         badgeAccumulationPointRepository.save(badgeAccumulationPoint);
+    }
+
+    public UserResponse getUserInfo(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("not found userId: " + userId));
+        log.info("Retrieved user: userId = {}", userId);
+
+//        List<String> fcmTokens = user.getFcmTokens()
+//                .stream()
+//                .map(FcmToken::getToken)
+//                .toList();
+
+        return new UserResponse(user.getId(), user.getNickname(), user.getProfileImage(), user.getCategory().getId());
+    }
+
+    @Transactional
+    public void deleteUserAccount(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("not found userId: " + userId));
+        userRepository.deleteById(userId);
     }
 
 }

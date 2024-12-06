@@ -9,7 +9,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface MovieActorRepository extends JpaRepository<MovieActor, Long> {
-    @Query("SELECT ma FROM MovieActor ma JOIN FETCH ma.movie WHERE ma.actor.id = :actorId")
+    @Query("SELECT ma FROM MovieActor ma JOIN FETCH ma.movie m WHERE ma.actor.id = :actorId ORDER BY m.releasedAt DESC")
     List<MovieActor> findAllMoviesByActorId(Long actorId);
 
     @Query("""

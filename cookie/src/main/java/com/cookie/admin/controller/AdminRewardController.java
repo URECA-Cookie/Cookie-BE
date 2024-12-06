@@ -5,6 +5,7 @@ import com.cookie.admin.dto.response.AdminBadges;
 import com.cookie.admin.service.reward.AdminRewardService;
 import com.cookie.global.util.ApiUtil;
 import com.cookie.global.util.ApiUtil.ApiSuccess;
+import io.swagger.v3.oas.annotations.Hidden;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,12 +19,14 @@ public class AdminRewardController {
 
     private final AdminRewardService adminRewardService;
 
+    @Hidden
     @GetMapping()
     public ApiSuccess<?> getRewardBadges() {
         List<AdminBadges> data = adminRewardService.getRewardBadges();
         return ApiUtil.success(data);
     }
 
+    @Hidden
     @PostMapping
     public ApiSuccess<?> createRewardBadges(@RequestPart("badgeImage") MultipartFile badgeImage,
                                             @RequestPart("request") AdminBadgeRequest request) {
@@ -31,6 +34,7 @@ public class AdminRewardController {
         return ApiUtil.success("SUCCESS");
     }
 
+    @Hidden
     @PutMapping("/{badgeId}")
     public ApiSuccess<?> updateRewardBadge(@PathVariable("badgeId") Long badgeId,
                                            @RequestPart(value = "badgeImage", required = false) MultipartFile image,
@@ -39,6 +43,7 @@ public class AdminRewardController {
         return ApiUtil.success("SUCCESS");
     }
 
+    @Hidden
     @DeleteMapping("/{badgeId}")
     public ApiSuccess<?> deleteRewardBadge(@PathVariable("badgeId") Long badgeId) {
         adminRewardService.deleteRewardBadge(badgeId);

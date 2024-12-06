@@ -12,6 +12,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface MovieRepository extends JpaRepository<Movie, Long> {
@@ -46,6 +47,13 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
 
     Page<Movie> findByTitleContainingIgnoreCase(String keyword, Pageable pageable);
 
+    @Query("SELECT ma.movie FROM MovieActor ma JOIN FETCH ma.movie.director WHERE ma.actor.name LIKE %:keyword%")
+    Page<Movie> findMoviesByActorName(@Param("keyword") String keyword, Pageable pageable);
+
+
+    @Query("SELECT m FROM Movie m JOIN FETCH m.director WHERE LOWER(m.director.name) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+    Page<Movie> findMoviesByDirectorNameContainingIgnoreCase(@Param("keyword") String keyword, Pageable pageable);
+
     @Query("""
     SELECT new com.cookie.domain.movie.dto.response.MovieSimpleResponse(
         m.id, 
@@ -53,6 +61,7 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
         m.poster, 
         m.releasedAt, 
         c2.name, 
+        m.score, 
         CAST((SELECT COUNT(ml) FROM MovieLike ml WHERE ml.movie.id = m.id) AS long), 
         CAST((SELECT COUNT(r) FROM Review r WHERE r.movie.id = m.id) AS long)
     )
@@ -63,11 +72,7 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
     WHERE c.subCategory = :genre
     ORDER BY m.movieLikes DESC
 """)
-    List<MovieSimpleResponse> findTopMoviesByCategory(@Param("genre") String genre);
-
-
-
-
+    List<MovieSimpleResponse> findTopMoviesByCategory(String genre);
 
 
     @Query("SELECT c.subCategory FROM MovieCategory mc " +
@@ -77,5 +82,13 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
 
     @Query("SELECT COUNT(ml) FROM MovieLike ml WHERE ml.movie.id = :movieId")
     Long countLikesByMovieId(@Param("movieId") Long movieId);
+
+    @Query("""
+        SELECT m
+        FROM Movie m
+        WHERE m.TMDBMovieId IN :tmdbIds
+    """)
+    List<Movie> findAllByTMDBMovieIds(@Param("tmdbIds") Set<Long> tmdbIds);
+
 }
 

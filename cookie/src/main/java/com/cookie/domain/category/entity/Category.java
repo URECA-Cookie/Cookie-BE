@@ -20,9 +20,11 @@ public class Category {
 
     private String mainCategory;
     private String subCategory;
+    private String subCategoryEn;
 
-    public Category(String mainCategory, String subCategory) {
+    public Category(String mainCategory, String subCategory, String subCategoryEn) {
         this.mainCategory = mainCategory;
         this.subCategory = subCategory;
+        this.subCategoryEn = subCategoryEn;
     }
 }

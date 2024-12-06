@@ -38,10 +38,6 @@ public class AdminRecommendService {
     @Transactional
     public void recommendMovies(Set<Long> movieIds) {
 
-        if (movieIds.size() > 1) {
-            throw new MovieBadRequestException("추천 영화는 1개만 생성 할 수 있습니다.");
-        }
-
         if (movieIds.isEmpty()) {
             recommendRepository.deleteAll();
         } else {
