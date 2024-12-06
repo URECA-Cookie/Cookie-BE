@@ -214,6 +214,7 @@ public class MovieService {
 
         // 3. 감독 정보 가져오기
         DirectorResponse directorResponse = DirectorResponse.builder()
+                .id(movie.getDirector().getId())
                 .name(movie.getDirector().getName())
                 .profileImage(movie.getDirector().getProfileImage())
                 .build();
@@ -258,7 +259,7 @@ public class MovieService {
 
 
 
-    @Cacheable("categoryMoviesCache")
+    @Cacheable(value = "categoryMoviesCache" , cacheManager = "categoryMoviesCache")
     public MoviePagenationResponse getMoviesByCategory(String mainCategory, String subCategory, int page, int size) {
         // 1. mainCategory와 subCategory로 Category ID 조회
         Category category = categoryRepository.findByMainCategoryAndSubCategory(
