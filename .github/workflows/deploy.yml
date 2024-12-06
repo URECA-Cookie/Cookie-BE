@@ -22,6 +22,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Debug environment variables Debug
+        run: |
+          echo "SPRING_DATASOURCE_DRIVER_CLASS_NAME=$SPRING_DATASOURCE_DRIVER_CLASS_NAME"
+          echo "SPRING_DATASOURCE_URL=$SPRING_DATASOURCE_URL"
+          echo "SPRING_DATASOURCE_USERNAME=$SPRING_DATASOURCE_USERNAME"
+          echo "SPRING_DATASOURCE_PASSWORD=$SPRING_DATASOURCE_PASSWORD"
+          echo "SPRING_JPA_SHOW_SQL=$SPRING_JPA_SHOW_SQL"
+          echo "SPRING_JPA_HIBERNATE_DDL_AUTO=$SPRING_JPA_HIBERNATE_DDL_AUTO"
+          echo "SPRING_JPA_HIBERNATE_DIALECT=$SPRING_JPA_HIBERNATE_DIALECT"
+          echo "SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL=$SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL"
+          
       # DB connect
       - name: Set environment variables
         run: |
@@ -61,6 +72,7 @@ jobs:
           # 디버깅용 출력
           echo "EC2_HOST=$EC2_HOST"
           echo "EC2_USERNAME=$EC2_USERNAME"
+          echo "EC2_SSH_KEY=$EC2_SSH_KEY"
       
           # 프로젝트 경로 설정
           PROJECT_DIR="/home/ubuntu/Cookie-BE/cookie"
