@@ -2,13 +2,13 @@ name: Cookie Project BE Deploy
 
 on:
   push:
-   branches:
+    branches:
       - develop
   pull_request:
-      branches:
-        - develop
-      types:
-        - closed
+    branches:
+      - develop
+    types:
+      - closed
 
 # 워크플로우가 깃 레포에 대한 권한을 읽기만 가능하게 설정
 permissions:
@@ -16,7 +16,6 @@ permissions:
 
 # 작업 시작
 jobs:
-
   deploy:
     runs-on: ubuntu-latest
 
