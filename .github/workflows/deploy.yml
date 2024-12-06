@@ -54,15 +54,14 @@ jobs:
       # EC2 서버로 배포
       - name: Deploy to EC2
         run: |
-          # SSH 환경 변수 설정
-          echo "EC2_SSH_KEY=${{ secrets.EC2_SSH_KEY }}" >> $GITHUB_ENV
-          echo "EC2_USERNAME=${{ secrets.EC2_USERNAME }}" >> $GITHUB_ENV
-          echo "EC2_HOST=${{ secrets.EC2_HOST }}" >> $GITHUB_ENV
-          
           # 비공개 키 파일 생성
           echo -e "$EC2_SSH_KEY" > private_key.pem
           chmod 600 private_key.pem
           
+          # 디버깅용 출력
+          echo "EC2_HOST=$EC2_HOST"
+          echo "EC2_USERNAME=$EC2_USERNAME"
+      
           # 프로젝트 경로 설정
           PROJECT_DIR="/home/ubuntu/Cookie-BE/cookie"
           BUILD_DIR="$PROJECT_DIR/build/libs"
