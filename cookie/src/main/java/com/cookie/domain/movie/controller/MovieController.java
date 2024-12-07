@@ -92,7 +92,7 @@ public class MovieController {
                     array = @ArraySchema(
                             schema = @Schema(implementation = MovieSimpleResponse.class))))
     })
-    @GetMapping("/{userId}/recommendations")
+    @GetMapping("/recommendations")
     public ApiSuccess<List<MovieSimpleResponse>> getRecommendations(@AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
         Long userId = (customOAuth2User != null) ? customOAuth2User.getId() : null;
         List<MovieSimpleResponse> recommendedMovies = movieService.getRecommendedMovies(userId);

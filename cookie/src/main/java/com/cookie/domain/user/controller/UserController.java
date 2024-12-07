@@ -41,7 +41,7 @@ public class UserController {
             @ApiResponse(responseCode = "200", content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = MyPageResponse.class)))
     })
-    @GetMapping("/{userId}")
+    @GetMapping("")
     public ApiSuccess<?> getMyPage(@AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
         Long userId = customOAuth2User.getId();
         log.info("userId: {}", userId);
