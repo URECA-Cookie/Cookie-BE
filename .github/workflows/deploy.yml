@@ -3,10 +3,6 @@ name: Cookie Project BE Deploy
 on:
   push:
     branches: [ develop ]
-  pull_request:
-    branches: [ develop ]
-    types:
-      - closed
 
 # 워크플로우가 깃 레포에 대한 권한을 읽기만 가능하게 설정
 permissions: read-all
@@ -53,6 +49,10 @@ jobs:
       - name: Build with Gradle
         working-directory: cookie
         run: ./gradlew build -x test
+
+      - name: Verify build artifacts
+        run: |
+          ls -al build/libs
 
       # EC2 서버로 배포
       - name: Deploy to EC2
