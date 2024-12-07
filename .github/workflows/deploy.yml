@@ -39,7 +39,14 @@ jobs:
           echo "SPRING_JPA_HIBERNATE_DDL_AUTO=$SPRING_JPA_HIBERNATE_DDL_AUTO"
           echo "SPRING_JPA_HIBERNATE_DIALECT=$SPRING_JPA_HIBERNATE_DIALECT"
           echo "SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL=$SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL"
-  
+
+      - name: Debug environment variables
+        run: |
+          echo "Debugging GitHub Actions environment variables..."
+          echo "SPRING_DATASOURCE_URL=$SPRING_DATASOURCE_URL"
+          echo "SPRING_DATASOURCE_USERNAME=$SPRING_DATASOURCE_USERNAME"
+          echo "SPRING_DATASOURCE_PASSWORD=********"
+      
       # Gradle Wrapper 실행 권한 부여
       - name: Grant execute permission for gradlew
         working-directory: cookie
@@ -68,26 +75,16 @@ jobs:
           EC2_HOST: ${{ secrets.EC2_HOST }}
           EC2_USERNAME: ${{ secrets.EC2_USERNAME }}
           EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
-          SPRING_DATASOURCE_URL: ${{ secrets.SPRING_DATASOURCE_URL }}
-          SPRING_DATASOURCE_USERNAME: ${{ secrets.SPRING_DATASOURCE_USERNAME }}
-          SPRING_DATASOURCE_PASSWORD: ${{ secrets.SPRING_DATASOURCE_PASSWORD }}
         run: |
           # 비공개 키 파일 생성
           echo -e "$EC2_SSH_KEY" > private_key.pem
           chmod 600 private_key.pem
           
-          # 디버깅용 출력 (테스트 후 주석 처리)
+          # ec2 connect host...
           echo "EC2_HOST=$EC2_HOST"
           echo "EC2_USERNAME=$EC2_USERNAME"
           # echo "EC2_SSH_KEY=$EC2_SSH_KEY"
-          export SPRING_DATASOURCE_URL=$SPRING_DATASOURCE_URL
-          export SPRING_DATASOURCE_USERNAME=$SPRING_DATASOURCE_USERNAME
-          export SPRING_DATASOURCE_PASSWORD=$SPRING_DATASOURCE_PASSWORD
-          
-          echo "SPRING_DATASOURCE_URL=\$SPRING_DATASOURCE_URL"
-          echo "SPRING_DATASOURCE_USERNAME=\$SPRING_DATASOURCE_USERNAME"
-          echo "SPRING_DATASOURCE_PASSWORD=********" # 비밀번호는 출력하지 않음
-
+ 
           # 프로젝트 경로 설정
           PROJECT_DIR="/home/ubuntu/Cookie-BE/cookie"
           BUILD_DIR="$PROJECT_DIR/build/libs"
