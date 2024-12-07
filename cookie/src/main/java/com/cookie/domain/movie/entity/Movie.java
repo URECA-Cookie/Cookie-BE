@@ -72,4 +72,9 @@ public class Movie {
     public void decreaseLikeCount() {
         if(this.movieLikes > 0) this.movieLikes--;
     }
+
+    public void updateScore(Double score) {
+        this.score = score;
+    }
+
 }

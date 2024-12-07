@@ -73,6 +73,12 @@ public class ReviewService {
             throw new IllegalArgumentException("해당 영화에 이미 리뷰를 등록했습니다.");
         }
 
+        // 영화 평점이 0.0일 경우 평점 반영
+        if (movie.getScore() == 0.0) {
+            movie.updateScore((double) createReviewRequest.getMovieScore());
+//            movieRepository.save(movie);
+        }
+
         List<String> genres = movie.getMovieCategories().stream()
                 .filter(mc -> "장르".equals(mc.getCategory().getMainCategory())) // "장르" 필터
                 .map(mc -> mc.getCategory().getSubCategory()) // SubCategory 추출
@@ -213,7 +219,7 @@ public class ReviewService {
                     boolean likedByUser = userId != null &&
                             review.getReviewLikes().stream()
                                     .anyMatch(like -> like.getUser().getId().equals(userId));
-                    return ReviewResponse.fromReview(review, likedByUser,Long.valueOf(review.getReviewComments().size()));
+                    return ReviewResponse.fromReview(review, likedByUser, Long.valueOf(review.getReviewComments().size()));
                 })
                 .toList();
 
