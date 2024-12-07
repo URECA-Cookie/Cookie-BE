@@ -227,7 +227,7 @@ public class MovieService {
                 .limit(4) // 최대 4개의 리뷰만 가져옴
                 .map(review -> {
                     // 리뷰 정보를 ReviewResponse로 변환<<<<<<< feature/#57-RefactorLikeAuth
-                    return ReviewResponse.fromReview(review, reviewRepository.existsById(userId)); 
+                    return ReviewResponse.fromReview(review, reviewRepository.existsById(userId),Long.valueOf(review.getReviewComments().size()));
 
                 })
                 .collect(Collectors.toList());
