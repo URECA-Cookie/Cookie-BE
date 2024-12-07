@@ -100,10 +100,10 @@ public class ReviewService {
             String topic = genre.toLowerCase();
 
             if (topic.equals(user.getCategory().getSubCategoryEn().toLowerCase())) {
-                if (userId.equals(user.getId())) {
-                    log.info("자기 자신에게는 알림을 보내지 않습니다: userId = {}", userId);
-                    break;
-                }
+//                if (userId.equals(user.getId())) {
+//                    log.info("자기 자신에게는 알림을 보내지 않습니다: userId = {}", userId);
+//                    break;
+//                }
 
                 String title = String.format("%s님 새로운 리뷰가 등록되었습니다!", user.getId());
                 String body = String.format("%s님이 %s 영화에 리뷰를 남겼습니다.", user.getNickname(), movie.getTitle());
