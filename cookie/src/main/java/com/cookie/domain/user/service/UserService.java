@@ -140,7 +140,7 @@ public class UserService {
         List<Review> reviews = reviewRepository.findAllByUserIdWithMovie(userId);
 
         return reviews.stream()
-                .map(review -> ReviewResponse.fromReview(review, false))
+                .map(review -> ReviewResponse.fromReview(review, false,Long.valueOf(review.getReviewComments().size())))
                 .toList();
     }
 

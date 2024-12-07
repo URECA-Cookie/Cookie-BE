@@ -225,8 +225,11 @@ public class MovieService {
         // 4. 리뷰 가져오기
         List<ReviewResponse> reviews = reviewRepository.findReviewsByMovieId(movieId).stream()
                 .limit(4) // 최대 4개의 리뷰만 가져옴
-                .map(review -> ReviewResponse.fromReview(review, userId != null && reviewRepository.existsById(userId)))
-                .collect(Collectors.toList());
+                .map(review -> {
+                    return ReviewResponse.fromReview(review, userId != null && reviewRepository.existsById(userId),Long.valueOf(review.getReviewComments().size()));
+
+                })
+                .toList();
 
         // 5. 카테고리 리스트
         List<CategoryResponse> categories = movieCategoryRepository.findByMovieIdWithCategory(movieId).stream()
