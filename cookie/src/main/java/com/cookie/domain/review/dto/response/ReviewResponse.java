@@ -26,8 +26,9 @@ public class ReviewResponse {
     private ReviewMovieResponse movie;
     private ReviewUserResponse user;
     private boolean likedByUser;
+    private Long comments;
 
-    public static ReviewResponse fromReview(Review review, boolean likedByUser) {
+    public static ReviewResponse fromReview(Review review, boolean likedByUser, Long comments) {
         return new ReviewResponse(
                 review.getId(),
                 review.getContent(),
@@ -46,7 +47,8 @@ public class ReviewResponse {
                         review.getUser().getProfileImage(),
                         review.getUser().getMainBadge() != null ? review.getUser().getMainBadge().getBadgeImage() : null
                 ),
-                likedByUser
+                likedByUser,
+                comments
         );
     }
 

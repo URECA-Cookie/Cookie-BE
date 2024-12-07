@@ -5,6 +5,7 @@ import com.cookie.domain.category.entity.Category;
 import com.cookie.domain.movie.entity.MovieLike;
 import com.cookie.domain.notification.entity.FcmToken;
 import com.cookie.domain.review.entity.Review;
+import com.cookie.domain.review.entity.ReviewComment;
 import com.cookie.domain.review.entity.ReviewLike;
 import com.cookie.domain.user.entity.enums.Role;
 import com.cookie.domain.user.entity.enums.SocialProvider;
@@ -63,6 +64,12 @@ public class User extends BaseTimeEntity {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<FcmToken> fcmTokens = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ReviewComment> reviewComments = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<MatchUpParticipation> matchUpParticipations = new ArrayList<>();
 
 
     // mainBadge 반환 메서드

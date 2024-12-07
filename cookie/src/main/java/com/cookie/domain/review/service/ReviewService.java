@@ -73,6 +73,12 @@ public class ReviewService {
             throw new IllegalArgumentException("해당 영화에 이미 리뷰를 등록했습니다.");
         }
 
+        // 영화 평점이 0.0일 경우 평점 반영
+        if (movie.getScore() == 0.0) {
+            movie.updateScore((double) createReviewRequest.getMovieScore());
+//            movieRepository.save(movie);
+        }
+
         List<String> genres = movie.getMovieCategories().stream()
                 .filter(mc -> "장르".equals(mc.getCategory().getMainCategory())) // "장르" 필터
                 .map(mc -> mc.getCategory().getSubCategory()) // SubCategory 추출
@@ -94,10 +100,10 @@ public class ReviewService {
             String topic = genre.toLowerCase();
 
             if (topic.equals(user.getCategory().getSubCategoryEn().toLowerCase())) {
-                if (userId.equals(user.getId())) {
-                    log.info("자기 자신에게는 알림을 보내지 않습니다: userId = {}", userId);
-                    break;
-                }
+//                if (userId.equals(user.getId())) {
+//                    log.info("자기 자신에게는 알림을 보내지 않습니다: userId = {}", userId);
+//                    break;
+//                }
 
                 String title = String.format("%s님 새로운 리뷰가 등록되었습니다!", user.getId());
                 String body = String.format("%s님이 %s 영화에 리뷰를 남겼습니다.", user.getNickname(), movie.getTitle());
@@ -116,7 +122,7 @@ public class ReviewService {
 
     @Async
     public void sendReviewCreatedEvent(Review review, CopyOnWriteArrayList<SseEmitter> reviewEmitters) {
-        ReviewResponse reviewResponse = ReviewResponse.fromReview(review, false);
+        ReviewResponse reviewResponse = ReviewResponse.fromReview(review, false, Long.valueOf(review.getReviewComments().size()));
 
         for (SseEmitter emitter : reviewEmitters) {
             try {
@@ -191,7 +197,7 @@ public class ReviewService {
                     boolean likedByUser = userId != null &&
                             review.getReviewLikes().stream()
                                     .anyMatch(like -> like.getUser().getId().equals(userId));
-                    return ReviewResponse.fromReview(review, likedByUser);
+                    return ReviewResponse.fromReview(review, likedByUser,Long.valueOf(review.getReviewComments().size()));
                 })
                 .toList();
 
@@ -213,7 +219,7 @@ public class ReviewService {
                     boolean likedByUser = userId != null &&
                             review.getReviewLikes().stream()
                                     .anyMatch(like -> like.getUser().getId().equals(userId));
-                    return ReviewResponse.fromReview(review, likedByUser);
+                    return ReviewResponse.fromReview(review, likedByUser, Long.valueOf(review.getReviewComments().size()));
                 })
                 .toList();
 
@@ -329,7 +335,7 @@ public class ReviewService {
         List<ReviewResponse> reviews = likedReviewsPage.getContent().stream()
                 .map(reviewLike -> {
                     Review review = reviewLike.getReview();
-                    return ReviewResponse.fromReview(review, true);
+                    return ReviewResponse.fromReview(review, true,Long.valueOf(review.getReviewComments().size()));
                 })
                 .toList();
 

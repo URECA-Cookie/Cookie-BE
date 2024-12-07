@@ -7,6 +7,14 @@ plugins {
 group = 'com'
 version = '0.0.1-SNAPSHOT'
 
+processResources {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE // 중복된 리소스 제외
+    from('src/main/resources') {
+        include '**/*.properties' // 애플리케이션 프로퍼티 포함
+        include 'firebase/*.json' // Firebase JSON 파일 포함
+    }
+}
+
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(17)
