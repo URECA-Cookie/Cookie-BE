@@ -78,7 +78,7 @@ jobs:
           
           # 빌드된 JAR 파일을 EC2로 전송
           echo "Transferring JAR file to EC2..."
-          scp -i private_key.pem -o StrictHostKeyChecking=no build/libs/$DEPLOY_JAR $EC2_USERNAME@$EC2_HOST:$BUILD_DIR/ || exit 1
+          scp -i private_key.pem -o StrictHostKeyChecking=no cookie/build/libs/$DEPLOY_JAR $EC2_USERNAME@$EC2_HOST:$BUILD_DIR/ || exit 1
           
           # EC2에서 기존 애플리케이션 중지 및 새 JAR 실행
           echo "Deploying application on EC2..."
