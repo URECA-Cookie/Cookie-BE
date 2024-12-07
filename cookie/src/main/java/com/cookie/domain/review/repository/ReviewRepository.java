@@ -30,7 +30,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     @Query("SELECT r FROM Review r JOIN FETCH r.user u LEFT JOIN FETCH u.userBadges ub LEFT JOIN FETCH ub.badge b WHERE r.movie.id = :movieId AND r.isSpoiler = true AND r.isHide = false")
     Page<Review> findSpoilerReviewsByMovieId(Long movieId, Pageable pageable);
   
-    // 특정 유저의 리뷰와 연관된 영화 정보를 가져오기
+
     @Query("SELECT r FROM Review r JOIN FETCH r.movie WHERE r.user.id = :userId")
     List<Review> findAllByUserIdWithMovie(Long userId);
 
@@ -53,5 +53,9 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
         WHERE r.movie.id = :movieId
     """)
     void deleteByMovieId(@Param("movieId") Long movieId);
+
+    @Query("SELECT r FROM Review r JOIN FETCH r.movie WHERE r.user.id = :userId")
+    Page<Review> findAllByUserId(Long userId, Pageable pageable);
+
 }
 

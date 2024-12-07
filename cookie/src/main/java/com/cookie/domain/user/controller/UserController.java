@@ -25,7 +25,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
 
 @Tag(name = "유저", description = "유저")
 @Slf4j
@@ -42,7 +41,7 @@ public class UserController {
             @ApiResponse(responseCode = "200", content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = MyPageResponse.class)))
     })
-    @GetMapping()
+    @GetMapping("/{userId}")
     public ApiSuccess<?> getMyPage(@AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
         Long userId = customOAuth2User.getId();
         log.info("userId: {}", userId);
@@ -124,11 +123,15 @@ public class UserController {
                             schema = @Schema(implementation = ReviewResponse.class))))
     })
     @GetMapping("/myReviews")
-    public ApiSuccess<?> getMyReviewsByUserId(@AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
+    public ApiSuccess<?> getMyReviewsByUserId(
+            @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
+            @RequestParam int page,
+            @RequestParam int size) {
         Long userId = customOAuth2User.getId();
-        List<ReviewResponse> reviews = userService.getReviewsByUserId(userId);
-        return ApiUtil.success(reviews);
+        ReviewPagenationResponse response = userService.getReviewsPagenation(userId, page, size);
+        return ApiUtil.success(response);
     }
+
 
     @Operation(summary = "영화 좋아요 생성", responses = {
             @ApiResponse(responseCode = "200", content = @Content(mediaType = "application/json",
