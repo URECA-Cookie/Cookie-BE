@@ -17,21 +17,28 @@ jobs:
       # 코드 체크아웃
       - name: Checkout code
         uses: actions/checkout@v3
-
-      - name: Debug environment variables Debug
-        run: |
           
       # DB connect
       - name: Set environment variables
+        env:
+          SPRING_DATASOURCE_DRIVER_CLASS_NAME: com.mysql.cj.jdbc.Driver
+          SPRING_DATASOURCE_URL: ${{ secrets.SPRING_DATASOURCE_URL }}
+          SPRING_DATASOURCE_USERNAME: ${{ secrets.SPRING_DATASOURCE_USERNAME }}
+          SPRING_DATASOURCE_PASSWORD: ${{ secrets.SPRING_DATASOURCE_PASSWORD }}
+          SPRING_JPA_SHOW_SQL: "true"
+          SPRING_JPA_HIBERNATE_DDL_AUTO: update
+          SPRING_JPA_HIBERNATE_DIALECT: org.hibernate.dialect.MySQL8Dialect
+          SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL: "true"
         run: |
-          echo "SPRING_DATASOURCE_DRIVER_CLASS_NAME=com.mysql.cj.jdbc.Driver" >> $GITHUB_ENV
-          echo "SPRING_DATASOURCE_URL=${{ secrets.SPRING_DATASOURCE_URL }}" >> $GITHUB_ENV
-          echo "SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME }}" >> $GITHUB_ENV
-          echo "SPRING_DATASOURCE_PASSWORD=${{ secrets.SPRING_DATASOURCE_PASSWORD }}" >> $GITHUB_ENV
-          echo "SPRING_JPA_SHOW_SQL=true" >> $GITHUB_ENV
-          echo "SPRING_JPA_HIBERNATE_DDL_AUTO=update" >> $GITHUB_ENV
-          echo "SPRING_JPA_HIBERNATE_DIALECT=org.hibernate.dialect.MySQL8Dialect" >> $GITHUB_ENV
-          echo "SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL=true" >> $GITHUB_ENV
+          echo "Environment variables set:"
+          echo "SPRING_DATASOURCE_DRIVER_CLASS_NAME=$SPRING_DATASOURCE_DRIVER_CLASS_NAME"
+          echo "SPRING_DATASOURCE_URL=$SPRING_DATASOURCE_URL"
+          echo "SPRING_DATASOURCE_USERNAME=$SPRING_DATASOURCE_USERNAME"
+          echo "SPRING_DATASOURCE_PASSWORD=********" # 비밀번호는 마스킹 처리
+          echo "SPRING_JPA_SHOW_SQL=$SPRING_JPA_SHOW_SQL"
+          echo "SPRING_JPA_HIBERNATE_DDL_AUTO=$SPRING_JPA_HIBERNATE_DDL_AUTO"
+          echo "SPRING_JPA_HIBERNATE_DIALECT=$SPRING_JPA_HIBERNATE_DIALECT"
+          echo "SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL=$SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL"
   
       # Gradle Wrapper 실행 권한 부여
       - name: Grant execute permission for gradlew
@@ -61,6 +68,9 @@ jobs:
           EC2_HOST: ${{ secrets.EC2_HOST }}
           EC2_USERNAME: ${{ secrets.EC2_USERNAME }}
           EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+          SPRING_DATASOURCE_URL: ${{ secrets.SPRING_DATASOURCE_URL }}
+          SPRING_DATASOURCE_USERNAME: ${{ secrets.SPRING_DATASOURCE_USERNAME }}
+          SPRING_DATASOURCE_PASSWORD: ${{ secrets.SPRING_DATASOURCE_PASSWORD }}
         run: |
           # 비공개 키 파일 생성
           echo -e "$EC2_SSH_KEY" > private_key.pem
@@ -70,6 +80,13 @@ jobs:
           echo "EC2_HOST=$EC2_HOST"
           echo "EC2_USERNAME=$EC2_USERNAME"
           # echo "EC2_SSH_KEY=$EC2_SSH_KEY"
+          export SPRING_DATASOURCE_URL=$SPRING_DATASOURCE_URL
+          export SPRING_DATASOURCE_USERNAME=$SPRING_DATASOURCE_USERNAME
+          export SPRING_DATASOURCE_PASSWORD=$SPRING_DATASOURCE_PASSWORD
+          
+          echo "SPRING_DATASOURCE_URL=\$SPRING_DATASOURCE_URL"
+          echo "SPRING_DATASOURCE_USERNAME=\$SPRING_DATASOURCE_USERNAME"
+          echo "SPRING_DATASOURCE_PASSWORD=********" # 비밀번호는 출력하지 않음
 
           # 프로젝트 경로 설정
           PROJECT_DIR="/home/ubuntu/Cookie-BE/cookie"
