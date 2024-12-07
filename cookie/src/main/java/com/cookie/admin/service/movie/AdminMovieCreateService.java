@@ -34,6 +34,7 @@ import reactor.util.retry.Retry;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -61,7 +62,7 @@ public class AdminMovieCreateService {
     public AdminMovieBaseAddResponse defaultMoviesAdd() {
         long movieAddCount = 0;
 
-        for (int year = 2024; year >= 2024; year--) {
+        for (int year = 2024; year >= 2019; year--) {
             for (int page = 1; page <= 2; page++) {
                 String urlDiscover = createDiscoverUrl(year, page);
                 System.out.println("urlDiscover = " + urlDiscover);
@@ -98,6 +99,7 @@ public class AdminMovieCreateService {
                                 return null;
                             }
                         })
+                        .filter(Objects::nonNull) // null 제거
                         .collect(Collectors.toList());
 
                 if (!movies.isEmpty()) {

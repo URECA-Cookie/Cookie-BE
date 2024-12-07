@@ -1,0 +1,97 @@
+name: Cookie Project BE Deploy
+
+on:
+  push:
+    branches: [ develop ]
+  pull_request:
+    branches: [ develop ]
+    types:
+      - closed
+
+# 워크플로우가 깃 레포에 대한 권한을 읽기만 가능하게 설정
+permissions: read-all
+
+# 작업 시작
+jobs:
+
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 코드 체크아웃
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Debug environment variables Debug
+        run: |
+
+          
+      # DB connect
+      - name: Set environment variables
+        run: |
+          echo "SPRING_DATASOURCE_DRIVER_CLASS_NAME=com.mysql.cj.jdbc.Driver" >> $GITHUB_ENV
+          echo "SPRING_DATASOURCE_URL=${{ secrets.SPRING_DATASOURCE_URL }}" >> $GITHUB_ENV
+          echo "SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME }}" >> $GITHUB_ENV
+          echo "SPRING_DATASOURCE_PASSWORD=${{ secrets.SPRING_DATASOURCE_PASSWORD }}" >> $GITHUB_ENV
+          echo "SPRING_JPA_SHOW_SQL=true" >> $GITHUB_ENV
+          echo "SPRING_JPA_HIBERNATE_DDL_AUTO=update" >> $GITHUB_ENV
+          echo "SPRING_JPA_HIBERNATE_DIALECT=org.hibernate.dialect.MySQL8Dialect" >> $GITHUB_ENV
+          echo "SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL=true" >> $GITHUB_ENV
+  
+      # Gradle Wrapper 실행 권한 부여
+      - name: Grant execute permission for gradlew
+        working-directory: cookie
+        run: chmod +x gradlew
+ 
+      # JDK 17 설정
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      # 프로젝트 빌드
+      - name: Build with Gradle
+        working-directory: cookie
+        run: ./gradlew build -x test
+
+      # EC2 서버로 배포
+      - name: Deploy to EC2
+        run: |
+          # 비공개 키 파일 생성
+          echo -e "$EC2_SSH_KEY" > private_key.pem
+          chmod 600 private_key.pem
+          
+          # 디버깅용 출력
+          echo "EC2_HOST=$EC2_HOST"
+          echo "EC2_USERNAME=$EC2_USERNAME"
+          echo "EC2_SSH_KEY=$EC2_SSH_KEY"
+          
+          # 디버깅용 출력 (RDS)
+          echo "SPRING_DATASOURCE_DRIVER_CLASS_NAME=$SPRING_DATASOURCE_DRIVER_CLASS_NAME"
+          echo "SPRING_DATASOURCE_URL=$SPRING_DATASOURCE_URL"
+          echo "SPRING_DATASOURCE_USERNAME=$SPRING_DATASOURCE_USERNAME"
+          echo "SPRING_DATASOURCE_PASSWORD=$SPRING_DATASOURCE_PASSWORD"
+          echo "SPRING_JPA_SHOW_SQL=$SPRING_JPA_SHOW_SQL"
+          echo "SPRING_JPA_HIBERNATE_DDL_AUTO=$SPRING_JPA_HIBERNATE_DDL_AUTO"
+          echo "SPRING_JPA_HIBERNATE_DIALECT=$SPRING_JPA_HIBERNATE_DIALECT"
+          echo "SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL=$SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL"
+          
+          # 프로젝트 경로 설정
+          PROJECT_DIR="/home/ubuntu/Cookie-BE/cookie"
+          BUILD_DIR="$PROJECT_DIR/build/libs"
+          DEPLOY_JAR="cookie-0.0.1-SNAPSHOT.jar"
+          
+          # 빌드된 JAR 파일을 EC2로 전송
+          echo "Transferring JAR file to EC2..."
+          scp -i private_key.pem -o StrictHostKeyChecking=no build/libs/$DEPLOY_JAR $EC2_USERNAME@$EC2_HOST:$BUILD_DIR/ || exit 1
+          
+          # EC2에서 기존 애플리케이션 중지 및 새 JAR 실행
+          echo "Deploying application on EC2..."
+          ssh -i private_key.pem -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_HOST << EOF
+          pkill -f 'java -jar' || true
+          nohup java -jar $BUILD_DIR/$DEPLOY_JAR > $BUILD_DIR/app.log 2>&1 &
+          EOF
+          
+          # 비공개 키 파일 삭제
+          rm -f private_key.pem

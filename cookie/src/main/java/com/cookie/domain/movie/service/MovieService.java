@@ -226,11 +226,10 @@ public class MovieService {
         List<ReviewResponse> reviews = reviewRepository.findReviewsByMovieId(movieId).stream()
                 .limit(4) // 최대 4개의 리뷰만 가져옴
                 .map(review -> {
-                    // 리뷰 정보를 ReviewResponse로 변환<<<<<<< feature/#57-RefactorLikeAuth
-                    return ReviewResponse.fromReview(review, reviewRepository.existsById(userId),Long.valueOf(review.getReviewComments().size()));
+                    return ReviewResponse.fromReview(review, userId != null && reviewRepository.existsById(userId),Long.valueOf(review.getReviewComments().size()));
 
                 })
-                .collect(Collectors.toList());
+                .toList();
 
         // 5. 카테고리 리스트
         List<CategoryResponse> categories = movieCategoryRepository.findByMovieIdWithCategory(movieId).stream()
@@ -242,7 +241,7 @@ public class MovieService {
                 .collect(Collectors.toList());
 
         // 6. 사용자가 해당 영화에 좋아요를 눌렀는지 안 눌렀는지 여부
-        boolean isLiked = movieLikeRepository.isMovieLikedByUser(movieId,userId);
+        boolean isLiked = (userId != null) && movieLikeRepository.isMovieLikedByUser(movieId, userId);
 
         // 7. MovieResponse 생성
         return MovieResponse.builder()

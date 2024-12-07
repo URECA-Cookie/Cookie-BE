@@ -1,6 +1,5 @@
 package com.cookie.domain.search.service;
 
-import com.cookie.domain.movie.entity.MovieCategory;
 import com.cookie.domain.movie.entity.MovieMonthRanking;
 import com.cookie.domain.movie.repository.MovieMonthRankingRepository;
 import com.cookie.domain.search.dto.response.SearchMovieMonthRankingResponse;
@@ -27,23 +26,16 @@ public class SearchMovieMonthRankingService {
         }
 
         return movieMonthRankings.stream().map(movie -> {
-
-            String releaseYear = movie.getMovie().getReleasedAt().substring(0, 4);
-            List<MovieCategory> movieCategories = movie.getMovie().getMovieCategories();
-            String genreAgent = movieCategories.isEmpty() ? "N/A" : movieCategories.get(0).getCategory().getSubCategory();
-
             return SearchMovieMonthRankingResponse.builder()
                     .movieId(movie.getMovie().getId())
                     .movieTitle(movie.getMovie().getTitle())
-                    .runtime(movie.getMovie().getRuntime())
+                    .releaseAt(movie.getMovie().getReleasedAt())
                     .ranking(movie.getRanking())
-                    .releaseYear(releaseYear)
-                    .genreAgent(genreAgent)
-                    .certification(movie.getMovie().getCertification())
+                    .poster(movie.getMovie().getPoster())
+                    .director(movie.getMovie().getDirector().getName())
                     .build();
         }).toList();
     }
-
 }
 
 

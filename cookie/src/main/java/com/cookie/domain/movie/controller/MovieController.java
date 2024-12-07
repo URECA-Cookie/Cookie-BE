@@ -9,6 +9,7 @@ import com.cookie.domain.movie.service.MovieService;
 import com.cookie.domain.user.dto.response.auth.CustomOAuth2User;
 import com.cookie.global.util.ApiUtil;
 import com.cookie.global.util.ApiUtil.ApiSuccess;
+import com.google.protobuf.Api;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -40,12 +41,12 @@ public class MovieController {
     })
 
     @GetMapping("/{movieId}")
-    public ResponseEntity<MovieResponse> getMovieDetail(
+    public ApiSuccess<MovieResponse> getMovieDetail(
             @PathVariable(name="movieId") Long movieId,
             @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
         Long userId = (customOAuth2User != null) ? customOAuth2User.getId() : null;
         MovieResponse movieDetail = movieService.getMovieDetails(movieId, userId);
-        return ResponseEntity.ok(movieDetail);
+        return ApiUtil.success(movieDetail);
     }
 
     @Operation(summary = "영화에 작성 된 리뷰", responses = {
@@ -71,7 +72,7 @@ public class MovieController {
 
     }
 
-    @Operation(summary = "카테로리로 영화 리스트 조회", responses = {
+    @Operation(summary = "카테고리로 영화 리스트 조회", responses = {
             @ApiResponse(responseCode = "200", content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = MoviePagenationResponse.class)))
     })
@@ -98,20 +99,21 @@ public class MovieController {
         return ApiUtil.success(recommendedMovies);
     }
 
-    @Operation(summary = "메인 페이지", responses = {
+    @Operation(summary = "메인 페이지 (매치 업 영화)", responses = {
             @ApiResponse(responseCode = "200", content = @Content(mediaType = "application/json",
-                    array = @ArraySchema(
-                            schema = @Schema(implementation = MainPageResponse.class))))
+                    schema = @Schema(implementation = MainMatchUpsResponse.class)))
     })
-
-
-
     @GetMapping("/mainMatchUps")
     public ApiSuccess<MainMatchUpsResponse> getMainPageMatchUps(){
         MainMatchUpsResponse mainMatchUpsResponse = matchUpService.getMainMatchUps();
         return ApiUtil.success(mainMatchUpsResponse);
     }
 
+    @Operation(summary = "관리자 추천 영화 리스트", responses = {
+            @ApiResponse(responseCode = "200", content = @Content(mediaType = "application/json",
+                    array = @ArraySchema(
+                            schema = @Schema(implementation = MovieSimpleResponse.class))))
+    })
     @GetMapping("/mainAdminRecommend")
     public ApiSuccess<List<MovieSimpleResponse>> getMainAdminRecommend(){
         List<MovieSimpleResponse> mainAdminRecommend = movieService.getMainAdminRecommend();
