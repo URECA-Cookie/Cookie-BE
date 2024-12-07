@@ -117,12 +117,12 @@ public class ReviewService {
 
 
         sendReviewCreatedEvent(savedReview, reviewEmitters); // 리뷰 피드에 실시간으로 리뷰 추가
-        sendPushNotification(userId, movie, savedReview, pushNotificationEmitters); // 장르를 좋아하는 유저들에게 푸시 알림
+//        sendPushNotification(userId, movie, savedReview, pushNotificationEmitters); // 장르를 좋아하는 유저들에게 푸시 알림
     }
 
     @Async
     public void sendReviewCreatedEvent(Review review, CopyOnWriteArrayList<SseEmitter> reviewEmitters) {
-        ReviewResponse reviewResponse = ReviewResponse.fromReview(review, false);
+        ReviewResponse reviewResponse = ReviewResponse.fromReview(review, false, Long.valueOf(review.getReviewComments().size()));
 
         for (SseEmitter emitter : reviewEmitters) {
             try {
@@ -219,7 +219,7 @@ public class ReviewService {
                     boolean likedByUser = userId != null &&
                             review.getReviewLikes().stream()
                                     .anyMatch(like -> like.getUser().getId().equals(userId));
-                    return ReviewResponse.fromReview(review, likedByUser);
+                    return ReviewResponse.fromReview(review, likedByUser, Long.valueOf(review.getReviewComments().size()));
                 })
                 .toList();
 
