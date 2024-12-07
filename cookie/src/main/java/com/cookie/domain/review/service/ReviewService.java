@@ -78,9 +78,11 @@ public class ReviewService {
                 .map(mc -> mc.getCategory().getSubCategory()) // SubCategory 추출
                 .toList();
 
-        genres.forEach(genre -> dailyGenreScoreService.saveScore(user, genre, 7, ActionType.MOVIE_LIKE));
-
+        // 평점에 따른 점수 계산 및 반영
         Review review = createReviewRequest.toEntity(user, movie);
+        int score = calculateScoreBasedOnRating(review.getMovieScore());
+        genres.forEach(genre -> dailyGenreScoreService.saveScore(user, genre, score, ActionType.REVIEW));
+
         Review savedReview = reviewRepository.save(review);
         log.info("Created review: userId = {}, movieId = {}", userId, movieId);
         log.info("Saved review: {}", savedReview.getContent());
@@ -109,10 +111,22 @@ public class ReviewService {
             }
         }
 
-
         sendReviewCreatedEvent(savedReview, reviewEmitters); // 리뷰 피드에 실시간으로 리뷰 추가
-//        sendPushNotification(userId, movie, savedReview, pushNotificationEmitters); // 장르를 좋아하는 유저들에게 푸시 알림
+        // sendPushNotification(userId, movie, savedReview, pushNotificationEmitters); // 장르를 좋아하는 유저들에게 푸시 알림
     }
+
+    // 평점에 따른 점수 계산 메소드
+    private int calculateScoreBasedOnRating(int rating) {
+        return switch (rating) {
+            case 1 -> -8;
+            case 2 -> -7;
+            case 3 -> 5;
+            case 4 -> 7;
+            case 5 -> 8;
+            default -> throw new IllegalArgumentException("Invalid movie score: " + rating);
+        };
+    }
+
 
     @Async
     public void sendReviewCreatedEvent(Review review, CopyOnWriteArrayList<SseEmitter> reviewEmitters) {
