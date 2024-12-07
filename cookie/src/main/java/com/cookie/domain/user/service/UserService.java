@@ -94,7 +94,7 @@ public class UserService {
         List<Review> reviews = reviewRepository.findAllByUserIdWithMovie(userId);
 
         return reviews.stream()
-                .map(review -> ReviewResponse.fromReview(review, false))
+                .map(review -> ReviewResponse.fromReview(review, false, Long.valueOf(review.getReviewComments().size())))
                 .toList();
     }
     /**
@@ -161,7 +161,7 @@ public class UserService {
         // ReviewLike -> ReviewResponse 변환
         List<ReviewResponse> reviews = reviewsPage.getContent().stream()
                 .map(review -> {
-                    return ReviewResponse.fromReview(review, true);
+                    return ReviewResponse.fromReview(review, true, Long.valueOf(review.getReviewComments().size()));
                 })
                 .toList();
 
