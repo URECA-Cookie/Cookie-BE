@@ -1,8 +1,11 @@
 package com.cookie.domain.user.dto.response;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Getter
+@Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -26,4 +29,5 @@ public class GenreScoreResponse {
     private long tvMovie;
     private long western;
     private long adventure;
+
 }

@@ -23,8 +23,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationFilter;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.firewall.DefaultHttpFirewall;
 import org.springframework.security.web.firewall.HttpFirewall;
+import org.springframework.security.web.firewall.StrictHttpFirewall;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
@@ -94,8 +94,15 @@ public class SecurityConfig {
                                 "/api/auth/**",
                                 "/login/oauth2/code/**",
                                 "/oauth2/authorization/**",
-                                "/api/**", // TODO: will delete
-                                "/ws/**" // TODO: will delete
+                                "/api/reviews",
+                                "/api/reviews/spoiler",
+                                "/api/reviews/{reviewId}",
+                                "/api/movies/{movieId}/reviews",
+                                "/api/movies/{movieId}/reviews/spoiler",
+                                "/api/admin/movie/base",
+
+                                "/swagger-ui.html",
+                                "/v3/api-docs"
                         ).permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
@@ -137,8 +144,8 @@ public class SecurityConfig {
     }
 
     @Bean
-    public HttpFirewall defaultHttpFirewall() {
-        return new DefaultHttpFirewall();
+    public HttpFirewall strictHttpFirewall() {
+        return new StrictHttpFirewall();
     }
 
     @Bean

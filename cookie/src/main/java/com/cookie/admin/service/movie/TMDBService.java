@@ -111,9 +111,9 @@ public class TMDBService {
                 .runtime(detail.getRuntime())
                 .posterPath(imageUrl + detail.getPosterPath())
                 .releaseDate(detail.getReleaseDate())
-                .certification(certification)
+                .certification(certification.isEmpty() ? "N/A" : certification)
                 .country(detail.getOriginCountry().get(0))
-                .plot(detail.getOverview())
+                .plot(detail.getOverview().isEmpty() ? "N/A" : detail.getOverview())
                 .youtube(video.orElse("N/A"))
                 .stillCuts(images)
                 .actors(actors)
@@ -235,7 +235,7 @@ public class TMDBService {
 
         return dates.getBackdrops().stream()
                 .map(data-> imageUrl + data.getFilePath())
-                .limit(5)
+                .limit(10)
                 .collect(Collectors.toList());
     }
 

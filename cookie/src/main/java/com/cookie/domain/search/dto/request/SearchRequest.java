@@ -8,5 +8,4 @@ import lombok.Setter;
 public class SearchRequest {
     private String type;
     private String keyword;
-    private int page = 0;
 }

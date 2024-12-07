@@ -2,6 +2,7 @@ package com.cookie.admin.service.recommend;
 
 import com.cookie.admin.dto.response.RecommendResponse;
 import com.cookie.admin.entity.AdminMovieRecommend;
+import com.cookie.admin.exception.MovieBadRequestException;
 import com.cookie.admin.exception.MovieNotFoundException;
 import com.cookie.admin.repository.RecommendRepository;
 import com.cookie.domain.movie.entity.Movie;

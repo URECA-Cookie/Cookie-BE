@@ -36,7 +36,10 @@ public class GenreScoreWriter implements ItemWriter<GenreScoreUpdate> {
             Map.entry("가족", "family"),
             Map.entry("미스터리", "mistery"),
             Map.entry("TV 영화", "tvMovie"),
-            Map.entry("서부극", "western")
+            Map.entry("서부극", "western"),
+            Map.entry("범죄", "crime"),
+            Map.entry("역사", "history")
+
     );
 
     @Override

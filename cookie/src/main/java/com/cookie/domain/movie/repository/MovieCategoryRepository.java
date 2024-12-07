@@ -2,6 +2,8 @@ package com.cookie.domain.movie.repository;
 
 import com.cookie.domain.movie.entity.Movie;
 import com.cookie.domain.movie.entity.MovieCategory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -46,4 +48,8 @@ public interface MovieCategoryRepository extends JpaRepository<MovieCategory, Lo
 
     @Query("SELECT mc.movie FROM MovieCategory mc WHERE mc.category.id = :categoryId")
     List<Movie> findMoviesByCategoryId(@Param("categoryId") Long categoryId);
+
+    @Query("SELECT mc.movie FROM MovieCategory mc WHERE mc.category.id = :categoryId")
+    Page<Movie> findMoviesByCategoryIdWithPagination(@Param("categoryId") Long categoryId, Pageable pageable);
+
 }

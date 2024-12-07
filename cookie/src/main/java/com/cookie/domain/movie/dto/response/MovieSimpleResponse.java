@@ -12,10 +12,12 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MovieSimpleResponse {
+    private Long id;
     private String title;
     private String poster;
     private String releasedAt;
     private String country;
+    private double score;
     private Long likes;
     private Long reviews;
 }

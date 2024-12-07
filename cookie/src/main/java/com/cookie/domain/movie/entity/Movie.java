@@ -50,10 +50,7 @@ public class Movie {
     private List<MovieCategory> movieCategories = new ArrayList<>();
 
     @Builder
-    public Movie(Long id, Long TMDBMovieId, String title, String poster, String youtubeUrl, String plot, String releasedAt, Integer runtime,
-                 double score, String certification, Director director, Country country,
-                 List<MovieImage> movieImages, List<Review> reviews, List<MovieCategory> movieCategories) {
-        this.id = id;
+    public Movie(Long TMDBMovieId, String title, String poster, String youtubeUrl, String plot, String releasedAt, Integer runtime, double score, String certification, Long movieLikes, Director director, Country country) {
         this.TMDBMovieId = TMDBMovieId;
         this.title = title;
         this.poster = poster;
@@ -63,11 +60,17 @@ public class Movie {
         this.runtime = runtime;
         this.score = score;
         this.certification = certification;
+        this.movieLikes = movieLikes;
         this.director = director;
         this.country = country;
-        this.movieImages = movieImages;
-        this.reviews = reviews;
-        this.movieCategories = movieCategories;
+    }
+
+    public void increaseLikeCount() {
+        this.movieLikes++;
+    }
+
+    public void decreaseLikeCount() {
+        if(this.movieLikes > 0) this.movieLikes--;
     }
 
     public void updateScore(Double score) {

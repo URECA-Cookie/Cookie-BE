@@ -21,8 +21,6 @@ public interface ActorRepository extends JpaRepository<Actor, Long> {
            """)
     Optional<Actor> findByTMDBCasterId(@Param("tmdbCasterId") Long tmdbCasterId);
 
-    Page<Actor> findByNameContainingIgnoreCase(String keyword, Pageable pageable);
-
     @Query("""
             SELECT a
             FROM Actor a
@@ -31,7 +29,7 @@ public interface ActorRepository extends JpaRepository<Actor, Long> {
     List<Actor> findAllByTmdbCasterIdIn(@Param("actorIds") List<Long> actorIds);
 
     @Query("SELECT new com.cookie.domain.actor.dto.response.ActorResponse("
-            + "a.name, a.profileImage"
+            + "a.id,a.name, a.profileImage"
             + ") "
             + "FROM Actor a "
             + "JOIN MovieActor ma ON ma.actor.id = a.id "
