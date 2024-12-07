@@ -9,9 +9,8 @@ public class SearchMovieMonthRankingResponse {
 
     private Long movieId;
     private String movieTitle;
-    private String releaseYear;
+    private String releaseAt;
     private int ranking;
-    private String genreAgent;
-    private Integer runtime;
-    private String certification;
+    private String poster;
+    private String director;
 }
