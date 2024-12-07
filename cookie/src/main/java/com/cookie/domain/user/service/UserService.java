@@ -10,6 +10,7 @@ import com.cookie.domain.movie.repository.MovieLikeRepository;
 import com.cookie.domain.movie.repository.MovieRepository;
 import com.cookie.domain.notification.repository.FcmTokenRepository;
 import com.cookie.domain.notification.service.NotificationService;
+import com.cookie.domain.review.dto.response.ReviewPagenationResponse;
 import com.cookie.domain.review.dto.response.ReviewResponse;
 import com.cookie.domain.review.entity.ReviewLike;
 import com.cookie.domain.review.repository.ReviewLikeRepository;
@@ -25,6 +26,9 @@ import com.cookie.domain.notification.entity.FcmToken;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -68,8 +72,11 @@ public class UserService {
         // 3. 유저의 장르 점수 조회
         List<GenreScoreResponse> genreScoreDtos = getGenreScoresByUserId(userId);
 
-        // 4. 유저의 리뷰 조회
-        List<ReviewResponse> reviewDtos = getReviewsByUserId(userId);
+        // 4. 유저의 리뷰 조회 (4개)
+        List<ReviewResponse> reviewDtos = getReviewsByUserId(userId).stream()
+                .limit(4) // 최대 4개의 리뷰만 선택
+                .collect(Collectors.toList());
+
 
         // 5. MyPageResponse 생성 및 반환
         return MyPageResponse.builder()
@@ -82,7 +89,14 @@ public class UserService {
     }
 
 
+    @Transactional(readOnly = true)
+    public List<ReviewResponse> getReviewsByUserId(Long userId) {
+        List<Review> reviews = reviewRepository.findAllByUserIdWithMovie(userId);
 
+        return reviews.stream()
+                .map(review -> ReviewResponse.fromReview(review, false))
+                .toList();
+    }
     /**
      * 유저가 보유한 뱃지 조회
      */
@@ -135,14 +149,30 @@ public class UserService {
     /**
      * 유저의 리뷰 조회
      */
-    @Transactional(readOnly = true)
-    public List<ReviewResponse> getReviewsByUserId(Long userId) {
-        List<Review> reviews = reviewRepository.findAllByUserIdWithMovie(userId);
 
-        return reviews.stream()
-                .map(review -> ReviewResponse.fromReview(review, false))
+    @Transactional(readOnly = true)
+    public ReviewPagenationResponse getReviewsPagenation(Long userId, int page, int size) {
+        // 페이징 요청 생성
+        Pageable pageable = PageRequest.of(page, size);
+
+        // ReviewLike 엔티티를 페이징 처리하여 조회
+        Page<Review> reviewsPage = reviewRepository.findAllByUserId(userId, pageable);
+
+        // ReviewLike -> ReviewResponse 변환
+        List<ReviewResponse> reviews = reviewsPage.getContent().stream()
+                .map(review -> {
+                    return ReviewResponse.fromReview(review, true);
+                })
                 .toList();
+
+        // ReviewPagenationResponse 생성
+        return ReviewPagenationResponse.builder()
+                .currentPage(page)
+                .reviews(reviews)
+                .totalPages(reviewsPage.getTotalPages())
+                .build();
     }
+
 
     public MyProfileDataResponse getMyProfile(Long userId) {
         // 1. 유저 정보 조회
