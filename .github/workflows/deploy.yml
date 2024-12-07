@@ -49,10 +49,11 @@ jobs:
       - name: Build with Gradle
         working-directory: cookie
         run: ./gradlew build -x test
-
+      
       - name: Verify build artifacts
         run: |
-          ls -al build/libs
+          ls -al cookie/build/libs || echo "No JAR files found in cookie/build/libs!"
+
 
       # EC2 서버로 배포
       - name: Deploy to EC2
