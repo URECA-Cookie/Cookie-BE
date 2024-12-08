@@ -27,13 +27,14 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("SELECT DISTINCT ft.token FROM User u " +
             "JOIN FETCH u.fcmTokens ft " +
-            "JOIN FETCH u.category c " +
+            "JOIN u.category c " +
             "WHERE c.subCategoryEn = :genre " +
             "AND u.id != :userId")
     List<String> findTokensByGenreAndExcludeUser(
             @Param("genre") String genre,
             @Param("userId") Long userId
     );
+
 
 
 }
