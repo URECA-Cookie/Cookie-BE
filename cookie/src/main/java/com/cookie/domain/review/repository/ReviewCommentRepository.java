@@ -12,7 +12,7 @@ import java.util.List;
 
 @Repository
 public interface ReviewCommentRepository extends JpaRepository<ReviewComment, Long> {
-    @Query("SELECT rc FROM ReviewComment rc JOIN FETCH rc.user u WHERE rc.review.id = :reviewId")
+    @Query("SELECT rc FROM ReviewComment rc JOIN FETCH rc.user u WHERE rc.review.id = :reviewId ORDER BY rc.updatedAt DESC")
     List<ReviewComment> findCommentsWithUserByReviewId(@Param("reviewId") Long reviewId);
 
 }
