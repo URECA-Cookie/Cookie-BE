@@ -61,58 +61,81 @@ public class ReviewService {
 
     @Transactional
     public void createReview(Long userId, CreateReviewRequest createReviewRequest, CopyOnWriteArrayList<SseEmitter> reviewEmitters, CopyOnWriteArrayList<SseEmitter> pushNotificationEmitters) {
+        long startTime = System.currentTimeMillis();
+        log.info("Start createReview");
+
+        long stepTime = System.currentTimeMillis();
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("not found userId: " + userId));
-        log.info("Retrieved user: userId = {}", userId);
+        log.info("Retrieved user: userId = {}, Time Taken: {} ms", userId, System.currentTimeMillis() - stepTime);
 
+        stepTime = System.currentTimeMillis();
         Long movieId = createReviewRequest.getMovieId();
         Movie movie = movieRepository.findById(movieId)
                 .orElseThrow(() -> new IllegalArgumentException("not found movieId: " + movieId));
-        log.info("Retrieved movie: movieId = {}", movieId);
+        log.info("Retrieved movie: movieId = {}, Time Taken: {} ms", movieId, System.currentTimeMillis() - stepTime);
 
+        stepTime = System.currentTimeMillis();
         if (reviewRepository.findByUserAndMovie(user, movie).isPresent()) {
             throw new IllegalArgumentException("해당 영화에 이미 리뷰를 등록했습니다.");
         }
+        log.info("Checked for existing review, Time Taken: {} ms", System.currentTimeMillis() - stepTime);
 
         // 영화 평점이 0.0일 경우 평점 반영
         if (movie.getScore() == 0.0) {
+            stepTime = System.currentTimeMillis();
             movie.updateScore((double) createReviewRequest.getMovieScore());
-//            movieRepository.save(movie);
+            log.info("Updated movie score, Time Taken: {} ms", System.currentTimeMillis() - stepTime);
         }
 
+        stepTime = System.currentTimeMillis();
         List<String> genres = movie.getMovieCategories().stream()
-                .filter(mc -> "장르".equals(mc.getCategory().getMainCategory())) // "장르" 필터
-                .map(mc -> mc.getCategory().getSubCategory()) // SubCategory 추출
+                .filter(mc -> "장르".equals(mc.getCategory().getMainCategory()))
+                .map(mc -> mc.getCategory().getSubCategory())
                 .toList();
+        log.info("Extracted genres, Time Taken: {} ms", System.currentTimeMillis() - stepTime);
 
+        stepTime = System.currentTimeMillis();
         genres.forEach(genre -> dailyGenreScoreService.saveScore(user, genre, 7, ActionType.MOVIE_LIKE));
+        log.info("Saved daily genre scores, Time Taken: {} ms", System.currentTimeMillis() - stepTime);
 
+        stepTime = System.currentTimeMillis();
         Review review = createReviewRequest.toEntity(user, movie);
         Review savedReview = reviewRepository.save(review);
-        log.info("Created review: userId = {}, movieId = {}, Saved review: {}", userId, movieId, savedReview.getContent());
+        log.info("Saved review: userId = {}, movieId = {}, Time Taken: {} ms", userId, movieId, System.currentTimeMillis() - stepTime);
 
+        stepTime = System.currentTimeMillis();
         List<String> enGenres = movie.getMovieCategories().stream()
                 .filter(mc -> "장르".equals(mc.getCategory().getMainCategory()))
                 .map(mc -> mc.getCategory().getSubCategoryEn())
                 .toList();
+        log.info("Extracted genres (EN), Time Taken: {} ms", System.currentTimeMillis() - stepTime);
 
         for (String genre : enGenres) {
+            stepTime = System.currentTimeMillis();
             List<String> userTokens = userRepository.findTokensByGenreAndExcludeUser(genre, userId);
+            log.info("Fetched user tokens for genre '{}', Time Taken: {} ms", genre, System.currentTimeMillis() - stepTime);
+
+            stepTime = System.currentTimeMillis();
             List<String> excludedTokens = user.getFcmTokens().stream()
                     .map(FcmToken::getToken)
                     .toList();
+            log.info("Extracted excluded tokens, Time Taken: {} ms", System.currentTimeMillis() - stepTime);
 
+            stepTime = System.currentTimeMillis();
             String title = String.format("%s님 새로운 리뷰가 등록되었습니다!", user.getId());
             String body = String.format("%s님이 %s 영화에 리뷰를 남겼습니다.", user.getNickname(), movie.getTitle());
-            log.info("genre:{}, title:{}, body:{}, userTokens:{}", genre, title, body, userTokens);
-
-            // 알림을 보낼 때, 작성자의 토큰을 제외하고 나머지 사용자들에게 알림 전송
             notificationService.sendPushNotificationToUsers(userTokens, title, body, excludedTokens);
+            log.info("Sent push notification for genre '{}', Time Taken: {} ms", genre, System.currentTimeMillis() - stepTime);
         }
 
-        sendReviewCreatedEvent(savedReview, reviewEmitters); // 리뷰 피드에 실시간으로 리뷰 추가
-//        sendPushNotification(userId, movie, savedReview, pushNotificationEmitters); // 장르를 좋아하는 유저들에게 푸시 알림
+        stepTime = System.currentTimeMillis();
+        sendReviewCreatedEvent(savedReview, reviewEmitters);
+        log.info("Sent review created event, Time Taken: {} ms", System.currentTimeMillis() - stepTime);
+
+        log.info("End createReview, Total Time Taken: {} ms", System.currentTimeMillis() - startTime);
     }
+
 
     @Async
     public void sendReviewCreatedEvent(Review review, CopyOnWriteArrayList<SseEmitter> reviewEmitters) {
