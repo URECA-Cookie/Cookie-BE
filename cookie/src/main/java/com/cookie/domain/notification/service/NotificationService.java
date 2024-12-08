@@ -77,4 +77,29 @@ public class NotificationService {
             log.error("Error sending push notification: {}", e.getMessage());
         }
     }
+
+    public void sendPushNotificationToUsers(List<String> tokens, String title, String body, List<String> excludedTokens) {
+        for (String token : tokens) {
+            // 작성자의 토큰은 제외
+            if (excludedTokens.contains(token)) {
+                continue;
+            }
+
+            Message message = Message.builder()
+                    .setToken(token)
+                    .setNotification(Notification.builder()
+                            .setTitle(title)
+                            .setBody(body)
+                            .build())
+                    .build();
+
+            try {
+                String response = firebaseMessaging.send(message);
+                log.info("Push notification sent successfully to token: {} and response: {}", token, response);
+            } catch (FirebaseMessagingException e) {
+                log.error("Error sending push notification to token {}: {}", token, e.getMessage());
+            }
+        }
+    }
+
 }

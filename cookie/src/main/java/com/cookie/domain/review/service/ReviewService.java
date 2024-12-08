@@ -5,6 +5,7 @@ import com.cookie.domain.movie.dto.response.ReviewMovieResponse;
 import com.cookie.domain.movie.dto.response.ReviewOfMovieResponse;
 import com.cookie.domain.movie.entity.Movie;
 import com.cookie.domain.movie.repository.MovieRepository;
+import com.cookie.domain.notification.entity.FcmToken;
 import com.cookie.domain.notification.service.NotificationService;
 import com.cookie.domain.review.dto.request.ReviewCommentRequest;
 import com.cookie.domain.review.dto.request.CreateReviewRequest;
@@ -88,33 +89,26 @@ public class ReviewService {
 
         Review review = createReviewRequest.toEntity(user, movie);
         Review savedReview = reviewRepository.save(review);
-        log.info("Created review: userId = {}, movieId = {}", userId, movieId);
-        log.info("Saved review: {}", savedReview.getContent());
+        log.info("Created review: userId = {}, movieId = {}, Saved review: {}", userId, movieId, savedReview.getContent());
 
-        List<String> topics = movie.getMovieCategories().stream()
+        List<String> enGenres = movie.getMovieCategories().stream()
                 .filter(mc -> "장르".equals(mc.getCategory().getMainCategory()))
                 .map(mc -> mc.getCategory().getSubCategoryEn())
                 .toList();
 
-        for (String genre : topics) {
-            String topic = genre.toLowerCase();
+        for (String genre : enGenres) {
+            List<String> userTokens = userRepository.findTokensByGenreAndExcludeUser(genre, userId);
+            List<String> excludedTokens = user.getFcmTokens().stream()
+                    .map(FcmToken::getToken)
+                    .toList();
 
-            if (topic.equals(user.getCategory().getSubCategoryEn().toLowerCase())) {
-//                if (userId.equals(user.getId())) {
-//                    log.info("자기 자신에게는 알림을 보내지 않습니다: userId = {}", userId);
-//                    break;
-//                }
+            String title = String.format("%s님 새로운 리뷰가 등록되었습니다!", user.getId());
+            String body = String.format("%s님이 %s 영화에 리뷰를 남겼습니다.", user.getNickname(), movie.getTitle());
+            log.info("genre:{}, title:{}, body:{}, userTokens:{}", genre, title, body, userTokens);
 
-                String title = String.format("%s님 새로운 리뷰가 등록되었습니다!", user.getId());
-                String body = String.format("%s님이 %s 영화에 리뷰를 남겼습니다.", user.getNickname(), movie.getTitle());
-                log.info("topic:{}, title:{}, body:{}", topic, title, body);
-                notificationService.sendPushNotificationToTopic(topic, title, body);
-                break;
-            } else {
-                log.info("{}, 구독 장르 없음", user.getNickname());
-            }
+            // 알림을 보낼 때, 작성자의 토큰을 제외하고 나머지 사용자들에게 알림 전송
+            notificationService.sendPushNotificationToUsers(userTokens, title, body, excludedTokens);
         }
-
 
         sendReviewCreatedEvent(savedReview, reviewEmitters); // 리뷰 피드에 실시간으로 리뷰 추가
 //        sendPushNotification(userId, movie, savedReview, pushNotificationEmitters); // 장르를 좋아하는 유저들에게 푸시 알림
