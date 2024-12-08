@@ -286,6 +286,7 @@ public class ReviewService {
                 review.getUpdatedAt(),
                 new ReviewMovieResponse(review.getMovie().getTitle(), review.getMovie().getPoster()),
                 new ReviewUserResponse(
+                        review.getUser().getId(),
                         review.getUser().getNickname(),
                         review.getUser().getProfileImage(),
                         review.getUser().getMainBadge() != null ? review.getUser().getMainBadge().getBadgeImage() : null),

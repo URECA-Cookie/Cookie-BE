@@ -43,6 +43,7 @@ public class ReviewResponse {
                         review.getMovie().getPoster()
                 ),
                 new ReviewUserResponse(
+                        review.getUser().getId(),
                         review.getUser().getNickname(),
                         review.getUser().getProfileImage(),
                         review.getUser().getMainBadge() != null ? review.getUser().getMainBadge().getBadgeImage() : null
