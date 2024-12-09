@@ -133,8 +133,8 @@ public class AuthController {
         UserInfoResponse userInfoResponse = new UserInfoResponse(userResponse, response);
 
         if(pushEnabledValue) {
-            fcmTokenService.saveToken(newUser.getId(), fcmToken);
-            notificationService.subscribeToTopic(fcmToken, newUser.getCategory().getId(), newUser.getId());
+            fcmTokenService.saveFcmToken(newUser.getId(), fcmToken);
+//            notificationService.subscribeToTopic(fcmToken, newUser.getCategory().getId(), newUser.getId());
         }
 
         return ResponseEntity.ok()

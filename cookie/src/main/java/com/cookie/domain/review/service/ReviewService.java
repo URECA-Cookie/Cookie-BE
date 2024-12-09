@@ -116,42 +116,42 @@ public class ReviewService {
             List<String> userTokens = userRepository.findTokensByGenreAndExcludeUser(genre, userId);
             log.info("Fetched user tokens for genre '{}', Time Taken: {} ms", genre, System.currentTimeMillis() - stepTime);
 
-            stepTime = System.currentTimeMillis();
-            List<String> excludedTokens = user.getFcmTokens().stream()
-                    .map(FcmToken::getToken)
-                    .toList();
-            log.info("Extracted excluded tokens, Time Taken: {} ms", System.currentTimeMillis() - stepTime);
+//            stepTime = System.currentTimeMillis();
+//            List<String> excludedTokens = user.getFcmTokens().stream()
+//                    .map(FcmToken::getToken)
+//                    .toList();
+//            log.info("Extracted excluded tokens, Time Taken: {} ms", System.currentTimeMillis() - stepTime);
 
             stepTime = System.currentTimeMillis();
             String title = String.format("%s님 새로운 리뷰가 등록되었습니다!", user.getId());
             String body = String.format("%s님이 %s 영화에 리뷰를 남겼습니다.", user.getNickname(), movie.getTitle());
-            notificationService.sendPushNotificationToUsers(userTokens, title, body, excludedTokens);
+            notificationService.sendPushNotificationToUsers(userTokens, title, body);
             log.info("Sent push notification for genre '{}', Time Taken: {} ms", genre, System.currentTimeMillis() - stepTime);
         }
 
         stepTime = System.currentTimeMillis();
-        sendReviewCreatedEvent(savedReview, reviewEmitters);
+//        sendReviewCreatedEvent(savedReview, reviewEmitters);
         log.info("Sent review created event, Time Taken: {} ms", System.currentTimeMillis() - stepTime);
 
         log.info("End createReview, Total Time Taken: {} ms", System.currentTimeMillis() - startTime);
     }
 
 
-    @Async
-    public void sendReviewCreatedEvent(Review review, CopyOnWriteArrayList<SseEmitter> reviewEmitters) {
-        ReviewResponse reviewResponse = ReviewResponse.fromReview(review, false, Long.valueOf(review.getReviewComments().size()));
-
-        for (SseEmitter emitter : reviewEmitters) {
-            try {
-                emitter.send(SseEmitter.event()
-                        .name("review-created")
-                        .data(reviewResponse)); // ReviewResponse 전송
-            } catch (Exception e) {
-                log.error("Failed to send event to emitter: {}", e.getMessage());
-                reviewEmitters.remove(emitter);
-            }
-        }
-    }
+//    @Async
+//    public void sendReviewCreatedEvent(Review review, CopyOnWriteArrayList<SseEmitter> reviewEmitters) {
+//        ReviewResponse reviewResponse = ReviewResponse.fromReview(review, false, Long.valueOf(review.getReviewComments().size()));
+//
+//        for (SseEmitter emitter : reviewEmitters) {
+//            try {
+//                emitter.send(SseEmitter.event()
+//                        .name("review-created")
+//                        .data(reviewResponse)); // ReviewResponse 전송
+//            } catch (Exception e) {
+//                log.error("Failed to send event to emitter: {}", e.getMessage());
+//                reviewEmitters.remove(emitter);
+//            }
+//        }
+//    }
 
 //    @Async
 //    public void sendPushNotification(Long userId, Movie movie, Review review, CopyOnWriteArrayList<SseEmitter> pushNotificationEmitters) {

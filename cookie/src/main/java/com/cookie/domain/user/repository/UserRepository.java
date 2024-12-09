@@ -29,10 +29,12 @@ public interface UserRepository extends JpaRepository<User, Long> {
             "JOIN u.fcmTokens ft " +
             "JOIN u.category c " +
             "WHERE c.subCategoryEn = :genre " +
-            "AND u.id != :userId")
+            "AND u.id != :userId " +
+            "AND u.isPushEnabled = true")
     List<String> findTokensByGenreAndExcludeUser(
             @Param("genre") String genre,
             @Param("userId") Long userId
     );
+
 
 }

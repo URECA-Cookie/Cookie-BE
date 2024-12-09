@@ -78,12 +78,13 @@ public class NotificationService {
         }
     }
 
-    public void sendPushNotificationToUsers(List<String> tokens, String title, String body, List<String> excludedTokens) {
+
+    public void sendPushNotificationToUsers(List<String> tokens, String title, String body) {
         for (String token : tokens) {
             // 작성자의 토큰은 제외
-            if (excludedTokens.contains(token)) {
-                continue;
-            }
+//            if (excludedTokens.contains(token)) {
+//                continue;
+//            }
 
             Message message = Message.builder()
                     .setToken(token)
@@ -95,7 +96,7 @@ public class NotificationService {
 
             try {
                 String response = firebaseMessaging.send(message);
-                log.info("Push notification sent successfully to token: {} and response: {}", token, response);
+                log.info("Push notification sent successfully to token: {}", token);
             } catch (FirebaseMessagingException e) {
                 log.error("Error sending push notification to token {}: {}", token, e.getMessage());
             }
